@@ -1,0 +1,484 @@
+% IMPORTANT: Please write various parts in different files, and then include
+% them into this document.
+% If you have a file called intro.tex then write: \include{intro}
+% This is to avoid nasty merge conflicts, as well as to keep it tidy,
+% modular, etc
+
+\documentclass[12pt,a4paper,twoside]{book}
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage{graphicx}
+\usepackage{etex} % for fixing error: no room for a new \dimension
+
+% Make bibliography appear in table of contents
+% \usepackage[nottoc,numbib]{tocbibind}
+\usepackage[nottoc]{tocbibind}
+\usepackage[titles,subfigure]{tocloft}
+
+\usepackage{amsmath,amssymb,calc,ifthen,capt-of,mathrsfs,eufrak}
+\usepackage{multirow} % for mergins cells vertically
+\usepackage{makecell} % for thicker horizontal/vertical lines
+
+\usepackage{lscape}
+\usepackage{booktabs} % for much better looking tables
+\usepackage{nicefrac}
+\usepackage{url}
+\usepackage{array}
+
+%%% Defining symbols
+\usepackage{stackengine}
+\def\delequal{\mathrel{\stackon[1pt]{=}{$\scriptscriptstyle\Delta$}}}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+%\usepackage[giveninits=true,hyperref]{biblatex}
+%\bibliography{citations} % or
+
+\usepackage[raggedright]{titlesec} % for section titles not to exceed page margins
+
+\usepackage[nomessages]{fp}% http://ctan.org/pkg/fp
+\usepackage{python} % allows to run pythonrvisors code inside latex
+
+% \usepackage{subfig}%
+
+\usepackage[ampersand]{easylist}
+
+\usepackage[table,usenames,dvipsnames]{xcolor} % for coloured cells in tables
+
+% \usepackage{auto-pst-pdf} % convert ps to pdf ... you need this if you compile with pdflatex
+\usepackage{epsf}
+
+\definecolor{blue3}{HTML}{86B7FC} % med blue
+\definecolor{blue1}{HTML}{B5F1FF} % light blue
+\definecolor{blue2}{HTML}{E0F9FF} % very light blue
+\definecolor{blue4}{HTML}{0047bc} % dark blue
+
+
+\usepackage[bottom]{footmisc} % prevent figures/floats to be placed after the footnote
+
+% Allows us to click on links and references!
+% http://tex.stackexchange.com/questions/73862/how-can-i-make-a-clickable-table-of-contents
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=blue4,
+    filecolor=blue4,
+    linkcolor=black,
+    urlcolor=black
+}
+
+% Nice package for plotting graphs
+% See excellent guide:
+% http://www.tug.org/TUGboat/tb31-1/tb97wright-pgfplots.pdf
+\usepackage{pgfplots}
+\usetikzlibrary{plotmarks}
+
+\usepackage{amsmath,graphicx}
+\usepackage{epstopdf}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage[table]{xcolor}
+\usepackage{bbm}
+\usepackage{dsfont}
+
+\usepackage{mathtools}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\usepackage{arydshln} % for horiz dotted line in table
+\usepackage{pdfpages} % for importing pdf images
+
+%\usepackage[romanian]{babel} % for romanian characters
+%\usepackage{combelow}
+
+\usepackage{multicol} % double-colum list
+
+\usepackage{listings} % for listing source code
+
+\usepackage[toc,page]{appendix}
+
+\usepackage{scalefnt} %^ scale font for neurological brain images
+
+\pgfplotsset{compat = newest}
+
+% highlight - useful for TODOs and similar
+\usepackage{color}
+%  \newcommand{\hilight}[1]{\colorbox{yellow}{#1}}
+\newcommand{\hilight}[1]{}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\usepackage{array,booktabs}
+
+\usepackage[export]{adjustbox}
+
+\usepackage{pifont}% for xmark http://ctan.org/pkg/pifont
+
+% margin size
+\usepackage[margin=1in,headheight=14pt]{geometry}
+
+% \usepackage{algpseudocode} % for writing pseudocode & algorithms
+\usepackage[linesnumbered]{algorithm2e}
+\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+\SetCommentSty{mycommfont}
+
+\usepackage{enumitem} % for nested enumerate numbers 1 1.1 1.1.1
+\usepackage{pgfgantt} % for grantt charts
+\usepackage{rotating}
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage{graphicx}
+
+\usepackage{bm}
+\usepackage{pdflscape}
+
+\newgantttimeslotformat{stardate}{%
+\def\decomposestardate##1.##2\relax{%
+\def\stardateyear{##1}\def\stardateday{##2}%
+}%
+\decomposestardate#1\relax%
+\pgfcalendardatetojulian{\stardateyear-01-01}{#2}%
+\advance#2 by-1\relax%
+\advance#2 by\stardateday\relax%
+}
+
+\usepackage[section]{placeins} % prevents placing floats before a section
+
+\usepackage{color}
+
+\usepackage{silence} % silence warning that page 
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\ttfamily,        	    % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should  happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mymauve},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII 
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=C++,                    % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings 
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\setcounter{secnumdepth}{3}
+
+% % Left bar
+\usepackage{framed}
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+
+
+\definecolor{lightgray}{gray}{0.00}
+\renewenvironment{leftbar}[1][\hsize]{%
+  \def\FrameCommand{%
+    {\hspace{0pt}\color{lightgray}\vrule width 3pt}%
+    \hspace{5pt}%
+    %\fboxsep=\FrameSep\colorbox{lightgray}%
+  }%
+  \MakeFramed{\hsize#1\advance\hsize-\width\FrameRestore}%
+}
+{
+  \endMakeFramed%
+}
+\setlength{\FrameSep}{0pt}
+
+% Custom environments
+% \theoremstyle{definition}
+% \declaretheorem[shaded={bgcolor={gray}{0.93},margin=5pt}]{definition}
+% \declaretheorem[name=Definition]{rawdefinition}
+% \theoremstyle{definition}
+% \declaretheorem{proposition}
+% \theoremstyle{definition}
+% \declaretheorem{lemma}
+% \declaretheorem{corollary}
+
+% \newtheorem{rawdefinition}{Proof}
+% 
+% \newtheoremstyle{named}{1em}{1em}{\itshape}{}{\bfseries}{}{\newline}{#3 }
+% \theoremstyle{named}
+% \newtheorem*{namedtheorem}{Theorem}
+
+
+\newenvironment{myalgo}[1][]{%
+  \begin{leftbar}%
+  \vspace{-11pt}%
+  \subsubsection{#1}
+}
+{
+  \end{leftbar}%
+
+}
+
+\newenvironment{algotwo}[1][]{%
+  \begin{leftbar}%
+  \vspace{-11pt}%
+  \subsubsection{#1}
+  \begin{algorithm}
+}
+{
+  \end{algorithm}
+  \end{leftbar}%
+
+}
+
+
+\usepackage{tabularx, booktabs} % make width of table columns evenly distributed (see http://tex.stackexchange.com/questions/60601/evenly-distributing-column-widths)
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+
+% % Definition with left bar
+% \newenvironment{mydef}[1][]{%
+%   \begin{rawdefinition}[#1]%
+%   \vspace{-11pt}%
+%   \begin{leftbar}%
+% }
+% {
+%   \end{leftbar}%
+%   \vspace{-11pt}%
+%   \end{rawdefinition}%
+% }
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+% fancy headers and footers from Petr 
+
+\usepackage{fancyhdr}
+
+\newcommand{\FrontPageStyle}{\pagestyle{empty}}
+\newcommand{\MainPageStyle}{\pagestyle{main}}
+
+
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+
+\fancypagestyle{main}{%
+  \fancyhf{}%
+  \fancyhead[RE]{\nouppercase{\leftmark}}%
+  \fancyhead[LO]{\nouppercase{\rightmark}}%
+  \fancyhead[LE,RO]{\thepage}
+}
+
+% \includeonly{introduction, background_research, pcaProg, perf_eval, voxelwise, dkt, tadpole, conclusion, appendix}
+% \includeonly{pcaProg, appendix}
+%\newcommand*{\pcaPaperFigs}{../PCA_long_paper/figures}
+\newcommand*{\pcaPaperFigs}{images/pcaPaperFigs}
+\newcommand{\voxDpmFolder}{../voxelwiseDPM/}
+
+\newcommand\ci{\perp\!\!\!\perp} % perpendicular sign
+\newcommand{\Mu}{M}
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+
+
+
+
+\DeclareSymbolFont{matha}{OML}{txmi}{m}{it}% txfonts
+\DeclareMathSymbol{\varv}{\mathord}{matha}{118}
+
+% \usepackage{titling}
+% 
+% % set up \maketitle to accept a new item
+% \predate{\begin{center}\placetitlepicture\large}
+% \postdate{\par\end{center}}
+% 
+% % commands for including the picture
+% \newcommand{\titlepicture}[2][]{%
+%   \renewcommand\placetitlepicture{%
+%     \includegraphics[#1]{#2}\par\medskip
+%   }%
+% }
+% \newcommand{\placetitlepicture}{} % initialization
+
+
+
+\begin{document}
+\belowdisplayskip=12pt plus 3pt minus 9pt
+\belowdisplayshortskip=7pt plus 3pt minus 4pt
+
+% for fancyhdr
+\FrontPageStyle{}
+
+\begin{titlepage}
+\begin{center}
+
+% % Upper part of the page. The '~' is needed because \\
+% % works if a paragraph has started.
+% \includegraphics[width=0.3\textwidth]{./images/ucl-logo2}~\\[1cm]
+% 
+% \textsc{\LARGE University College London}\\[1.5cm]
+% 
+% \textsc{\Large MRes Project}\\[0.5cm]
+
+\vspace*{-9em}; 
+\hbox{ \hspace*{-18em} \includegraphics[width=1.7\textwidth]{images/univ_logo-eps-converted-to.pdf}}
+\null%
+\vspace*{7em}%
+
+{\Large 
+
+% Title
+%\HRule \\[0.4cm]
+{ \Huge \textbf{ Uncertainty Modelling in\\ Deep Learning and Decision Trees \\ for Medical Image Processing}\\ [0.4cm]}
+%\HRule \\[1.5cm]
+
+% Author and supervisor
+
+
+% Raz's original format
+%\begin{minipage}{0.4\textwidth}
+%\begin{flushleft} \Large
+%\emph{Author:}\\
+%Ryutaro \textsc{Tanno}
+%\end{flushleft}
+%\end{minipage}
+%\begin{minipage}{0.5\textwidth}
+%\begin{flushright} \Large
+%\emph{Supervisors:} \\
+%Prof. Daniel C. \textsc{Alexander}\\
+%Dr. Antonio \textsc{Criminisi }\\
+%\end{flushright}
+%\end{minipage}
+
+\vspace{5em}
+\LARGE \textbf{Ryutaro Tanno}
+ \vspace{3em}%
+\begin{center}%
+	\large
+	\textbf{Department of Computer Science} \\
+	\textbf{University College London}\\
+	Gower Street, London, United Kingdom\\
+\end{center}%
+\vspace{4em}%
+
+
+\begin{center}%
+	\large THESIS %
+	\vspace{1em}
+\end{center}%
+
+ \begin{center}%
+ 	\large
+	Submitted for the degree of \\
+	\textbf{Doctor of Philosophy, University College London} \\
+\end{center}%
+\vspace{1em}%
+
+
+
+ \vfill
+% 
+% Word count: 18,847 (as measured by texcount)
+% 
+% \vfill
+
+% Bottom of the page
+{\Large \today}
+
+}
+\end{center}
+\end{titlepage}
+% \maketitle{}
+
+
+\clearpage
+
+
+I, Ryutaro Tanno, confirm that the work presented in this thesis is my own. Where information has been derived from other sources, I confirm that this has been indicated in the thesis.
+
+\clearpage
+
+
+\chapter*{Abstract}
+% 
+
+
+%In order to find effective treatments for Alzheimer's disease (AD), a devastating neurodegenerative disease affecting millions of people worldwide, we need to identify subjects at risk of AD as early as possible. To this end, disease progression models have been recently developed, which not only to perform early diagnosis, but also estimate a unique disease signature that is used to predict the subjects' disease stages and future evolution. However, these models have not yet been applied to rare neurodegenerative diseases, are not suitable to understand the complex dynamics of biomarkers, work only on large multimodal datasets, and their predictive performance has not been objectively validated.
+%
+%In this work I developed novel models of disease progression and applied them to estimate the progression of Alzheimer's disease and Posterior Cortical atrophy, a rare neurodegenerative syndrome causing visual deficits. My first contribution is a study on the progression of Posterior Cortical Atrophy, using models already developed: the Event-based Model (EBM) and the Differential Equation Model (DEM). My second contribution is the development of DIVE, a novel spatio-temporal model of disease progression that estimates fine-grained spatial patterns of pathology, potentially enabling us to understand complex disease mechanisms relating to pathology propagation along brain networks. My third contribution is the development of Disease Knowledge Transfer (DKT), a novel disease progression model that estimates the multimodal progression of rare neurodegenerative diseases from limited, unimodal datasets, by transferring information from larger, multimodal datasets of typical neurodegenerative diseases. My fourth contribution is the development of novel extensions for the EBM and the DEM, and the development of novel measures for performance evaluation of such models. My last contribution is the organization of the TADPOLE challenge, a competition which aims to identify algorithms and features that best predict the evolution of AD. 
+
+\chapter*{Impact Statement}
+\thispagestyle{empty}
+
+%The work presented in this thesis furthers our understanding of the temporal evolution of Posterior Cortical Atrophy and Alzheimer's disease. The disease progression models and evaluation techniques that we developed can help towards understanding underlying disease mechanisms, aid patient stratification and drug evaluation in clinical trials for Alzheimer's disease and Posterior Cortical Atrophy, and can be used in clinical practice for predicting the future evolution of subjects that are at risk of developing Alzheimer's disease. 
+%
+%I published the work in this PhD thesis in two first-author papers (DIVE and TADPOLE chapters), and will soon submit another two papers (DKT and PCA chapters). I have also communicated my results in international conferences. I have also engaged with the broader scientific community by organising the TADPOLE Challenge, as well as a couple of hackathons at the PyConUK conference and the CMIC Summer School.
+
+% link: https://www.grad.ucl.ac.uk/essinfo/docs/Impact-Statement-Guidance-Notes-for-Research-Students-and-Supervisors.pdf
+
+
+\chapter*{Acknowledgements}
+\thispagestyle{empty}
+Aknowledgement. 
+
+\clearpage
+\cleardoublepage{}
+\MainPageStyle{}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+%
+%\setcounter{tocdepth}{1}
+%\listoffigures
+%\listoftables
+
+
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+\setlength{\tabcolsep}{0.2em}
+ \include{chapter_0/phd_transfer_statement}
+% \include{chapter_1/introduction}
+ \include{chapter_2/pred_uncertainty_DT}
+ \include{chapter_3/pred_uncertainty_deep_learning}
+ \include{chapter_4/human_uncertainty}
+\include{chapter_5/multitask_part1}
+\include{chapter_6/multitask_iccv}
+\include{chapter_7/main}
+
+%\include{conclusions/conclusion}
+
+
+
+% these do NOT count as part of the suggested page count
+% This is probably a good place to explain the models in some detail for example
+
+%\appendix
+%\include{appendices/appendix}
+
+\cleardoublepage
+\bibliographystyle{unsrt}
+\bibliography{reference}
+
+%\bibliographystyle{unsrt}
+%\bibliography{citations}
+
+
+%\printbibliography
+\end{document}

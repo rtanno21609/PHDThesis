@@ -1,0 +1,55 @@
+% %%%%%%%% ICML 2019 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+%\documentclass{article}
+%% Recommended, but optional, packages for figures and better typesetting:
+%\usepackage{microtype}
+%\usepackage{graphicx}
+%%\usepackage{subfigure}
+%\usepackage{booktabs} % for professional tables
+%% hyperref makes hyperlinks in the resulting PDF.
+%% If your build breaks (sometimes temporarily if a hyperlink spans a page)
+%% please comment out the following usepackage line and replace
+%% \usepackage{icml2019} with \usepackage[nohyperref]{icml2019} above.
+%\usepackage{hyperref}
+%% Attempt to make hyperref and algorithmic work together better:
+%%\newcommand{\theHalgorithm}{\arabic{algorithm}}
+%% If accepted, instead use the following line for the camera-ready submission:
+%\usepackage[accepted]{icml2019}
+%
+%%%% BEGIN our stuff
+%\RequirePackage[table]{xcolor}
+%\usepackage{multirow}
+%\usepackage{makecell}
+%\usepackage{pifont}% http://ctan.org/pkg/pifont
+%\newcommand{\cmark}{\ding{51}}%
+%\newcommand{\xmark}{\ding{55}}%
+%\usepackage{amsmath,amssymb}
+%\usepackage{dsfont}
+%% \usepackage{bbm}
+%\usepackage{caption,subcaption}
+%\usepackage[noend]{algpseudocode}  % Note: Had to disable algorithmic in icml2019.sty
+%\usepackage[12pt]{moresize}
+%
+%\newcommand{\fix}{\marginpar{FIX}}
+%\newcommand{\new}{\marginpar{NEW}}
+%%%% END our stuff
+\chapter{How to Combine Decision Trees and Neural Networks}
+\label{chapter:ant}
+Deep neural networks and decision trees operate on largely separate paradigms; typically, the former performs representation learning with pre-specified architectures, while the latter is characterised by learning hierarchies over pre-specified features with data-driven architectures. We unite the two via \emph{adaptive neural trees} (ANTs) that incorporates representation learning into edges, routing functions and leaf nodes of a decision tree, along with a backpropagation-based training algorithm that adaptively grows the architecture from primitive modules (e.g., convolutional layers). We demonstrate that, whilst achieving competitive performance on classification and regression datasets, ANTs benefit from (i) lightweight inference via conditional computation, (ii) hierarchical separation of features useful to the task e.g. learning meaningful class associations, such as separating natural vs. man-made objects, and (iii) a mechanism to adapt the architecture to the size and complexity of the training dataset.
+
+%
+\input{chapter_7/introduction.tex}
+\input{chapter_7/related.tex}
+\input{chapter_7/ant.tex}
+\input{chapter_7/optimisation.tex}
+\input{chapter_7/experiments.tex}
+%\input{chapter_7/conclusions.tex}
+
+%\bibliography{bibliography}
+%\bibliographystyle{icml2019}
+
+% \newpage
+% \twocolumn[
+% \icmltitle{\Large Supplementary materials: Adaptive Neural Trees\\}
+% ]
+% \appendix
+% \input{supplementary.tex}
