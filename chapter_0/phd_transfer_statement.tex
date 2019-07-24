@@ -1,36 +1,79 @@
-\chapter{MPhil-to-PhD Transfer}
-\label{chapter:mphiltransfer}
+\chapter*{MPhil-to-PhD Transfer}
+\thispagestyle{empty}
 
-\section{Problem statement}
+\section*{Problem statement}
 Deep learning and decisions trees are now ubiquitous in the field of medical image processing. However, the current methods disproportionately rely on deterministic algorithms, which lack a mechanism to represent and manipulate uncertainty about models and predictions. In safety-critical applications such as medical imaging, quantifying what the model does not know is critical for constructing a reliable decision making system. The aim of this thesis is to explore probabilitic modelling as a framework to integrate uncertainty information in deep learning and decision tree models, and demonstrate utility in various medical image processing applications. 
 
 % you could mention: towards a safer and more robust
 %Describe the research problem that your work is addressing (approx. 5-6 sentences)
 
-\section{Literature Review} 
-
-
+\section*{Literature Review} 
 %Details of any research literature you have reviewed and conclusions drawn
 
-\section{Summary of the contribution} 
-your PhD is intended to make to already existing literature on the topic
+I plan to survey the following topics in the given order to motivate the thesis. 
 
-\section{Scope of the thesis}
-state the boundaries of your research – what will be included, what not?
+\begin{enumerate}
+	\item \textbf{``Classics" on uncertainty quantification for medical imaging}: there is a large body of prior work on uncertainty quantification based on traditional probabilistic modelling techniques (e.g. grpahical models) in a variety of medical image analysis applications such as registration, classification, segmentation and image synthesis. I would like to use this section to motivate the importance of uncertainty quantification in medical imaging applications. 
 
-\section{Research progress}
-Activities (reviews, studies, experiments, simulations, etc.) that you have carried out, and their results. 
+	\item \textbf{Surge of black-box models in medical imaging}: In the last few years, with increasing availability of labelled data, hardware and user-friendly software, black-box models such as deep learning and decision trees have permeated every corner of medical image processing research, often surpassing the performance of more traditional probabilistic techniques. 
+	
+	\item \textbf{Uncertainty in black-box models}: This section will review both theoretical and application-driven previous research on uncertainty modelling in deep learning and decision trees. We will discuss why such research is important for designing safer and interpretable systems for medical applications. 
+\end{enumerate}
 
-\section{Others}
-In addition, it would be nice to have a summary of:
-\begin{itemize}
-	\item Activities you are planning to do to further your thesis/ your plan going forward.
-	\item Any draft chapters for your final thesis you have already prepared
-	\item Any publications you have submitted/ intend to submit to a conference or journal.
-	\item Draft timetable 
-\end{itemize}
+\section*{Summary of the contribution} 
+In this thesis I contributed to the three key aspects mentioned above. 
 
-\section{List of publications}
+%My key contributions for each chapter are described in the following sections.
+%your PhD is intended to make to already existing literature on the topic
+
+\section*{Scope of the thesis}
+
+%state the boundaries of your research – what will be included, what not?
+
+\section*{Research/thesis progress}
+\begin{enumerate}
+	\item Relevant publications have been formated into different chapters, but still require editing to improve the flow. 
+	\item Need to write an introduction chapter to set the context with a literature review, explain the importance of uncertainty modelling in medical imaging, and outline my thesis and contributions. 
+	\item Need to write a chapter on future research. 
+	\item (Optional): If time permits, I plan to add another subsection in Chapter~\ref{chapter:humanuncertainty} by extending the presented method for modelling human uncertainty to the segmentation task.		
+\end{enumerate}
+
+\section*{Timeline}
+I plan to submit the thesis by mid September (My post-doc fellow position is due to start in the same month). The first rought draft should be completed before 16 August 2019. 
+
+\clearpage
+\section*{List of publications}
+\small
+\begin{enumerate}
+	\item \textbf{R. Tanno}, A. Ghosh, F. Grussu, E. Kaden, A. Criminisi, and D. C. Alexander, “Bayesian image quality transfer". (2016) \textbf{MICCAI}
+	
+	\item \textbf{R. Tanno}, D. E. Worrall, A. Ghosh, E. Kaden, S. N. Sotiropoulos, A. Criminisi, and D. C. Alexander, “Bayesian image quality transfer with cnns: Exploring uncertainty in dmri super-resolution”. (2017) \textbf{MICCAI}
+		
+	\item D. C. Alexander, D. Zikic, A. Ghosh, \textbf{R. Tanno}, V. Wottschel, J. Zhang, E. Kaden, T. B. Dyrby, S. N. Sotiropoulos et al., “Image quality transfer and applications in diffusion MRI”.  (2017) \textbf{Neuroimage}
+	
+	\item \textbf{R. Tanno}, A. Makropoulos, S. Arslan, O. Oktay, S. Mischkewitz, F. Al-Noor1, J. Oppenheimer, R. Mandegaran, B. Kainz, M. Heinrich. “AutoDVT: Joint Real-time Classification for Vein Compressibility Analysis in Deep Vein Thrombosis Ultrasound Diagnostics”. (2018) \textbf{MICCAI}
+	
+	\item F.J.S. Bragman, \textbf{R. Tanno}, Z. Eaton-Rosen, W. Li, D. J. Hawkes, S. Ourselin, D. C. Alexander, J. R. McClelland, M. J. Cardoso, “Uncertainty in multitask learning: joint representations for probabilistic MR-only radiotherapy planning”. (2018) \textbf{MICCAI}
+	
+	\item S. B. Blumberg, \textbf{R. Tanno}, I. Kokkinos, D. C Alexander. “Deeper Image Quality Transfer: Training Low-Memory Neural Networks for 3D Images”. (2018) \textbf{MICCAI }
+	
+	\item K. Kamnitsas, D. Castro, L. Folgoc, \textbf{R. Tanno}, D. Rueckert, B. Glocker, A. Criminisi, A. Nori. “Semi-Supervised Learning via Compact Latent Space Clustering”. (2018) \textbf{ICML}
+	
+	\item \textbf{R. Tanno}, A. Saheedi, S. Sankaranarayanan, D. C. Alexander, N. Silberman, “Learning From Noisy Labels By Regularized Estimation Of Annotator Confusion”.  (2019) \textbf{CVPR}
+	\item \textbf{R. Tanno}, K. Arulkumaran, D. C. Alexander, A. Criminisi and A. Nori,  “Adaptive Neural Trees”.  (2019) \textbf{ICML }
+	\item F.J.S. Bragman$^*$, \textbf{R. Tanno}$^*$, S. Ourselin, D. C. Alexander, M. J. Cardoso, "Stochastic Filter Groups for Multi-Task CNNs: Learning Specialist and Generalist Convolution Kernels".  (2019) \textbf{ICCV} ($^*$ equal contributions)
+	
+	\item \textbf{R. Tanno}, D. E. Worrall, E. Kaden, A. Ghosh, F. Grussu, A. Bizzi, S. N. Sotiropoulos, A. Criminisi, and D. C. Alexander, “Uncertainty Quantification in Deep Learning for Safer Neuroimage Enhancement”. (2019) \textbf{Neuroimage} (Under Submission)
+	
+	\item F.J.S. Bragman$^*$, \textbf{R. Tanno}$^*$, S. Ourselin, D. C. Alexander, M. J. Cardoso, "Learning task-specific and shared representations in medical imaging".  (2019) \textbf{MICCAI} ($^*$equal contributions)
+	
+	\item C. Sudre, B.G. Anson, S. Ingala, D. Jimenez, C. Lane, L. Haider, T. Varsavsky,  \textbf{R.~Tanno}, L. Smith, S. Ourselin, R. Jager, M. J. Cardoso, "Let's agree to disagree: learning highly debatable multirater labelling".  (2019) \textbf{MICCAI} 
+	
+	\item S. B. Blumberg, M. Palombo, C. S. Khoo, C. Tax, \textbf{R. Tanno}, D. C Alexander. “Multi-Stage Prediction Networks for Data Harmonization”. (2019) \textbf{MICCAI }
+	
+\end{enumerate}
+
+
 % bibunit to list our publications
 %\begin{bibunit}[apacite]
 %	\nocite{tanno2019learning}

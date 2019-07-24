@@ -1,4 +1,5 @@
 ## Core latex/pdflatex auxiliary files:
+report.synctex.gz
 *.synctex.gz
 *.aux
 *.lof
@@ -12,6 +13,7 @@
 *.cb
 *.cb2
 .*.lb
+.DS_Store
 
 # these rules might exclude image files for figures etc.
 # *.ps
