@@ -2,7 +2,7 @@
 \thispagestyle{empty}
 
 \section*{Problem statement}
-Deep learning and decisions trees are now ubiquitous in the field of medical image processing. However, the current methods disproportionately rely on deterministic algorithms, which lack a mechanism to represent and manipulate uncertainty about models and predictions. In safety-critical applications such as medical imaging, quantifying what the model does not know is critical for constructing a reliable decision making system. The aim of this thesis is to explore probabilitic modelling as a framework to integrate uncertainty information in deep learning and decision tree models, and demonstrate utility in various medical image processing applications. 
+Deep learning and decisions trees are now ubiquitous in the field of medical image processing. However, the current methods disproportionately rely on deterministic algorithms, which lack a mechanism to represent and manipulate uncertainty about models and predictions. In safety-critical applications such as medical imaging, quantifying what the model does not know is important for constructing a reliable decision making system. The aim of this thesis is to explore probabilitic modelling as a framework to integrate uncertainty information in deep learning and decision tree models, and demonstrate utility in various medical image processing applications. 
 
 % you could mention: towards a safer and more robust
 %Describe the research problem that your work is addressing (approx. 5-6 sentences)
@@ -13,35 +13,45 @@ Deep learning and decisions trees are now ubiquitous in the field of medical ima
 I plan to survey the following topics in the given order to motivate the thesis. 
 
 \begin{enumerate}
-	\item \textbf{``Classics" on uncertainty quantification for medical imaging}: there is a large body of prior work on uncertainty quantification based on traditional probabilistic modelling techniques (e.g. grpahical models) in a variety of medical image analysis applications such as registration, classification, segmentation and image synthesis. I would like to use this section to motivate the importance of uncertainty quantification in medical imaging applications. 
+	\item \textbf{``Classics" on uncertainty quantification for medical imaging}: there is a large body of prior works on uncertainty quantification based on traditional probabilistic modelling techniques (e.g. graphical models) in a variety of medical image analysis applications such as registration, classification, segmentation and image synthesis. I would like to use this section to motivate the importance of uncertainty quantification in medical imaging applications. 
 
 	\item \textbf{Surge of black-box models in medical imaging}: In the last few years, with increasing availability of labelled data, hardware and user-friendly software, black-box models such as deep learning and decision trees have permeated every corner of medical image processing research, often surpassing the performance of more traditional probabilistic techniques. 
 	
-	\item \textbf{Uncertainty in black-box models}: This section will review both theoretical and application-driven previous research on uncertainty modelling in deep learning and decision trees. We will discuss why such research is important for designing safer and interpretable systems for medical applications. 
+	\item \textbf{Uncertainty in black-box models}: This section will review both theoretical and application-driven previous research on uncertainty modelling in deep learning and decision trees. We will discuss why such research is important for designing safe and interpretable systems for medical applications. 
 \end{enumerate}
 
-\section*{Summary of the contribution} 
-In this thesis I contributed to the three key aspects mentioned above. 
+\section*{Scope}
+The thesis primarily focuses on both the development of new techniques for accounting for uncertainty information in deep learning and decision trees, and demonstrating their practical values in medical imaging applications. 
+%state the boundaries of your research – what will be included, what not?
+
+\section*{Summary of the contributions} 
+To summarise, the contributions of this thesis are as follows:
+
+\begin{enumerate}
+	\item \textbf{Modelling predictive uncertainty}:  We introduce methods to quantify uncertainty over the output of deep learning and decision tree models. We demonstrate how such uncertainty measure can be used to quantify the quality of output and develop a more risk-averse image enhancement system for diffusion MRI \cite{tanno2016bayesian,tanno2017bayesian,tannonimg2019}.  We further show that the same concept could be naturally extended to the multi-task learning paradigm, and test the benefits in the context of MR-only radiotherapy planning application \cite{bragman2018multi}. 
+	
+	\item \textbf{Modelling human uncertainty}: We propose a method to model the biases and skill levels of human annotators, and integrate this information into the learning process of the neural network classifier \cite{tanno2019learning}. We demonstrate in classification of ultrasound cardiac images that the method not only improves the robustness of the model to label noise, but also yields insights into the performance of different human annotators. 
+	
+	\item \textbf{Modelling structural uncertainty}: We propose methods to learn model structures of a deep neural network. In the context of multi-task learning, we introduce the concept of \emph{stochastic filter  groups} (SFGs) \cite{sfg2019} to estimate the posterior distribution over the possible connectivity structures in a convolutional neural network in order to disentangle task-specific and shared features across different tasks. We demonstrate in the MR-only radiotherapy planning application that SFGs are capable of learning meaningful separations of representations, and consequently improve the performance. Lastly, we explore how the training algorithm of decision trees could be extended to adapt the architectuore of a neural network to the given availability of training data and the complexity of the task \cite{AdaptiveNeuralTrees19}. 
+	
+\end{enumerate}
 
 %My key contributions for each chapter are described in the following sections.
 %your PhD is intended to make to already existing literature on the topic
 
-\section*{Scope of the thesis}
 
-%state the boundaries of your research – what will be included, what not?
 
-\section*{Research/thesis progress}
+\section*{Progress}
 \begin{enumerate}
-	\item Relevant publications have been formated into different chapters, but still require editing to improve the flow. 
-	\item Need to write an introduction chapter to set the context with a literature review, explain the importance of uncertainty modelling in medical imaging, and outline my thesis and contributions. 
-	\item Need to write a chapter on future research. 
+	\item Relevant publications have been formated into different chapters, but editing of text is required to improve the flow. 
+	\item I need to write an introduction chapter to set the context with a literature review, explain the importance of uncertainty modelling in medical imaging, and outline my thesis and contributions. 
+	\item I need to write a chapter on future research. 
 	\item (Optional): If time permits, I plan to add another subsection in Chapter~\ref{chapter:humanuncertainty} by extending the presented method for modelling human uncertainty to the segmentation task.		
 \end{enumerate}
 
 \section*{Timeline}
-I plan to submit the thesis by mid September (My post-doc fellow position is due to start in the same month). The first rought draft should be completed before 16 August 2019. 
+I plan to submit the thesis by mid September (my post-doc position NYU is due to start in the same month). The first rough draft should be completed before 16 August 2019. 
 
-\clearpage
 \section*{List of publications}
 \small
 \begin{enumerate}
