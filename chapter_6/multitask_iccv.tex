@@ -215,7 +215,7 @@ We introduce a new approach for determining where to learn task-specific and sha
 \begin{figure}[ht]
 	\center
 % 	\vspace{-3mm}
-	\includegraphics[width=0.75\linewidth]{chapter_6/figures/forward_and_backward.pdf}
+	\includegraphics[width=0.8\linewidth]{chapter_6/figures/forward_and_backward.pdf}
 	\caption{\small Illustration of feature routing. The circles $G_{1}, G_{s}, G_{2}$ denote the task-specific and shared filter groups in each layer. (i) shows the directions of routing of activations between different filter groups while (ii) shows the directions of the gradient flow from the task losses $L_{1}$ and $L_{2}$. The red and blue arrows denote the gradients that step from $L_{1}$ and $L_{2}$, respectively. The task-specific groups $G_{1}, G_{2}$ are only updated based on the associated losses, while the shared group $G_{s}$ is updated based on both. }
     \label{fig:forward_and_backward}
 \end{figure}
@@ -276,12 +276,12 @@ where $\{\mathbf{w}^{(l),k}_1,\mathbf{w}^{(l),k}_{s}, \mathbf{w}^{(l),k}_{2}\}$ 
 where $\mathbf{z}^{(l),k}$ is the one-hot encoding of a sample from the categorical distribution over filter group assignments. The variational parameters $\phi_{lk}$ consists of the pre-grouping convolution kernel $\mathbf{w}^{(l),k}$ and the grouping probabilities $\mathbf{p}^{(l),k}=[p^{(l),k}_1, p^{(l),k}_{s}, p^{(l),k}_2]$. 
 
 We minimize the KL divergence between the approximate posterior $q_{\phi}(\mathcal{W})$ and $p(\mathcal{W}|\textbf{X}, \mathbf{Y}^{(1)}, \mathbf{Y}^{(2)})$. Assuming that the joint likelihood over the two tasks factorizes, we have the following optimization objective:
-\begin{multline}\label{eq:variational_loss}
-    \mathcal{L}_{\text{MC}}(\phi) = -\frac{N}{M}\sum_{i=1}^{M} \Big{[}\text{log } p(y^{(1)}_i|\mathbf{x}_i, \mathcal{W}_i) + \text{log }p(y^{(2)}_i|\mathbf{x}_i, \mathcal{W}_i)\Big{]} \\ + \sum_{l=1}^{L}\sum_{k=1}^{K_l}\text{KL}(q_{\phi_{lk}}(\mathbf{W}^{(l),k})||p(\mathbf{W}^{(l),k}))
-\end{multline}
+\begin{equation}\label{eq:variational_loss}
+    \mathcal{L}_{\text{MC}}(\phi) = -\frac{N}{M}\sum_{i=1}^{M} \Big{[}\text{log } p(y^{(1)}_i|\mathbf{x}_i, \mathcal{W}_i) + \text{log }p(y^{(2)}_i|\mathbf{x}_i, \mathcal{W}_i)\Big{]} + \sum_{l=1}^{L}\sum_{k=1}^{K_l}\text{KL}(q_{\phi_{lk}}(\mathbf{w}^{(l),k})||p(\mathbf{w}^{(l),k}))
+\end{equation}
 where $M$ is the size of the mini-batch, $N$ is the total number of training data points, and $\mathcal{W}_i$ denotes a set of model parameters sampled from $q_{\phi}(\mathcal{W})$. The last KL term regularizes the deviation of the approximate posterior from the prior $p(\mathbf{W}^{(l),k})=\mathcal{N}(0, \mathbf{I}/l^{2})$ where $l>0$. Adapting the approximation presented in \cite{gal2016uncertainty} to our scenario, we obtain:
 \begin{equation}\label{eq:KL}
-    \text{KL}(q_{\phi_{lk}}(\mathbf{C}^{(l),k})||p(\mathbf{C}^{(l),k})) \propto \frac{l^2}{2}||\mathbf{M}^{(l),k}||^{2}
+    \text{KL}(q_{\phi_{lk}}(\mathbf{C}^{(l),k})||p(\mathbf{C}^{(l),k})) \propto \frac{l^2}{2}||\mathbf{w}^{(l),k}||^{2}
     _{2} - \mathcal{H}(\mathbf{p}^{(l),k})
 \end{equation}
 where $\mathcal{H}(\mathbf{p}^{(l),k})=-\sum_{i\in \{1,2,s\}}p^{(l),k}_i\text{log }p^{(l),k}_i$ is the entropy of the grouping probabilities. While the first term performs the L2-weight norm, the second term pulls the grouping probabilities towards the uniform distribution. Plugging eq.\eqref{eq:KL} into eq.\eqref{eq:variational_loss} yields the overall loss: 

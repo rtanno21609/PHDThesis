@@ -1,10 +1,10 @@
 \section{Experiments} 
 \label{sec:experiments}
 \begin{table*}[t]
-	\caption{\footnotesize Comparison of performance of different models on SARCOS, MNIST and CIFAR-10. The columns ``Error (multi-path)'' and ``Error (single-path)'' indicate the classification ($\%$) or regression (MSE) errors of predictions based on the multi-path and the single-path inference. The columns ``Params. (multi-path)'' and ``Params. (single-path)'' respectively show the total number of parameters in the model and the average number of parameters used during single-path inference. ``Ensemble Size'' indicates the size of ensemble used. An entry of ``--'' indicates that no value was reported.  Methods marked with \textsuperscript{\textdagger} are from our implementations trained in the same experimental setup. * indicates that the parameters are initialised with a pre-trained CNN.}
+	\caption{\small Comparison of performance of different models on SARCOS, MNIST and CIFAR-10. The columns ``Error (multi-path)'' and ``Error (single-path)'' indicate the classification ($\%$) or regression (MSE) errors of predictions based on the multi-path and the single-path inference. The columns ``Params. (multi-path)'' and ``Params. (single-path)'' respectively show the total number of parameters in the model and the average number of parameters used during single-path inference. ``Ensemble Size'' indicates the size of ensemble used. An entry of ``--'' indicates that no value was reported.  Methods marked with \textsuperscript{\textdagger} are from our implementations trained in the same experimental setup. * indicates that the parameters are initialised with a pre-trained CNN.}
 	\label{table:mnist_results}
     \centering
-    \scriptsize
+    \footnotesize
 	\begin{tabular}{|c|l|cc|cc|c|}
 		\hline
 		%\abovespace\belowspace
@@ -110,7 +110,7 @@ Lastly, we highlight the observation that ANT-MNIST-C, with the simplest primiti
 
 \begin{table}[t]
 	\caption{\footnotesize Ablation study on regression (MSE) and classification ($\%$) errors. ``CNN'' refers to the case where the ANT is grown without routers while ``SDT/HME'' refers to the case where transformer modules on the edges are disabled.} \label{tab:ablationstudy}
-	\scriptsize
+	\footnotesize
     \center
 	\begin{tabular}{|l|ccc|ccc|}
 		\hline
@@ -158,29 +158,32 @@ The growth procedure of ANTs is capable of discovering hierarchical structures i
 		\vspace{-6mm}
 		\caption{After refinement}
 	\end{subfigure}
-	\caption{\footnotesize Visualisation of class distributions (red) and path probabilities (blue) computed over the whole test set at respective nodes of an example ANT (a) before and (b) after the refinement phase. (a) shows that the model captures an interpretable hierarchy, grouping semantically similar images on the same branches. (b) shows that the refinement phase polarises path probabilities, pruning a branch.}
+	\caption{\small Visualisation of class distributions (red) and path probabilities (blue) computed over the whole test set at respective nodes of an example ANT (a) before and (b) after the refinement phase. (a) shows that the model captures an interpretable hierarchy, grouping semantically similar images on the same branches. (b) shows that the refinement phase polarises path probabilities, pruning a branch.}
 	\label{fig:learnedmodel}
 \end{figure*}
 
-\begin{figure*}[t!]
+\begin{figure}[t!]
 	\centering
-	\begin{subfigure}[t]{0.295\linewidth}
+	\begin{subfigure}[t]{0.48\linewidth}
+		\caption{}
 		\includegraphics[width=\linewidth]{chapter_7/figures/fig_1_2.pdf}
 		%\label{fig:ch5:active}
 	\end{subfigure}
 	\hspace{0mm}
-	\begin{subfigure}[t]{0.305\linewidth}
+	\begin{subfigure}[t]{0.50\linewidth}
+		\caption{}
 		\includegraphics[width=\linewidth]{chapter_7/figures/fig_2_2.pdf}
 		%\label{fig:ch5:active2}
 	\end{subfigure}
 	\hspace{0mm}
-	\begin{subfigure}[t]{0.32\linewidth}
+	\begin{subfigure}[t]{0.52\linewidth}
+		\caption{}
 		\includegraphics[width=\linewidth]{chapter_7/figures/fig_3_2.pdf}
 		%\label{fig:ch5:active2}
 	\end{subfigure}
-	\caption{\footnotesize (Left). Test accuracy on CIFAR-10 of ANTs for varying amounts of training data. (Middle) The complexity of the grown ANTs increases with dataset size. (Right) Refinement improves generalisation; the dotted lines show where the refinement phase starts.}
+	\caption{\small (a) Test accuracy on CIFAR-10 of ANTs for varying amounts of training data. (b) The complexity of the grown ANTs increases with dataset size. (c) Refinement improves generalisation; the dotted lines show where the refinement phase starts.}
 	\label{fig:cifar10}
-\end{figure*}
+\end{figure}
 
 We observe that global refinement phase improves the generalisation error. Fig. \ref{fig:cifar10} (Right) shows the generalisation error of various ANT models on CIFAR-10, with vertical dotted lines indicating the epoch when the models enter the refinement phase. As we switch from optimising parts of the ANT in isolation to optimising all parameters, we shift the optimisation landscape, resulting in an initial drop in performance. However, they all consistently converge to higher test accuracy than the best value attained during the growth phase. This provides evidence that refinement phase remedies suboptimal decisions made during the locally-optimised growth phase. In many cases, we observed that global optimisation polarises the decision probability of routers, which occasionally leads to the effective ``pruning" of some branches. For example, in the case of the tree shown in Fig. \ref{fig:learnedmodel}(b), we observe that the decision probability of routers are more concentrated near 0 or 1 after global refinement, and as a result, the empirical probability of visiting one of the leaf nodes, calculated over the validation set, reduces to 0.09\%---meaning that the corresponding branch could be pruned without a negligible change in the network's accuracy. The resultant model attains lower generalisation error, showing the pruning has resolved a suboptimal partioning of data. 
 %We emphasise that this is a consequence of global fine-tuning, and does not involve additional algorithms that would be used to prune or compress standard NNs.
