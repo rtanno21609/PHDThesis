@@ -32,6 +32,8 @@
 \chapter{Part I: Uncertainty in Multitask Learning}
 \label{chapter:multitaskuncertainty_part1}
 
+\textcolor{red}{Here I could use my work with ThinkSono to motivate the importance of tuning the relative weightings of task losses to benefit from multi-task learning \cite{tanno2018autodvt}.}
+
 Multi-task neural network architectures provide a learning mechanism that jointly synthesises information from distinct sources. The success of multi-task learning stems from inductive transfer, which is known to improve the performance of a model by learning task-invariant representations. Multi-task learning is ideal in the context of MR-only radiotherapy planning as it can jointly synthesize a synthetic CT (synCT) scan (regression) and an automated contour of organs-at-risk (segmentation) from MRI data. We propose to use a probabilistic deep-learning formulation to estimate the \textit{intrinsic} and \textit{parameter} uncertainty through a heteroscedastic noise model, where parameter uncertainty is modelled using approximate Bayesian inference. This allows the sampling of multiple segmentations and synCTs that share their network representation, enabling a fully end-to-end uncertainty aware MRI-based probabilistic planning system. We show that our model produces more accurate and consistent synCTs with a better estimation in the variance of the errors, equivalent state of the art results in OAR segmentation and a methodology for quality assurance in treatment planning. The model also produces samples with anatomically-consistent segmentations and synCTs, a necessary characteristic in probabilistic planning models. 
 
 \section{Introduction}

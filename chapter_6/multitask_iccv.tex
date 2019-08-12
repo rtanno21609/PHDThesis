@@ -43,6 +43,8 @@
 \chapter{Part II: Uncertainty in Multitask Learning }
 \label{chapter:multitaskuncertainty_part2}
 
+\textcolor{red}{Here I could use my work with ThinkSono to motivate the problem with a fixed architecture \cite{tanno2018autodvt}.}
+
 The performance of multi-task learning in Convolutional Neural Networks (CNNs) hinges on the design of feature sharing between tasks within the architecture. The number of possible sharing patterns are combinatorial in the depth of the network and the number of tasks, and thus hand-crafting an architecture, purely based on the human intuitions of task relationships can be time-consuming and suboptimal. In this paper, we present a probabilistic approach to learning task-specific and shared representations in CNNs for multi-task learning. Specifically, we propose ``stochastic filter groups'' (SFG), a mechanism to assign convolution kernels in each layer to ``specialist'' or ``generalist'' groups, which are specific to or shared across different tasks, respectively. The SFG modules determine the connectivity between layers and the structures of task-specific and shared representations in the network. We employ variational inference to learn the posterior distribution over the possible grouping of kernels and network parameters. Experiments demonstrate that the proposed method generalises across multiple tasks and shows improved performance over baseline methods. 
 
 \section{Introduction}
@@ -263,35 +265,32 @@ Another important aspect that needs to be highlighted is the varying dimensional
 \subsection{T+1 Way ``Drop-Out''}
 Here we derive the method for simultaneously optimising the CNN parameters and grouping probabilities. We achieve this by extending the variational interpretation of binary dropout \cite{gal2016uncertainty,gal2017concrete} to the $(T+1)$-way assignment of each convolution kernel to the filter groups where $T$ is the number of tasks. As before, we consider the case $T=2$. 
 
-Suppose that the architecture consists of $L$ SFG modules, each with $K_l$ kernels where $l$ is the index. As the posterior distribution over the convolution kernels in SFG modules $p(\mathcal{W}|\textbf{X}, \mathbf{Y}^{(1)}, \mathbf{Y}^{(2)})$ is intractable, we approximate it with a simpler distribution $q_{\phi}(\mathcal{W})$ where $\mathcal{W}=\{\mathbf{w}^{(l),k}\}_{k=1,...,K_{l},l=1,...,L}$. Assuming that the posterior distribution factorizes over layers and kernels up to group assignment, we defined the variational distribution as:
+Suppose that the architecture consists of $L$ SFG modules, each with $K_l$ kernels where $l$ is the index. As the posterior distribution over the convolution kernels in SFG modules $p(\mathcal{W}|\textbf{X}, \mathbf{Y}^{(1)}, \mathbf{Y}^{(2)})$ is intractable, we approximate it with a simpler distribution $q_{\phi}(\mathcal{W})$ where $\mathcal{W}=\{\mathbf{W}^{(l),k}\}_{k=1,...,K_{l},l=1,...,L}$. Assuming that the posterior distribution factorizes over layers and kernels up to group assignment, we defined the variational distribution as:
 \begin{align*}
- q_{\phi}(\mathcal{W}) &= \prod_{l=1}^{L}\prod_{k=1}^{K_{l}} q_{\phi_{lk}}(\mathbf{w}^{(l),k}) \\
- &= \prod_{l=1}^{L}\prod_{k=1}^{K_{l}} q_{\phi_{lk}}(\mathbf{w}^{(l),k}_1,\mathbf{w}^{(l),k}_{s}, \mathbf{w}^{(l),k}_{2})
+q_{\phi}(\mathcal{W}) &= \prod_{l=1}^{L}\prod_{k=1}^{K_{l}} q_{\phi_{lk}}(\mathbf{W}^{(l),k}) \\
+&= \prod_{l=1}^{L}\prod_{k=1}^{K_{l}} q_{\phi_{lk}}(\mathbf{W}^{(l),k}_1,\mathbf{W}^{(l),k}_{s}, \mathbf{W}^{(l),k}_{2})
 \end{align*}
-where $\{\mathbf{w}^{(l),k}_1,\mathbf{w}^{(l),k}_{s}, \mathbf{w}^{(l),k}_{2}\}$ denotes the $k^{\text{th}}$ kernel in $l^{\text{th}}$ convolution layer after being routed into task-specific $G^{(l)}_1, G^{(l)}_2$ and shared group $G^{(l)}_{s}$. We define each $q_{\phi_{lk}}(\mathbf{w}^{(l),k}_1,\mathbf{w}^{(l),k}_2, \mathbf{w}^{(l),k}_{s})$ as: 
+where $\{\mathbf{W}^{(l),k}_1,\mathbf{W}^{(l),k}_{s}, \mathbf{W}^{(l),k}_{2}\}$ denotes the $k^{\text{th}}$ kernel in $l^{\text{th}}$ convolution layer after being routed into task-specific $G^{(l)}_1, G^{(l)}_2$ and shared group $G^{(l)}_{s}$. We define each $q_{\phi_{lk}}(\mathbf{W}^{(l),k}_1,\mathbf{W}^{(l),k}_2, \mathbf{W}^{(l),k}_{s})$ as: 
 \begin{align}
-\mathbf{w}^{(l),k}_{i} &= z^{(l),k}_{i}\cdot\mathbf{w}^{(l),k}\, \,\,\text{for } i \in\{1,s,2\}\\
+\mathbf{W}^{(l),k}_{i} &= z^{(l),k}_{i}\cdot\mathbf{M}^{(l),k}\, \,\,\text{for } i \in\{1,s,2\}\\
 \mathbf{z}^{(l),k}&=[z^{(l),k}_{1}, z^{(l),k}_{2},  z^{(l),k}_{s}] \sim \text{Cat}(\mathbf{p}^{(l),k}) \label{eq:sample_cat}
 \end{align}
-where $\mathbf{z}^{(l),k}$ is the one-hot encoding of a sample from the categorical distribution over filter group assignments. The variational parameters $\phi_{lk}$ consists of the pre-grouping convolution kernel $\mathbf{w}^{(l),k}$ and the grouping probabilities $\mathbf{p}^{(l),k}=[p^{(l),k}_1, p^{(l),k}_{s}, p^{(l),k}_2]$. 
+where $\mathbf{z}^{(l),k}$ is the one-hot encoding of a sample from the categorical distribution over filter group assignments, and $\mathbf{M}^{(l),k}$ denotes the parameters of the pre-grouping convolution kernel. The set of variational parameters for each kernel in each layer is thus given by $\phi_{lk} = \{\mathbf{M}^{(l),k}, \mathbf{p}^{(l),k}=[p^{(l),k}_1, p^{(l),k}_{s}, p^{(l),k}_2]\}$. 
 
 We minimize the KL divergence between the approximate posterior $q_{\phi}(\mathcal{W})$ and $p(\mathcal{W}|\textbf{X}, \mathbf{Y}^{(1)}, \mathbf{Y}^{(2)})$. Assuming that the joint likelihood over the two tasks factorizes, we have the following optimization objective:
 \begin{equation}\label{eq:variational_loss}
-    \mathcal{L}_{\text{MC}}(\phi) = -\frac{N}{M}\sum_{i=1}^{M} \Big{[}\text{log } p(y^{(1)}_i|\mathbf{x}_i, \mathcal{W}_i) + \text{log }p(y^{(2)}_i|\mathbf{x}_i, \mathcal{W}_i)\Big{]} + \sum_{l=1}^{L}\sum_{k=1}^{K_l}\text{KL}(q_{\phi_{lk}}(\mathbf{w}^{(l),k})||p(\mathbf{w}^{(l),k}))
+\mathcal{L}_{\text{MC}}(\phi) = -\frac{N}{M}\sum_{i=1}^{M} \Big{[}\text{log } p(y^{(1)}_i|\mathbf{x}_i, \mathcal{W}_i) + \text{log }p(y^{(2)}_i|\mathbf{x}_i, \mathcal{W}_i)\Big{]} \\ + \sum_{l=1}^{L}\sum_{k=1}^{K_l}\text{KL}(q_{\phi_{lk}}(\mathbf{W}^{(l),k})||p(\mathbf{W}^{(l),k}))
 \end{equation}
 where $M$ is the size of the mini-batch, $N$ is the total number of training data points, and $\mathcal{W}_i$ denotes a set of model parameters sampled from $q_{\phi}(\mathcal{W})$. The last KL term regularizes the deviation of the approximate posterior from the prior $p(\mathbf{W}^{(l),k})=\mathcal{N}(0, \mathbf{I}/l^{2})$ where $l>0$. Adapting the approximation presented in \cite{gal2016uncertainty} to our scenario, we obtain:
 \begin{equation}\label{eq:KL}
-    \text{KL}(q_{\phi_{lk}}(\mathbf{C}^{(l),k})||p(\mathbf{C}^{(l),k})) \propto \frac{l^2}{2}||\mathbf{w}^{(l),k}||^{2}
-    _{2} - \mathcal{H}(\mathbf{p}^{(l),k})
+\text{KL}(q_{\phi_{lk}}(\mathbf{W}^{(l),k})||p(\mathbf{W}^{(l),k})) \propto \frac{l^2}{2}||\mathbf{M}^{(l),k}||^{2}
+_{2} - \mathcal{H}(\mathbf{p}^{(l),k})
 \end{equation}
 where $\mathcal{H}(\mathbf{p}^{(l),k})=-\sum_{i\in \{1,2,s\}}p^{(l),k}_i\text{log }p^{(l),k}_i$ is the entropy of the grouping probabilities. While the first term performs the L2-weight norm, the second term pulls the grouping probabilities towards the uniform distribution. Plugging eq.\eqref{eq:KL} into eq.\eqref{eq:variational_loss} yields the overall loss: 
 
-\begin{multline}\label{eq:total_loss}
-\medmuskip=0mu
-\thinmuskip=0mu
-\thickmuskip=0mu
-\mathcal{L}_{\text{MC}}(\phi) = -\frac{N}{M}\sum_{i=1}^{M} \left[\log\text{\,} p\left(y^{(1)}_i|\mathbf{x}_i, \mathcal{W}_i\right) + \log\text{\,} p\left(y^{(2)}_i|\mathbf{x}_i, \mathcal{W}_i\right)\right] \\ + \lambda_{1} \cdot \sum_{l=1}^{L}\sum_{k=1}^{K_l}||\mathbf{w}^{(l),k}||^{2} - \lambda_{2} \cdot \sum_{l=1}^{L}\sum_{k=1}^{K_l}\mathcal{H}(\mathbf{p}^{(l),k})
-\end{multline}
+\begin{equation}\label{eq:total_loss}
+\mathcal{L}_{\text{MC}}(\phi) = -\frac{N}{M}\sum_{i=1}^{M} \left[\log\text{\,} p\left(y^{(1)}_i|\mathbf{x}_i, \mathcal{W}_i\right) + \log\text{\,} p\left(y^{(2)}_i|\mathbf{x}_i, \mathcal{W}_i\right)\right] \\ + \lambda_{1} \cdot \sum_{l=1}^{L}\sum_{k=1}^{K_l}||\mathbf{M}^{(l),k}||^{2} - \lambda_{2} \cdot \sum_{l=1}^{L}\sum_{k=1}^{K_l}\mathcal{H}(\mathbf{p}^{(l),k})
+\end{equation}
 where $\lambda_1>0, \lambda_2>0$ are regularization coefficients. 
 
 We note that the discrete sampling operation during filter group assignment (eq.~\eqref{eq:sample_cat}) creates discontinuities, giving the first term in the objective function (eq.~\ref{eq:total_loss}) zero gradient with respect to the grouping probabilities $\{\mathbf{p}^{(l),k}\}$. We therefore, as employed in \cite{kendall2017multi} for the binary case, approximate each of the categorical variables $\text{Cat}(\mathbf{p}^{(l),k})$ by the Gumbel-Softmax distribution, $\text{GSM}(\mathbf{p}^{(l),k}, \tau)$ \cite{maddison2016concrete,jang2016categorical}, a continuous relaxation which allows for sampling, differentiable with respect to the parameters $\mathbf{p}^{(l),k}$ through a reparametrisation trick. The temperature term $\tau$ adjusts the bias-variance tradeoff of gradient approximation; as the value of $\tau$ approaches 0, samples from the GSM distribution become one-hot (i.e. lower bias) while the variance of the gradients increases. \textcolor{black}{In practice, we start at a high $\tau$ and anneal to a small but non-zero value as in \cite{jang2016categorical,gal2017concrete} as detailed in supplementary materials.}
@@ -303,7 +302,7 @@ We note that the discrete sampling operation during filter group assignment (eq.
 % \begin{figure}[ht]
 % 	\center
 % % 	\vspace{-3mm}
-% 	\includegraphics[width=0.8\linewidth]{chapter_6/figures/training_sampling.pdf}
+% 	\includegraphics[width=0.8\linewidth]{figures/training_sampling.pdf}
 % 	\caption{Illustration of sampling during training. Each circle denotes a set of activations from each filter group. Each arrow indicates }
 %     \label{fig:sampling}
 % \end{figure}
