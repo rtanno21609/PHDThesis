@@ -63,7 +63,7 @@ In contrast, \textit{probabilistic machine learning} provides a natural framewor
 %		\item (Yarin Gal): ``The main goal of this thesis is to develop such practical tools to reason about uncertainty in deep learning.''
 %\end{itemize}}
 
-\section{Taxonomy of uncertainty}
+ \section{Taxonomy of uncertainty}
 There are many different types of uncertainty that are of practical importance. Here we provide a taxonomy of such uncertainty ``species'' and explain their relations and differences. 
 
 Imagine you have a machine learning model, $F$, which takes some input $\mathbf{x}$  (e.g. a MR image) and makes a prediction or decision about the quantity of interest, $\mathbf{y}=F(\mathbf{x})$ (e.g. presence of pathology). %Here $\theta$ denotes the set of parameters of the model, and has been optimised based on training data, consisting of $N$ pairs of inputs and labels of interest $\mathcal{D} = \{\mathbf{x}_{i}, \mathbf{y}_i\}_{i=1}^N $.
@@ -71,10 +71,20 @@ You now have thoroughly evaluated the performance of the model on a held-out tes
 
 \textit{Predictive uncertainty} describes the degree of ambiguity (or confidence) in the model's prediction on an given input. For example, error bounds are a common measure of predictive uncertainty, and can be used to assess the reliability of prediction for the particular data instance at hands. You might be interested in knowing how well your model performs in a new environment, but you may not have access to a sufficient volume of ground-truth labels for validation. However, quantification of predictive uncertainty provides a proxy measure of performance on each data point, which can be used to manage failure risks in a principled way---if the model encouters input examples with overly high predictive uncertainty, then we should not trust the system. 
 
-One is often interested not only in quantifying the predictive uncertainty, but also understanding its \textit{sources}. Having quantitative answers to questions such as ``is the model uncertain on this particular image because the observed feature is not represented in the training data or the image quality is too low to make conclusive decisions? Perhaps the current model does not best explain the data and we should use a different one?'' has clear benefits for building a more realiable system. Commonly, such \textit{source} uncertainty is divided into two types,\textit{aleatoric} and \textit{epistemic} uncertainty \cite{hora1996aleatory}. Aleatoric uncertainty --- from the Latin word, \textit{alea}, meaning a ``die'' --- refers to uncertainty about inherently stochastic phenomenon, . Epistemic uncertainty — from the Greek word \textit{episteme}, meaning “knowledge” — refers to uncertainty arising from lack of knowledge. The former type of uncertainty 
+One is often interested not only in quantifying the predictive uncertainty, but also understanding its \textit{sources}. Having quantitative answers to questions such as ``is the model uncertain on this particular image because the observed feature is not represented in the training data or the image quality is too low to make conclusive decisions? Perhaps the current model does not best explain the data and we should use a different one?'' has clear benefits for building a more realiable system. Commonly, such \textit{source} uncertainty is divided into two types,\textit{aleatoric} and \textit{epistemic} uncertainty \cite{hora1996aleatory}. Aleatoric uncertainty --- from the Latin word, \textit{alea}, meaning a ``die'' --- refers to uncertainty about inherently stochastic phenomenon, . Epistemic uncertainty — from the Greek word \textit{episteme}, meaning “knowledge” — refers to uncertainty arising from lack of knowledge. \textcolor{red}{Elaborate on both with examples! Also, end }
 
+\begin{figure}[bt]
+	\includegraphics[width=0.5\linewidth]{chapter_1/uncertainty_taxonomy.png}
+	\centering	
+	%	\vspace{-2mm}
+	\caption{Illustration of different types of uncertainty. The combined effects of both aleatoric and epistemic uncertainties induce \textit{predictive uncertainty}, the degree of confidence in a prediction of the model.  } 
+	\label{fig:uncertainty_taxonomy}
+	%\vspace{-10pt}
+\end{figure}
  
-The model may encouter some unfamiliar inputs, which are not observed in the training data (e.g. a rare pathology).
+%The model may encouter some unfamiliar inputs, which are not observed in the training data (e.g. a rare pathology).
+% 
+
  
 %More abstractly, the below are the types of uncertainty that the prior methods have tried to account for: 
 %\begin{itemize}
@@ -83,23 +93,20 @@ The model may encouter some unfamiliar inputs, which are not observed in the tra
 %	\item Structural uncertainty. 
 %\end{itemize}
 
-The combined effects of these sources of uncertainties induce \textit{predictive uncertainty}, the degree of confidence in a prediction of the model. 
+
 
 % (From Sullivan 2015): It is common to divide uncer- tainty into two types, aleatoric and epistemic uncertainty. Aleatoric uncer- tainty — from the Latin alea, meaning a die — refers to uncertainty about an inherently variable phenomenon. Epistemic uncertainty — from the Greek ε`πιστη ́μη, meaning knowledge — refers to uncertainty arising from lack of knowledge. If one has at hand a model for some system of interest, then epis- temic uncertainty is often further subdivided into model form uncertainty, in which one has significant doubts that the model is even ‘structurally correct’, and parametric uncertainty, in which one believes that the form of the model reflects reality well, but one is uncertain about the correct values to use for particular parameters in the model
 
-Different areas of applications in medical imaging have studied to varying degrees ways to represent these types of uncertainty, which I elaborate in the remaining part of this section. 
-
-\textcolor{red}{Explain more fundamentally how probabilistic modelling provides a language to manipulate uncertainty about models and predictions. Read Zoubin's paper? This would be more of a background materials though. I guess we could come up with a very simple example to illustrate all these aspects? Perhaps augment Zoubin's example?}
+%Different areas of applications in medical imaging have studied to varying degrees ways to represent these types of uncertainty, which I elaborate in the remaining part of this section. 
+%
+%\textcolor{red}{Explain more fundamentally how probabilistic modelling provides a language to manipulate uncertainty about models and predictions. Read Zoubin's paper? This would be more of a background materials though. I guess we could come up with a very simple example to illustrate all these aspects? Perhaps augment Zoubin's example?}
 
 
 
 
 \section{Uncertainty Modelling in Medical Imaging}
 % I would like to use this section to motivate the importance of uncertainty quantification in medical imaging applications. 
-The importance of representing uncertainty information has long been recognised in the medical imaging community. There is a large body of prior works on uncertainty quantification based on traditional probabilistic modelling techniques (e.g. graphical models and fuzzy logic) in a variety of medical image analysis applications such as registration, classification, segmentation and image synthesis. To the best of my knowledge, research addressing this issues goes back to the early 1970s. Here I would like to provide a brief survey of the prior works in an array of different applications. 
-
-
-
+The importance of representing uncertainty information has long been recognised in the medical imaging community. There is a large body of prior research on uncertainty quantification based on traditional probabilistic modelling techniques (e.g. graphical models and fuzzy logic) in a variety of medical image analysis applications such as registration, classification, segmentation and image synthesis. To the best of my knowledge, research addressing this issues goes back to the early 1970s. Here I provide a brief survey of such prior works.
  
  % (Yingzhen says):
  
