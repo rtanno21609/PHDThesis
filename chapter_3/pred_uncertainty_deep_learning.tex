@@ -52,7 +52,7 @@
 %
 
 
-\chapter{Taxonomy of Uncertainty in Deep Learning}
+\chapter{Predictive Uncertainty in Deep Learning}
 \label{chapter:deepuncertainty}
 
 
@@ -62,12 +62,8 @@
 
 %------------------------------------ Introduction  ------------------------------
 \section{Introduction}
-%A potential structure of intro below: 
-%\textcolor{red}{Make sure that context and contributions are separated. You need a concrete and well-referenced context development. Also, make sure our high-level contributions are evident.}
-
-
-% 2018-01-10
-%In the last few years, deep learning techniques have permeated the field of medical image processing \cite{shen2017deep,litjens2017survey}. Modern research in automation of radiological tasks through deep learning have shown a great promise in an array of applications such as segmentation \cite{kamnitsas2017efficient}, detection \cite{roth2014new}, disease grading and classification \cite{araujo2017classification}. Another notable category of problems is data enhancement, which aims to increase both the quality and quantity of medical images for research and clinics, and come in different forms such as super-resolution \cite{oktay2016multi}, image synthesis \cite{nie2016estimating,kang2017deep}, denoising \cite{benou2017ensemble}, data harminization \cite{karayumak2018harmonizing}, reconstruction \cite{jin2017deep,schlemper2018deep,zhu2018image,yang2018dagan}, registration \cite{sokooti2017nonrigid} and quality control \cite{wu2017fuiqa,esses2018automated}. These advances have the potential to not only increase the quality and efficiency of radiological care, but also facilitate scientific discoveries in medical research. 
+% (Interesting to motivate)
+%The most widely used deep learning models have an important shortcoming: they lack an under- lying mechanism to provide uncertainty infor- mation about the predictions they make. Instead they often output point estimates between 0 and 1, which are often taken blindly as a measure of confidence. There have already been a few high profile cases where blindly trusting deci- sions made by deep learning algorithms has had disastrous consequences. For example in 2016, and then again in 2018, there were fatalities due to mistakes made by the perception system of autonomous vehicles. In health care a wrong decision can be a matter of life or death, and so being able to place trust in the decisions of deep learning models applied to such an industry is of critical importance.
 
 In the last few years, deep learning techniques have permeated the field of medical image processing \cite{shen2017deep,litjens2017survey}. Beyond the automation of existing radiological tasks--- e.g. segmentation \cite{kamnitsas2017efficient}, detection \cite{roth2014new}, disease grading and classification \cite{araujo2017classification}---deep learning has been applied to a diverse set of ``data enhancement'' problems. Data enhancement aims to improve the quality, the information content, or the quantity of medical images available for research and clinics by transforming images from one domain to another \cite{isola2017image}. Previous research has shown the efficacy of data enhancement in different forms such as super-resolution \cite{oktay2016multi,chen2018efficient,ravi2019adversarial}, image synthesis \cite{nie2016estimating,kang2017deep}, denoising \cite{benou2017ensemble,chen2017low}, data harmonisation \cite{karayumak2018harmonizing,tax2019cross} across scanners and protocols, reconstruction \cite{sun2016deep,jin2017deep,hammernik2018learning,schlemper2018deep,zhu2018image,yang2018dagan,yoon2019efficient}, registration \cite{sokooti2017nonrigid,balakrishnan2018unsupervised} and quality control \cite{wu2017fuiqa,esses2018automated}.  These advances have the potential not only to enhance the quality and efficiency of radiological care, but also facilitate scientific discoveries in medical research through increased volume and content of usable data. 
 
