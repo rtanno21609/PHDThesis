@@ -39,8 +39,6 @@ To summarise, the contributions of this thesis are as follows:
 %My key contributions for each chapter are described in the following sections.
 %your PhD is intended to make to already existing literature on the topic
 
-
-
 \section*{Progress}
 \begin{enumerate}
 	\item Relevant publications have been formated into different chapters, but editing of text (and possibly change of structures) is required to improve the flow. 
@@ -91,6 +89,11 @@ I plan to submit the thesis by mid September (my post-doc position at NYU is due
 	\item F. A. Noor, S. Mischkewitz, A. Makropoulos, \textbf{R. Tanno}, B. Kainz, O. Oktay, “Blood vessel obstruction diagnosis method, apparatus \& system”  Patent No.WO2018162888A1. (Published in Sep 2018).
 	
 \end{enumerate}
+
+
+
+\section*{Thesis Structure}
+The thesis outline is as follows. In Chapter~\ref{chapter:biqt}, we introduce a probabilistic variant of decision trees to quantify predictive uncertainty, and demonstrate on image enhancement of neuroimages. In Chapter~\ref{chapter:deepuncertainty}, we focus on the same application, but explore ways to estimate the uncertainty over the prediction of deep learning models. We design a framework to jointly model the aleatoric uncertainty of the target mapping of interest, and the parameter uncertainty of the model, and propagate the two to estimate the predictive uncertainty. In Chapter~\ref{chapter:multitaskuncertainty_part1}, we show that the same concept could be naturally adapted to the multi-task learning paradigm, and demonstrate the benefits in the MR-only radiotherapy treatment planning application where the synthetic CT image and the segmentation of organs at risk are simultaneously predicted from the input MR image. Motivated by the same problem, Chapter~\ref{chapter:multitaskuncertainty_part2} introduces a Bayesian method to learn the connectivity structures in a neural network. The goal here is to disentangle task-specific and shared features across different tasks, and thereby benefit more from jointly learning from multiple related talks. In Chapter~\ref{chapter:ant}, we explore how the training algorithm of decision trees could be extended to learn the structure and the complexity of a network architecture for the given availability of data and the complexity of the task. In Chapter~\ref{chapter:humanuncertainty}, we consider explicitly modelling the ``measurement noise'' of human annotators, and propose a well-grounded and practical optimisation method to learn such noise model. We evaluate the method in the cardiac view classification task of ultrasound images, where the annotations are very noisy and sparse. Finally, in Chapter~\ref{chapter:conclusions}, we make overall conclusions, discuss the application of this technology and suggest directions for future research. For each chapter’s topic, we review the relevant prior art. 
 
 % bibunit to list our publications
 %\begin{bibunit}[apacite]
