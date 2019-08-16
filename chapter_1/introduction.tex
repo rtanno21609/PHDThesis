@@ -77,7 +77,7 @@ One is often interested not only in quantifying the predictive uncertainty, but 
 	\includegraphics[width=0.5\linewidth]{chapter_1/uncertainty_taxonomy.png}
 	\centering	
 	%	\vspace{-2mm}
-	\caption{Illustration of different types of uncertainty. The combined effects of both aleatoric and epistemic uncertainties induce \textit{predictive uncertainty}, the degree of confidence in a prediction of the model.  } 
+	\caption{\small Illustration of different types of uncertainty. The combined effects of both aleatoric and epistemic uncertainties induce \textit{predictive uncertainty}, the degree of confidence in a prediction of the model.  } 
 	\label{fig:uncertainty_taxonomy}
 	%\vspace{-10pt}
 \end{figure}
@@ -106,7 +106,13 @@ One is often interested not only in quantifying the predictive uncertainty, but 
 
 \section{Uncertainty Modelling in Medical Imaging}
 % I would like to use this section to motivate the importance of uncertainty quantification in medical imaging applications. 
-The importance of representing uncertainty information has long been recognised in the medical imaging community. There is a large body of prior research on uncertainty quantification based on traditional probabilistic modelling techniques (e.g. graphical models and fuzzy logic) in a variety of medical image analysis applications such as registration, classification, segmentation and image synthesis. To the best of my knowledge, research addressing this issues goes back to the early 1970s. Here I provide a brief survey of such prior works.
+The importance of representing uncertainty information has long been recognised in the medical imaging community. There is a large body of prior research on uncertainty quantification based on traditional probabilistic modelling techniques (e.g. graphical models and fuzzy logic) in a variety of medical image analysis applications such as registration, classification, segmentation and image synthesis. To the best of my knowledge, research addressing this issues goes back to the early 1970s. Here I provide a brief survey of such prior works.	
+
+\textcolor{red}{\textbf{Technical scope:} Here I should try and limit the scope by clearly explaining that the thesis focuses on simple supervised discriminative models, while touching upon other important avenues of research i.e.  generative, marriage between discriminative and generative, reinforcement learning (?), etc. We could use Eugenio's this year's MICCAI paper as a good example of hybrid models. }
+
+\textcolor{red}{\textbf{Application scope:}  should also mention that the thesis focuses on tasks of processing high-dimensional image data that arise in medical settings. However, in fact, healthcare domain offers much richer array of data such as sensors, genomics, EHRs, and etc \cite{esteva2019guide}, which are outside the scope of the thesis. This link also has a few relevant references \href{https://www.mckinsey.com/industries/pharmaceuticals-and-medical-products/our-insights/machine-learning-and-therapeutics-2-0-avoiding-hype-realizing-potential}{link}.}
+
+
  
  % (Yingzhen says):
  
@@ -117,10 +123,6 @@ The importance of representing uncertainty information has long been recognised 
 % (Mackay says:) Bayesian probability theory provides a framework for inductive inference which has been called ‘common sense reduced to calculation’; it is a poorly known fact that Bayesian methods actually embody Occam’s razor automatically and quantitatively [26, 38].
 
 \subsection{Computer-aided diagnosis}
-
-
-\subsection{Synethesis}
-
 
 \subsection{Registration}
 \textbf{(Wells 2018 MICCAI)}: ``Probabilisitc image registration (PIR) literature conventionally quantifies the registration un- certainty by summary statistics of the transformation distribution. Previous researchers have found applications of various summary statistics: the Shannon entropy and its variants of the categorical transformation distribution were used to measure the registration uncertainty of DPR [6]; the variance [4,11,13], stan- dard deviation [10], inter-quartile range [5,15] and the covariance Frobenius norm [9] of the transformation distribution were used to quantify the registration un	certainty of CPR.''
@@ -139,24 +141,30 @@ See Sec 5.2. (Page 106) "Advantages and challenges of Bayesian inference” wher
 
 Read "Juan Eugenio Iglesias, Mert Rory Sabuncu, and Koen Van Leemput. Incorporating parameter uncertainty in Bayesian segmentation models: Application to hippocampal subfield volumetry. In Proc. International Conference on Medical Image Computing and Computer Assisted Intervention, MICCAI 2012, pages 50–57. Springer, 2012b. "
 
+\subsection{Synethesis}
+
 \subsection{Inverse Problems}
+\begin{itemize}
+	\item Reconstruction
+	\item Deblurring, denoising, dealiasing, super-resolution 
+\end{itemize}
 
-\section{What is currently lacking?}
-\textbf{We need to highlight that given a large quantity of clean training data, deep learning is capable of attaining extremely good performance. } In the last few years, deep learning techniques have permeated the field of medical image processing \cite{shen2017deep,litjens2017survey}. Beyond the automation of existing radiological tasks--- e.g. segmentation \cite{kamnitsas2017efficient}, detection \cite{roth2014new}, disease grading and classification \cite{araujo2017classification}---deep learning has been applied to a diverse set of ``data enhancement'' problems. Data enhancement aims to improve the quality, the information content, or the quantity of medical images available for research and clinics by transforming images from one domain to another \cite{isola2017image}. Previous research has shown the efficacy of data enhancement in different forms such as super-resolution \cite{oktay2016multi,chen2018efficient,ravi2019adversarial}, image synthesis \cite{nie2016estimating,kang2017deep}, denoising \cite{benou2017ensemble,chen2017low}, data harmonisation \cite{karayumak2018harmonizing,tax2019cross} across scanners and protocols, reconstruction \cite{sun2016deep,jin2017deep,hammernik2018learning,schlemper2018deep,zhu2018image,yang2018dagan,yoon2019efficient}, registration \cite{sokooti2017nonrigid,balakrishnan2018unsupervised} and quality control \cite{wu2017fuiqa,esses2018automated}.  These advances have the potential not only to enhance the quality and efficiency of radiological care, but also facilitate scientific discoveries in medical research through increased volume and content of usable data. 
 
-\textbf{Surge of black-box models in medical imaging}: In the last few years, with increasing availability of labelled data, hardware and user-friendly software, black-box models such as deep learning and decision trees have permeated every corner of medical image processing research, often surpassing the performance of more traditional probabilistic techniques. 
+\section{What is lacking?}
+Having motivated the importance of modelling uncertainty in medical imaging, now I would like to give a brief account on the recent successes of decision trees and deep learning, the classes of machine learning models that this thesis focuses on. 
+
+In the last few years, discriminative approaches based on these powerful non-linear models have permeated the field of medical image processing \cite{criminisi2013decision,shen2017deep,litjens2017survey}, surpassing the performance of more traditional probabilistic techniques in well-defined problems with abundant labelled data. Beyond the automation of existing radiological tasks--- e.g. segmentation \cite{kamnitsas2017efficient}, detection \cite{roth2014new}, disease grading and classification \cite{araujo2017classification}---deep learning has been applied to a diverse set of ``data enhancement'' problems. Data enhancement aims to improve the quality, the information content, or the quantity of medical images available for research and clinics by transforming images from one domain to another \cite{isola2017image}. Previous research has shown the efficacy of data enhancement in different forms such as super-resolution \cite{oktay2016multi,chen2018efficient,ravi2019adversarial}, image synthesis \cite{nie2016estimating,kang2017deep}, denoising \cite{benou2017ensemble,chen2017low}, data harmonisation \cite{karayumak2018harmonizing,tax2019cross} across scanners and protocols, reconstruction \cite{sun2016deep,jin2017deep,hammernik2018learning,schlemper2018deep,zhu2018image,yang2018dagan,yoon2019efficient}, registration \cite{sokooti2017nonrigid,balakrishnan2018unsupervised} and quality control \cite{wu2017fuiqa,esses2018automated}.  These advances have the potential not only to enhance the quality and efficiency of radiological care, but also facilitate scientific discoveries in medical research through increased volume and content of usable data. 
 
 However, the disproportionate majority of approaches rely on deterministic methods, which lack a mechanism to represent and manipulate uncertainty about models and predictions. In safety-critical applications such as medical imaging, quantifying what the model does not know is important for constructing a reliable decision making system. The aim of this thesis is to explore probabilitic modelling as a framework to integrate uncertainty information in deep learning and decision tree models, and demonstrate utility in various medical image processing applications. 
  
 \textcolor{red}{The aim of the thesis is to investigate ways to } 
 
  
-\section{Gap between the modern ML and medical imaging}
-\textbf{Uncertainty in black-box models}: This section will review both theoretical and application-driven previous research on uncertainty modelling in deep learning and decision trees. We will discuss why such research is important for designing safe and interpretable systems for medical applications. 
+\section{Progress in Probabilistic Decision Trees and Deep Leanring}
+This section will review theoretical research on uncertainty modelling in deep learning and decision trees. We will discuss why such research is important for designing safe and interpretable systems for medical applications. 
 
-\textcolor{red}{\textbf{Technical scope:} Here I should try and limit the scope by clearly explaining that the thesis focuses on simple supervised discriminative models, while touching upon other important avenues of research i.e.  generative, marriage between discriminative and generative, reinforcement learning (?), etc. We could use Eugenio's this year's MICCAI paper as a good example of hybrid models. }
+This thesis is a mixture of applications of these methods to practical medical imaging problems, and development of new methods building upon such work. 
 
-\textcolor{red}{\textbf{Application scope:}  should also mention that the thesis focuses on tasks of processing high-dimensional image data that arise in medical settings. However, in fact, healthcare domain offers much richer array of data such as sensors, genomics, EHRs, and etc \cite{esteva2019guide}, which are outside the scope of the thesis. This link also has a few relevant references \href{https://www.mckinsey.com/industries/pharmaceuticals-and-medical-products/our-insights/machine-learning-and-therapeutics-2-0-avoiding-hype-realizing-potential}{link}.}
 
 
 
@@ -169,9 +177,9 @@ To summarise, the contributions of this thesis are as follows:
 \begin{enumerate}
 	\item \textbf{Modelling predictive uncertainty}:  We introduce methods to quantify uncertainty over the output of deep learning and decision tree models. We demonstrate how such uncertainty measure can be used to quantify the quality of output and develop a more risk-averse image enhancement system for diffusion MRI \cite{tanno2016bayesian,tanno2017bayesian,tannonimg2019}.  We further show that the same concept could be naturally extended to the multi-task learning paradigm, and test the benefits in the context of MR-only radiotherapy planning application \cite{bragman2018multi}. 
 	
-	\item \textbf{Modelling human uncertainty}: We propose a method to model the biases and skill levels of human annotators, and integrate this information into the learning process of the neural network classifier \cite{tanno2019learning}. We demonstrate in classification of ultrasound cardiac images that the method not only improves the robustness of the model to label noise, but also yields insights into the performance of different human annotators. \textcolor{red}{Here we couls also mention briefly the ideal observer performance as a historical attempt to quantify the maximum possible accuracy.}
-	
 	\item \textbf{Modelling structural uncertainty}: We propose methods to learn model structures of a deep neural network. In the context of multi-task learning, we introduce the concept of \emph{stochastic filter  groups} (SFGs) \cite{sfg2019} to estimate the posterior distribution over the possible connectivity structures in a convolutional neural network in order to disentangle task-specific and shared features across different tasks. We demonstrate in the MR-only radiotherapy planning application that SFGs are capable of learning meaningful separations of representations, and consequently improve the performance. Lastly, we explore how the training algorithm of decision trees could be extended to adapt the architecture of a neural network to the given availability of training data and the complexity of the task \cite{AdaptiveNeuralTrees19}. 
+	
+	\item \textbf{Modelling human uncertainty}: We propose a method to model the biases and skill levels of human annotators, and integrate this information into the learning process of the neural network classifier \cite{tanno2019learning}. We demonstrate in classification of ultrasound cardiac images that the method not only improves the robustness of the model to label noise, but also yields insights into the performance of different human annotators. \textcolor{red}{Here we couls also mention briefly the ideal observer performance as a historical attempt to quantify the maximum possible accuracy.}
 	
 \end{enumerate}
 
