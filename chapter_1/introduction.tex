@@ -63,7 +63,7 @@ In contrast, \textit{probabilistic machine learning} provides a natural framewor
 %		\item (Yarin Gal): ``The main goal of this thesis is to develop such practical tools to reason about uncertainty in deep learning.''
 %\end{itemize}}
 
- \section{Taxonomy of uncertainty}
+ \section{Taxonomy of Uncertainty}
 There are many different types of uncertainty that are of practical importance. Here we provide a taxonomy of such uncertainty ``species'' and explain their relations and differences. 
 
 Imagine you have a machine learning model, $F$, which takes some input $\mathbf{x}$  (e.g. a MR image) and makes a prediction or decision about the quantity of interest, $\mathbf{y}=F(\mathbf{x})$ (e.g. presence of pathology). %Here $\theta$ denotes the set of parameters of the model, and has been optimised based on training data, consisting of $N$ pairs of inputs and labels of interest $\mathcal{D} = \{\mathbf{x}_{i}, \mathbf{y}_i\}_{i=1}^N $.
@@ -163,15 +163,10 @@ However, the disproportionate majority of approaches rely on deterministic metho
 \section{Progress in Probabilistic Decision Trees and Deep Leanring}
 This section will review theoretical research on uncertainty modelling in deep learning and decision trees. We will discuss why such research is important for designing safe and interpretable systems for medical applications. 
 
-This thesis is a mixture of applications of these methods to practical medical imaging problems, and development of new methods building upon such work. 
+\textcolor{red}{This thesis is a mixture of applications of these methods to practical medical imaging problems, and development of new methods building upon such work. }
 
 
-
-
-
-\section{Summary of the contributions} 
-Here may be I should try and limite the scope of the thesis (perhaps earlier on? not sure)
-
+\section{Contributions} 
 To summarise, the contributions of this thesis are as follows:
 
 \begin{enumerate}
@@ -184,3 +179,13 @@ To summarise, the contributions of this thesis are as follows:
 \end{enumerate}
 
 \section{Thesis Structure}
+
+The thesis outline is as follows. In Chapter~\ref{chapter:biqt}, we introduce a probabilistic variant of decision trees to quantify predictive uncertainty, and demonstrate on image enhancement of neuroimages. In Chapter~\ref{chapter:deepuncertainty}, we focus on the same application, but explore ways to estimate the uncertainty over prediction of deep learning models. We design a framework to jointly model the aleatoric uncertainty of the target mapping of interest,and the parameter uncertainty of the network, and propagate the two to estimate the predictive uncertainty. In Chapter~\ref{chapter:multitaskuncertainty_part1}, we show that the same concept could be naturally adapted to the multi-task learning paradigm, and demonstrate the benefits 
+In Chapter~\ref{chapter:multitaskuncertainty_part2}, 
+In Chapter~\ref{chapter:ant}, 
+In Chapter~\ref{chapter:humanuncertainty}, 
+
+
+
+ In Chapter~\ref{chapter:conclusions}, we make overall conclusions, discuss the application of this technology and suggest directions for future research. For each chapter’s topic, we review the relevant prior art. 
+
