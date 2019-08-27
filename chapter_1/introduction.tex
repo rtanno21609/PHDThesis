@@ -6,7 +6,7 @@ Decision trees \cite{breiman2001random} and deep learning \cite{lecun2015deep} h
 
 In practice, ML systems often face situations where the correct decision or prediction is ambiguous. We therefore need a mechanism to quantify the confidence of the model output (e.g. error bounds) and act upon it to prevent catastrophic failures. We would also like to be able to reason about the sources of such uncertainty, and further improve the performance. Does the training data need to be more diverse? Were the images or the annotations too noisy? It might have been that the choice of the model was not adequate. Or perhaps we may have been just unlucky and the particular instance of failures is an inherently challenging case where the input image did not contain enough information. Implementing systematic approaches to answering these questions is important not only to improve the predictive performance, but also to build trust with the practioners. However, to date, the majority of deep learning and decision tree techniques used in the medical imaging context rely on deterministic methods, and lack a mechanism to communicate uncertainty, a key ingredient to address such problems. 
 
-In contrast, \textit{probabilistic machine learning} provides a natural framework to quantify the degree of uncertainty over different variables of interest, be it the prediction, the model parameters and structures, or the underlying data (images and labels) \cite{ghahramani2015probabilistic}. Probability distributions are used to represent all the uncertain unobserved quantities in a model and how they relate to the data, and probability theory is used as a language to compute and manipulate these distributions. The main goal of this thesis is to develop a practical framework for medical imaging applications to model different types of uncertainty in neural networks and decision trees by translating ideas from the paradigm of probabilistic machine learning. In the process, several fundamental enhancements to current methods arise. 
+In contrast, \textit{probabilistic machine learning} provides a natural framework to quantify the degree of uncertainty over different variables of interest, be it the prediction, the model parameters and structures, or the underlying data (images and labels) \cite{ghahramani2015probabilistic}. Probability distributions are used to represent all the uncertain unobserved quantities in a model and how they relate to the data, and probability theory is used as a language to compute and manipulate these distributions. The main goal of this thesis is to develop a practical framework for medical imaging applications to model and reason under different types of uncertainty in neural networks and decision trees by translating ideas from the paradigm of probabilistic machine learning. In the process, several fundamental enhancements to current methods arise. 
 
 \textcolor{red}{\textbf{Could include a couple of illustrative failure cases? } }
 
@@ -76,10 +76,23 @@ One is often interested not only in quantifying the predictive uncertainty, but 
 
 \textit{Epistemic uncertainty} — from the Greek word \textit{episteme}, meaning “knowledge” — refers to uncertainty arising from lack of knowledge. In the context of modelling, epistemic uncertainty is often subdivided into \textit{parameter uncertainty}, in which one believes that the form of the model reflects reality well, but one is uncertain about which values of the parameters $\theta$ in the model to use, and \textit{structural uncertainty}, in which one has significant doubts that the model $F_{\theta}(\cdot)$ is even ‘structurally correct’ (e.g. is linear regression appropriate or a neural network, if the latter, how many layers, etc).
 
-We should, however, note that the distinction between epistemic and aleatoric uncertainty is a rather ambiguous one and depends somewhat on the interpretation of what probability means \cite{cox2006principles,samaniego2010comparison}. For example, an orthodox frequentist, who believes in the definition of a probability based on the objective relative frequency of events, would say that the results of a coin flip are random and represents aleatoric uncertainty.  On the other hand, a devout Bayesian, who believes probabilites represents degrees of subjective ignorance, might say that the coin flip is characterised by epistemic uncertainty, arguing one is simply ignorant about the set of influential parameters e.g. initial conditions of the coin such as the angle and height of the drop, the material and shape of the coin, and the dynamics of the wind which may affect the trajectory, etc. In any case, putting aside the details of philosophical debates surrounding such categorisation of uncertainty, the language of probability theory provides a powerful tool in describing different forms of uncertainty \cite{sullivan2015introduction}. This thesis, in particular, focuses on the ways to describe such uncertainty with(in) deep learning and decision tree models, and aims to demonstrate the practical benefits thereof in medical imaging applications. 
+
+\begin{figure}[ht]
+	\vspace{-2mm}
+	\includegraphics[width=0.4\linewidth]{chapter_1/uncertainty_taxonomy.png}
+	\centering	
+	\vspace{-2mm}
+	\caption{\small Illustration of different types of uncertainty. The combined effects of both aleatoric and epistemic uncertainties induce \textit{predictive uncertainty}.  } 
+	\label{fig:uncertainty_taxonomy}
+	%\vspace{-10pt}
+\end{figure}
+
+We should, however, note that the distinction between epistemic and aleatoric uncertainty is a rather ambiguous one and depends somewhat on the interpretation of what probability means \cite{cox2006principles,samaniego2010comparison}. For example, an orthodox frequentist, who believes in the definition of a probability based on the objective relative frequency of events, would say that the results of a coin flip are random and represents aleatoric uncertainty.  On the other hand, a devout Bayesian, who believes probabilites represents degrees of subjective ignorance, might say that the coin flip is characterised by epistemic uncertainty, arguing one is simply ignorant about the set of influential parameters e.g. initial conditions of the coin such as the angle and height of the drop, the material and shape of the coin, and the dynamics of the wind which may affect the trajectory, etc. In any case, putting aside the details of philosophical debates surrounding such categorisation of uncertainty, the language of probability theory provides a powerful tool in describing different forms of uncertainty \cite{sullivan2015introduction}. This thesis, in particular, focuses on the ways to describe such uncertainty with(in) deep learning and decision tree models, and aims to demonstrate their practical benefits in medical imaging applications. 
 
 In the probabilistic framework of machine learning, all uncertain quanitities are treated as random variables, and 
-probability distributions are used to express their associated information of uncertainty. For example, the aleatoric uncertainty of the target mapping $\textbf{x} \rightarrow \mathbf{y}$ is summarised by the underlying conditional distribution of the task $P(\mathbf{y}|\mathbf{x})$. This distribution describes the inherent stochasticity in predicting $\mathbf{y}$ for input $\mathbf{x}$. On the other hand, the parameter uncertainty is described by $P(\theta|\mathcal{D}, m)$, the posterior distribution over the unknown parameters $\theta$ of the model class $m=\{F_{\theta}(\cdot): \theta \in \Theta\}$ given the training observations $\mathcal{D}$. Similarly, strucutural uncertainty is described by the distribution $P(m|\mathcal{D})$ which quantifies how probable the model class explains the observations. Finally, the predictive uncertainty is represented in the conditional distribution $P(\hat{\mathbf{y}}|\mathbf{x})$ over the model's output $\hat{\mathbf{y}}=F_{\theta}(\mathbf{x})$, and its standard deviation is commonly used as a confidence interval. The technical problems tackled in this thesis boil down to the estimation of these distributions in different settings. As will be explained later, for complex models such as deep neural networks and decisions trees, many of these distributions are not tractable, necessitating efficient and effective approximations. \textcolor{red}{To make matters even worse, in practical applications such as medical imaging, the ground truths for such distributions of interest, $P(\mathbf{y}|\mathbf{x}), P(\hat{\mathbf{y}}|\mathbf{x}), P(\theta|\mathcal{D}, m)$ and $P(m|\mathcal{D})$ are not available, thus rendering the direct evaluation of uncertainty estimation unfeasible. In this thesis, I take a pragmatic position and focus on measuring the utility---rather than the fidelity---of the derived uncertainty estimates via surrogate metrics such as the generalisation to out-of-distribution data and domain, robustness to noise and biases, detection of unseen structures, certification of performance based on confidence intervals, etc. }
+probability distributions are used to express their associated information of uncertainty. For example, the aleatoric uncertainty of the target mapping $\textbf{x} \rightarrow \mathbf{y}$ is summarised by the underlying conditional distribution of the task $P(\mathbf{y}|\mathbf{x})$. This distribution describes the inherent stochasticity in predicting $\mathbf{y}$ for input $\mathbf{x}$. On the other hand, the parameter uncertainty is described by $P(\theta|\mathcal{D}, m)$, the posterior distribution over the unknown parameters $\theta$ of the model class $m=\{F_{\theta}(\cdot): \theta \in \Theta\}$ given the training observations $\mathcal{D}$. Similarly, strucutural uncertainty is described by the distribution $P(m|\mathcal{D})$ which quantifies how probable the model class explains the observations. Finally, the predictive uncertainty is represented in the conditional distribution $P(\hat{\mathbf{y}}|\mathbf{x})$ over the model's output $\hat{\mathbf{y}}=F_{\theta}(\mathbf{x})$, and its standard deviation is commonly used as a confidence interval. The technical problems tackled in this thesis boil down to the estimation of these distributions in different settings. As will be explained later, for complex models such as deep neural networks and decisions trees, many of these distributions are not tractable, necessitating efficient and effective approximations. 
+
+To make matters even worse, in practical applications such as medical imaging, the ground truths for such distributions of interest, $P(\mathbf{y}|\mathbf{x}), P(\hat{\mathbf{y}}|\mathbf{x}), P(\theta|\mathcal{D}, m)$ and $P(m|\mathcal{D})$ are not available, thus rendering the direct evaluation of uncertainty estimation unfeasible. In this thesis, I take a pragmatic position and focus on evaluating the utility---rather than the fidelity---of the derived uncertainty estimates via surrogate measures, such as the generalisation to out-of-distribution data and domain, robustness to noise and biases, detection of unseen structures, certification of performance with confidence intervals, etc. 
 
 %To provide more precise definitions of the aforementioned types of uncertainty, we assume that the data generating process is untouchable\footnote{This is hardly realistic in the context of science.} and we only have freedoms in the way to describe the data (i.e. models). Under this assumption, we can separate 
 %We further confine 
@@ -96,14 +109,6 @@ probability distributions are used to express their associated information of un
 %Someone who was simultane- ously a devout Newtonian physicist and a devout Bayesian might argue that the results of dice rolls are not aleatoric uncertainties — one simply doesn’t have complete enough information about the initial conditions of die, the material and geometry of the die, any gusts of wind that might affect the flight of the die, and so forth. On the other hand, it is usually clear that some forms of uncertainty are epistemic rather than aleatoric: for example, when physicists say that they have yet to come up with a Theory of Every- thing, they are expressing a lack of knowledge about the laws of physics in our universe, and the correct mathematical description of those laws. In any case, regardless of one’s favoured interpretation of probability, the language of probability theory is a powerful tool in describing uncertainty.
 
 
-\begin{figure}[bt]
-	\includegraphics[width=0.5\linewidth]{chapter_1/uncertainty_taxonomy.png}
-	\centering	
-	%	\vspace{-2mm}
-	\caption{\small Illustration of different types of uncertainty. The combined effects of both aleatoric and epistemic uncertainties induce \textit{predictive uncertainty}, the degree of confidence in a prediction of the model.  } 
-	\label{fig:uncertainty_taxonomy}
-	%\vspace{-10pt}
-\end{figure}
  
 %The model may encouter some unfamiliar inputs, which are not observed in the training data (e.g. a rare pathology).
 % 
@@ -129,23 +134,24 @@ probability distributions are used to express their associated information of un
 
 \section{Uncertainty Modelling in Medical Imaging}
 % I would like to use this section to motivate the importance of uncertainty quantification in medical imaging applications. 
-The importance of representing uncertainty information has long been recognised in the medical imaging community. There is a large body of prior research on uncertainty quantification based on traditional probabilistic modelling techniques (e.g. graphical models and fuzzy logic) in a variety of medical image analysis applications such as registration, classification, segmentation and image synthesis. To the best of my knowledge, research addressing this issues goes back to the early 1970s. Here I provide a brief survey of such prior works.	
-
-\textcolor{red}{\textbf{Technical scope:} Here I should try and limit the scope by clearly explaining that the thesis focuses on simple supervised discriminative models, while touching upon other important avenues of research i.e.  generative, marriage between discriminative and generative, reinforcement learning (?), etc. We could use Eugenio's this year's MICCAI paper as a good example of hybrid models. }
-
-\textcolor{red}{\textbf{Application scope:}  should also mention that the thesis focuses on tasks of processing high-dimensional image data that arise in medical settings. However, in fact, healthcare domain offers much richer array of data such as sensors, genomics, EHRs, and etc \cite{esteva2019guide}, which are outside the scope of the thesis. This link also has a few relevant references \href{https://www.mckinsey.com/industries/pharmaceuticals-and-medical-products/our-insights/machine-learning-and-therapeutics-2-0-avoiding-hype-realizing-potential}{link}.}
-
-
- 
- % (Yingzhen says):
- 
- % (Ghahramani says):
- 
+The importance of representing uncertainty information has long been recognised in the medical imaging community. There is a large body of prior research on uncertainty quantification, based on traditional probabilistic modelling techniques in a variety of medical image processing tasks such as classification, registration, segmentation and synthesis. Here I provide a brief survey of such prior works in several important areas of research. 
+  
  % (Yarin says): This probabilistic view of machine learning offers confidence bounds for data analysis and decision making, information that a biologist for example would rely on to analyse her data, or an autonomous car would use to decide whether to brake or not. In analysing data or making decisions, it is required to be able to tell whether a model is certain about its output, being able to ask “maybe I need to use more diverse data? or change the model? or perhaps be careful when making a decision?”. Such questions are of fundamental concern in Bayesian machine learning, and have been studied extensively in the field [Ghahramani, 2015]. 
  
 % (Mackay says:) Bayesian probability theory provides a framework for inductive inference which has been called ‘common sense reduced to calculation’; it is a poorly known fact that Bayesian methods actually embody Occam’s razor automatically and quantitatively [26, 38].
 
-\subsection{Computer-aided diagnosis}
+\subsection{Classification} 
+Many medical decisions can be viewed as classification tasks where the information about patients are used as inputs to infer some discrete states of their health (e.g. diagnosis) and the subsequent course of treatment (e.g. prognosis). It is widely accepted that the information available to the physician about her patient and about medical relationships in general is inherently uncertain. Since the advent of computers, academics have attempted to formalise and emulate the process of such medical reasoning performed under uncertainty,  in an attempt to support clinicians through systemisation and standardisation of knowledge. Ledley et al. \cite{ledley1959reasoning} proposed in the 1950s the first decision theoretic framework to aggregate medical evidence of varying degrees of uncertainty, and derive the most likely diagnosis in a restricted setting. They introduced scoring cards for doctors to represent the presence of discriminative symptoms, and designed an automatic system to process them to compute the conditional probability of the disease of interest. During the subsequent twenty years from then, more advanced computerised diagnostic systems were developed for different problems \cite{shortliffe1979knowledge,kulikowski1980artificial,duda1983expert}, however, most were still manually designed and deterministic rule-based systems without a mechanism to account for uncertainty. Adlassing et al. \cite{adlassnig1985cadiag,adlassnig1986fuzzy} employed `fuzzy set theory' to quantify and reason with ambiquities which arise in each local decision of the if–then-else statement within such decision trees, which improved accuracy and robustness in applications in internal medicince\footnote{Incidentally, a recent study \cite{berner2008overconfidence} showed that over-confidence of doctors is also a big cause of diagnostic errors in medicine!}. Specifically, both the objective uncertainty of each decision measured in frequency of past occurence, and the subjective uncertainty based on the confidence of practioner were integrated to infer the plausibility of different diagnostic outcomes. More recently, the above approach was augmented with a variety of pre-processing steps to learn fuzzy rules automatically from data \cite{steimann1998fuzzy,john2005modeling,straszecka2006combining,anooj2012clinical,tsipouras2008automated}. 
+
+A popular alternative to the above rule-based approaches is based on Bayesian networks (BNs) \cite{pearl2014probabilistic}. A typical BN-based decision model consists of a set of nodes and edges with directions, where the nodes are random variables which represent a set of symptoms and diseases, and the directed edges define the probabilistic relationships (conditional dependencies) between them, which can be more complex than the simple if-then-else conditional statements. In addition to such generality, BNs are attractive because they can naturally communicate the uncertainty in possible diagnostic alternatives as well as its underlying compositional reasoning even even when data is incomplete or partially correct \cite{nikovski2000constructing}. Some notable applications of BNs include the diagnosis of cardiovascular diseases from echocardiography \cite{diez1997diaval}, prediction of mental retardation in newborn babies \cite{mani1997mentor} and detection of breast cancer in mammography \cite{kahn1997construction,sajda2003multi}. A more extensive review of the existing research, including attempts to mine unknown causal structures between symptoms and diseases, are provided in Sec.~2 in Luiz et al \cite{seixas2014bayesian}. Some of such development have also gone beyond the realm of academic research; several computerised diagnosis (also known as computer-aided diagnosis (CAD) \cite{doi1993digital}) systems have been approved by FDA for mammographic screening  and used in clinical practice \cite{sajda2006machine}. 
+
+
+%Bayesian networks have been broadly applied in biomedicine, particularly in probabilistic expert systems for clinical diagnosis (96–98) and computational biology (99). They are attractive because they are able to deal with biomedical data that is incomplete or partially correct (100). A novel method for exploiting conditional dependencies in the structure of radiological images to improve detection of breast cancer is described below.
+
+%Better classification accuracy is not enough for an expert system to be used in practice.It must be able to explain its decisions and it must be flexible enough to provide all possible alternatives.
+
+
+
 
 \subsection{Registration}
 \textbf{(Wells 2018 MICCAI)}: ``Probabilisitc image registration (PIR) literature conventionally quantifies the registration un- certainty by summary statistics of the transformation distribution. Previous researchers have found applications of various summary statistics: the Shannon entropy and its variants of the categorical transformation distribution were used to measure the registration uncertainty of DPR [6]; the variance [4,11,13], stan- dard deviation [10], inter-quartile range [5,15] and the covariance Frobenius norm [9] of the transformation distribution were used to quantify the registration un	certainty of CPR.''
@@ -165,8 +171,10 @@ See Sec 5.2. (Page 106) "Advantages and challenges of Bayesian inference” wher
 Read "Juan Eugenio Iglesias, Mert Rory Sabuncu, and Koen Van Leemput. Incorporating parameter uncertainty in Bayesian segmentation models: Application to hippocampal subfield volumetry. In Proc. International Conference on Medical Image Computing and Computer Assisted Intervention, MICCAI 2012, pages 50–57. Springer, 2012b. "
 
 \subsection{Synethesis}
+Jorge's paper and Nichola's ayaches' work. 
 
 \subsection{Inverse Problems}
+\textcolor{red}{(2019-Aug-22): This may take some time. Perhaps skip for now and come back.}
 \begin{itemize}
 	\item Reconstruction
 	\item Deblurring, denoising, dealiasing, super-resolution 
@@ -178,8 +186,8 @@ Having motivated the importance of modelling uncertainty in medical imaging, now
 
 In the last few years, discriminative approaches based on these powerful non-linear models have permeated the field of medical image processing \cite{criminisi2013decision,shen2017deep,litjens2017survey}, surpassing the performance of more traditional probabilistic techniques in well-defined problems with abundant labelled data. Beyond the automation of existing radiological tasks--- e.g. segmentation \cite{kamnitsas2017efficient}, detection \cite{roth2014new}, disease grading and classification \cite{araujo2017classification}---deep learning has been applied to a diverse set of ``data enhancement'' problems. Data enhancement aims to improve the quality, the information content, or the quantity of medical images available for research and clinics by transforming images from one domain to another \cite{isola2017image}. Previous research has shown the efficacy of data enhancement in different forms such as super-resolution \cite{oktay2016multi,chen2018efficient,ravi2019adversarial}, image synthesis \cite{nie2016estimating,kang2017deep}, denoising \cite{benou2017ensemble,chen2017low}, data harmonisation \cite{karayumak2018harmonizing,tax2019cross} across scanners and protocols, reconstruction \cite{sun2016deep,jin2017deep,hammernik2018learning,schlemper2018deep,zhu2018image,yang2018dagan,yoon2019efficient}, registration \cite{sokooti2017nonrigid,balakrishnan2018unsupervised} and quality control \cite{wu2017fuiqa,esses2018automated}.  These advances have the potential not only to enhance the quality and efficiency of radiological care, but also facilitate scientific discoveries in medical research through increased volume and content of usable data. 
 
-However, the disproportionate majority of approaches rely on deterministic methods, which lack a mechanism to represent and manipulate uncertainty about models and predictions. In safety-critical applications such as medical imaging, quantifying what the model does not know is important for constructing a reliable decision making system. The aim of this thesis is to explore probabilitic modelling as a framework to integrate uncertainty information in deep learning and decision tree models, and demonstrate utility in various medical image processing applications. 
- 
+However, despite the surge of interest in the last couple of years (cite some recent methods including my work?),  it still remains that the disproportionate majority of approaches rely on deterministic methods, which lack a mechanism to represent and manipulate uncertainty about models and predictions. In safety-critical applications such as medical imaging, quantifying what the model does not know is important for constructing a reliable decision making system. The aim of this thesis is to explore probabilitic modelling as a framework to integrate uncertainty information in deep learning and decision tree models, and demonstrate utility in various medical image processing applications. 
+
 \textcolor{red}{The aim of the thesis is to investigate ways to } 
 
  
@@ -190,7 +198,7 @@ This section will review theoretical research on uncertainty modelling in deep l
 
 
 \section{Contributions} 
-To summarise, the contributions of this thesis are as follows:
+\textcolor{red}{Until the late 2015 (around when my PhD started), no methods specifically had attempted address the problem of uncertainty quantification with decision trees and deep neural networks. The presence of this gap, combined with the rising interest in the use of these powerful ``black-box" approaches, motivated me to explore this topic in a variety of settings, with an eye on the eventual utilty in medical applications. More specifically, the contributions of this thesis can be recapitulated as follows:}
 
 \begin{enumerate}
 	\item \textbf{Modelling predictive uncertainty}:  We introduce methods to quantify uncertainty over the output of deep learning and decision tree models. We demonstrate how such uncertainty measure can be used to quantify the quality of output and develop a more risk-averse image enhancement system for diffusion MRI \cite{tanno2016bayesian,tanno2017bayesian,tannonimg2019}.  We further show that the same concept could be naturally extended to the multi-task learning paradigm, and test the benefits in the context of MR-only radiotherapy planning application \cite{bragman2018multi}. 
@@ -203,4 +211,50 @@ To summarise, the contributions of this thesis are as follows:
 
 \section{Thesis Structure}
 The thesis outline is as follows. In Chapter~\ref{chapter:biqt}, we introduce a probabilistic variant of decision trees to quantify predictive uncertainty, and demonstrate on image enhancement of neuroimages. In Chapter~\ref{chapter:deepuncertainty}, we focus on the same application, but explore ways to estimate the uncertainty over the prediction of deep learning models. We design a framework to jointly model the aleatoric uncertainty of the target mapping of interest, and the parameter uncertainty of the model, and propagate the two to estimate the predictive uncertainty. In Chapter~\ref{chapter:multitaskuncertainty_part1}, we show that the same concept could be naturally adapted to the multi-task learning paradigm, and demonstrate the benefits in the MR-only radiotherapy treatment planning application where the synthetic CT image and the segmentation of organs at risk are simultaneously predicted from the input MR image. Motivated by the same problem, Chapter~\ref{chapter:multitaskuncertainty_part2} introduces a Bayesian method to learn the connectivity structures in a neural network. The goal here is to disentangle task-specific and shared features across different tasks, and thereby benefit more from jointly learning from multiple related talks. In Chapter~\ref{chapter:ant}, we explore how the training algorithm of decision trees could be extended to learn the structure and the complexity of a network architecture for the given availability of data and the complexity of the task. In Chapter~\ref{chapter:humanuncertainty}, we consider explicitly modelling the ``measurement noise'' of human annotators, and propose a well-grounded and practical optimisation method to learn such noise model. We evaluate the method in the cardiac view classification task of ultrasound images, where the annotations are very noisy and sparse. Finally, in Chapter~\ref{chapter:conclusions}, we make overall conclusions, discuss the application of this technology and suggest directions for future research. For each chapter’s topic, we review the relevant prior art. 
+
+\section{The road not taken}
+\textcolor{red}{\textbf{Technical scope:} Here I should try and limit the scope by clearly explaining that the thesis focuses on simple supervised discriminative models, while touching upon other important avenues of research i.e.  generative, marriage between discriminative and generative, reinforcement learning (?), etc. We could use Eugenio's this year's MICCAI paper as a good example of hybrid models. }
+
+\textcolor{red}{\textbf{Application scope:}  should also mention that the thesis focuses on tasks of processing high-dimensional image data that arise in medical settings. However, in fact, healthcare domain offers much richer array of data such as sensors, genomics, EHRs, and etc \cite{esteva2019guide}, which are outside the scope of the thesis. This link also has a few relevant references \href{https://www.mckinsey.com/industries/pharmaceuticals-and-medical-products/our-insights/machine-learning-and-therapeutics-2-0-avoiding-hype-realizing-potential}{link}.}
+
+\section*{Publications}
+\small
+\begin{enumerate}
+	\item \textbf{R. Tanno}, A. Ghosh, F. Grussu, E. Kaden, A. Criminisi, and D. C. Alexander, “Bayesian image quality transfer". (2016) \textbf{MICCAI}
+	
+	\item \textbf{R. Tanno}, D. E. Worrall, A. Ghosh, E. Kaden, S. N. Sotiropoulos, A. Criminisi, and D. C. Alexander, “Bayesian image quality transfer with cnns: Exploring uncertainty in dmri super-resolution”. (2017) \textbf{MICCAI}
+	
+	\item D. C. Alexander, D. Zikic, A. Ghosh, \textbf{R. Tanno}, V. Wottschel, J. Zhang, E. Kaden, T. B. Dyrby, S. N. Sotiropoulos et al., “Image quality transfer and applications in diffusion MRI”.  (2017) \textbf{Neuroimage}
+	
+	\item \textbf{R. Tanno}, A. Makropoulos, S. Arslan, O. Oktay, S. Mischkewitz, F. Al-Noor1, J. Oppenheimer, R. Mandegaran, B. Kainz, M. Heinrich. ``AutoDVT: Joint Real-time Classification for Vein Compressibility Analysis in Deep Vein Thrombosis Ultrasound Diagnostics''. (2018) \textbf{MICCAI}
+	
+	\item F.J.S. Bragman, \textbf{R. Tanno}, Z. Eaton-Rosen, W. Li, D. J. Hawkes, S. Ourselin, D. C. Alexander, J. R. McClelland, M. J. Cardoso, ``Uncertainty in multitask learning: joint representations for probabilistic MR-only radiotherapy planning''. (2018) \textbf{MICCAI}
+	
+	\item S. B. Blumberg, \textbf{R. Tanno}, I. Kokkinos, D. C Alexander. ``Deeper Image Quality Transfer: Training Low-Memory Neural Networks for 3D Images''. (2018) \textbf{MICCAI }
+	
+	\item K. Kamnitsas, D. Castro, L. Folgoc, \textbf{R. Tanno}, D. Rueckert, B. Glocker, A. Criminisi, A. Nori. ``Semi-Supervised Learning via Compact Latent Space Clustering''. (2018) \textbf{ICML}
+	
+	\item \textbf{R. Tanno}, A. Saheedi, S. Sankaranarayanan, D. C. Alexander, N. Silberman, ``Learning From Noisy Labels By Regularized Estimation Of Annotator Confusion''.  (2019) \textbf{CVPR}
+	\item \textbf{R. Tanno}, K. Arulkumaran, D. C. Alexander, A. Criminisi and A. Nori,  “Adaptive Neural Trees”.  (2019) \textbf{ICML }
+	\item F.J.S. Bragman$^*$, \textbf{R. Tanno}$^*$, S. Ourselin, D. C. Alexander, M. J. Cardoso, ``Stochastic Filter Groups for Multi-Task CNNs: Learning Specialist and Generalist Convolution Kernels''.  (2019) \textbf{ICCV} ($^*$ equal contributions)
+	
+	\item \textbf{R. Tanno}, D. E. Worrall, E. Kaden, A. Ghosh, F. Grussu, A. Bizzi, S. N. Sotiropoulos, A. Criminisi, and D. C. Alexander, ``Uncertainty Quantification in Deep Learning for Safer Neuroimage Enhancement''. (2019) \textbf{Neuroimage} (Under Submission)
+	
+	\item F.J.S. Bragman$^*$, \textbf{R. Tanno}$^*$, S. Ourselin, D. C. Alexander, M. J. Cardoso, ``Learning task-specific and shared representations in medical imaging''.  (2019) \textbf{MICCAI} ($^*$equal contributions)
+	
+	\item C. Sudre, B.G. Anson, S. Ingala, D. Jimenez, C. Lane, L. Haider, T. Varsavsky,  \textbf{R.~Tanno}, L. Smith, S. Ourselin, R. Jager, M. J. Cardoso, ``Let's agree to disagree: learning highly debatable multirater labelling''.  (2019) \textbf{MICCAI} 
+	
+	\item S. B. Blumberg, M. Palombo, C. S. Khoo, C. Tax, \textbf{R. Tanno}, D. C Alexander. “Multi-Stage Prediction Networks for Data Harmonization”. (2019) \textbf{MICCAI }
+	
+	\item K. Quan, \textbf{R. Tanno}, M. Duong, R. Shipley, M. Jones, C. Bereton, J. Hurst, D. Hawkes, J. Jacobs, 	``Modelling Airway Geometry as Stock Market Data using Bayesian Changepoint Detection'', (2019) \textbf{MICCAI} 10$^{\text{th}}$Machine Learning in Medical Imaging Workshop
+	
+\end{enumerate}
+
+\newpage
+\section*{Patents}
+\begin{enumerate}
+	\item  \textbf{R. Tanno}, K. Arulkmaran, A. Nori, A. Criminisi, “Neural Trees”, G.B. Microsoft Technology Licensing LLC. (2018). Patent No. GB201810736D0. (Filed in Aug 2018).
+	\item F. A. Noor, S. Mischkewitz, A. Makropoulos, \textbf{R. Tanno}, B. Kainz, O. Oktay, “Blood vessel obstruction diagnosis method, apparatus \& system”  Patent No.WO2018162888A1. (Published in Sep 2018).
+	
+\end{enumerate}
 

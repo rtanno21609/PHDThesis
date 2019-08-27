@@ -419,6 +419,12 @@ I, Ryutaro Tanno, confirm that the work presented in this thesis is my own. Wher
 \chapter*{Abstract}
 Should contain summaries of the three main components of the project, an individual paragraph to each: (a) why you did the work and what you were trying to achieve; (b) what methods you used and what results obtained; and (c) what you concluded from it. 
 
+\paragraph{Problem statement}
+Deep learning and decisions trees are now ubiquitous in the field of medical image processing. However, the current methods disproportionately rely on deterministic algorithms, which lack a mechanism to represent and manipulate uncertainty about models and predictions. In safety-critical applications such as medical imaging, quantifying what the model does not know is important for constructing a reliable decision making system. The aim of this thesis is to explore probabilitic modelling as a framework to integrate uncertainty information in deep learning and decision tree models, and demonstrate utility in various medical image processing applications. 
+
+\paragraph{Scope}
+The thesis primarily focuses on both the development of new techniques for accounting for uncertainty information in deep learning and decision trees, and demonstrating their practical values in medical imaging applications. 
+
 %In order to find effective treatments for Alzheimer's disease (AD), a devastating neurodegenerative disease affecting millions of people worldwide, we need to identify subjects at risk of AD as early as possible. To this end, disease progression models have been recently developed, which not only to perform early diagnosis, but also estimate a unique disease signature that is used to predict the subjects' disease stages and future evolution. However, these models have not yet been applied to rare neurodegenerative diseases, are not suitable to understand the complex dynamics of biomarkers, work only on large multimodal datasets, and their predictive performance has not been objectively validated.
 %
 %In this work I developed novel models of disease progression and applied them to estimate the progression of Alzheimer's disease and Posterior Cortical atrophy, a rare neurodegenerative syndrome causing visual deficits. My first contribution is a study on the progression of Posterior Cortical Atrophy, using models already developed: the Event-based Model (EBM) and the Differential Equation Model (DEM). My second contribution is the development of DIVE, a novel spatio-temporal model of disease progression that estimates fine-grained spatial patterns of pathology, potentially enabling us to understand complex disease mechanisms relating to pathology propagation along brain networks. My third contribution is the development of Disease Knowledge Transfer (DKT), a novel disease progression model that estimates the multimodal progression of rare neurodegenerative diseases from limited, unimodal datasets, by transferring information from larger, multimodal datasets of typical neurodegenerative diseases. My fourth contribution is the development of novel extensions for the EBM and the DEM, and the development of novel measures for performance evaluation of such models. My last contribution is the organization of the TADPOLE challenge, a competition which aims to identify algorithms and features that best predict the evolution of AD. 
@@ -439,8 +445,8 @@ Aknowledgement.
 
 
 %%%%%%%%%%% MPhil transfer statement %%%%%%%%%%%%
-\clearpage
- \include{chapter_0/phd_transfer_statement}
+%\clearpage
+% \include{chapter_0/phd_transfer_statement}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \clearpage
