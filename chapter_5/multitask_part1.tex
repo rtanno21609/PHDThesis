@@ -31,13 +31,13 @@
 
 \chapter{Uncertainty in Multitask Learning for MR-only Radiotherapy Planning: Spatially Adaptive Weighting of Task Loss Functions} \label{chapter:multitaskuncertainty_part1}
 
-\paragraph{Abstract:} In this chapter, we extend the methods of uncertainty modelling introduced in Chapter~\ref{chapter:deepuncertainty} to the multi-task learning setting. Such adaptation naturally yields a mechanism to automatically determine, in a spatially adaptive fashion, the relative weighting between the task losses, which is a key determinant in the efficacy of multi-task learning. Focusing on the task of structured predictions, we evaluate the benfits of this idea in the context of MR-only radiotherapy planning by considering the multi-task learning problem of simultaneously regressing a synthetic CT (synCT) scan and segmenting  organs at risk (OAR) from the input MRI. We test our method on prostate cancer scans and show that it achieves state-of-the-art performance in the regression and segmentation of prostate cancer scans. We further show that automated estimates of uncertainty correlate strongly in areas prone to errors across both tasks, which can be used as mechanism for quality control in radiotherapy treatment planning. This chapter is based on a joint work \cite{bragman2018uncertainty} with Felix Bragman.
+\paragraph{Abstract:} In this chapter, we extend the methods of uncertainty modelling introduced in Chapter~\ref{chapter:deepuncertainty} to the multi-task learning setting. Such adaptation naturally yields a mechanism to automatically determine, in a spatially adaptive fashion, the relative weighting between the task losses, which is a key determinant in the efficacy of multi-task learning. Focusing on the task of structured predictions, we evaluate the benfits of this idea in the context of MR-only radiotherapy planning by considering the multi-task learning problem of simultaneously regressing a synthetic CT (synCT) scan and segmenting  organs at risk (OAR) from the input MRI. We test our method on prostate cancer scans and show that it achieves state-of-the-art performance in the regression and segmentation of prostate cancer scans. We further show that the estimates of uncertainty correlate strongly in areas prone to errors across both tasks, which can be used as mechanism for quality control in radiotherapy treatment planning. This chapter is based on a joint work \cite{bragman2018uncertainty} with Felix Bragman.
 
 \section{Introduction}
 % (version 2):
 Radiotherapy is a common and effective treatment modality for cancer. The state-of-the-art protocol in such treatment requires acquiring a magnetic resonance (MR) scan to accurately segment the target and surrounding organs at risk (OARs), and a registered computed tomography (CT) scan for dose calculation. However, this approach has seen limited translation to clinical practice because the acquisition of both MRI and CT is time-consuming, and the registration step for spatially aligning the modalities may introduce unacceptable errors that propagate in the planning process. MR-only treatment planning has recently attracted a lot of attention as a potential solution to these issues \cite{christiansen2017magnetic,tyagi2017clinical,tenhunen2018mri,jonsson2019rationale}, and involves translating MR image data into CT like image, so called synthetic CTs (synCT)  \cite{edmund2017review,johnstone2018systematic}. This synthesis process, when combined with a hand drawn region of interest and a set of safety margins, enable clinicians to devise a radiotherapy plan. In this chapter, we employ a convolutional neural network to jointly generate the synCT and the segmentation of the OARs for a given MR input. This multi-task learning formulation \cite{caruana1997multitask} provides an end-to-end system that operates on a single MR scan and provides the outputs necessary for radio-therapy planning, while improving the prediction quality by fusing information across the tasks. 
 
-However, the efficacy of such approach largely depends on the quality of the training data. While synthesising CT from MR can be fundamentally ill-posed \cite{cardoso2015template} in some regions, the variability in physicians' delineations of OARs and pathology has been empirically shown to be high \cite{parker2003magnetic,milosevic1998magnetic}. This means that the training data suffers from such sources of inherent variability. Considering the dire consequences of failures in radio-therapy treatment \cite{milosevic1998magnetic,international2001investigation,wack2007summary}, it is important to quantify the uncertainty in the predicted SynCT and segmentations of OARs, and account for it in the subsequent treatment planning. 
+However, the efficacy of such approach largely depends on the quality of the training data. While synthesising CT from MR can be fundamentally ill-posed in some regions \cite{cardoso2015template}, the variability in physicians' delineations of OARs and pathology has been empirically shown to be high \cite{parker2003magnetic,milosevic1998magnetic}. This means that the training data suffers from such sources of inherent variability. Considering the dire consequences of failures in radio-therapy treatment \cite{milosevic1998magnetic,international2001investigation,wack2007summary}, it is important to quantify the uncertainty in the predicted SynCT and segmentations of OARs, and account for it in the subsequent treatment planning. 
 
 In this chapter, we therefore take the methods introduced in Chapter~\ref{chapter:deepuncertainty}, where intrinsic uncertainty is estimated through a heteroscedastic noise model and parameter uncertainty is modelled using approximate Bayesian inference, and adapt them to the relevant multi-task learning setting. This provides a data-driven adaptation of task losses on a voxel-wise basis and importantly, a measure of uncertainty over the prediction of both tasks, which can be potentially used for quality assurance in radiotherapy treatment planning (e.g. quantification of dose delivery uncertainty). 
 
@@ -47,13 +47,13 @@ In this chapter, we therefore take the methods introduced in Chapter~\ref{chapte
 
 
 \paragraph{Uncertainty in Multi-task learning:}
-Past approaches to multi-task learning have relied on uniform or hand-tuned weighting of task losses \cite{moeskops2016deep,tanno2018autodvt}. Recently, Kendall et al.~\cite{kendall2017multi} proposed to model the uncertainty of each task, and thereby adjust each task’s relative weight in the cost function automatically. They demonstrated on various structured prediction tasks that the method outperformed separate models trained individually on each task. However, the work assumes that the uncertainty is constant for each task and spatially, which is unrealistic for imaging data. For example, Figure 1 in Asman and Landman \cite{asman2011robust} illustrates in the context of brain segmentation that even human experts have a clear inclination to mislabel boundary pixels and other ambiguous regions. In this chapter, we enrich their probabilistic multi-task learning method by modelling the spatial variation of intrinsic uncertainty via heteroscedastic noise, and integrating parameter uncertainty via dropout. We show later that this confers a mechanism to select the relative weighting of task losses in a pixel-wise fashion. 
+Past approaches to multi-task learning have relied on uniform or hand-tuned weighting of task losses \cite{moeskops2016deep,tanno2018autodvt}. Recently, Kendall et al.~\cite{kendall2017multi} proposed to model the uncertainty of each task, and thereby adjust each task’s relative weight in the cost function automatically. They demonstrated on various structured prediction tasks that the method outperformed separate models trained individually on each task. However, the work assumes that the uncertainty is constant for each task and spatially, which is unrealistic for imaging data. For example, Figure 1 in Asman and Landman \cite{asman2011robust} illustrates in the context of brain segmentation that even human experts have a clear inclination to mislabel boundary pixels and other ambiguous regions. Here we enrich their probabilistic multi-task learning method by modelling the spatial variation of intrinsic uncertainty via a so-called heteroscedastic noise model, and integrating parameter uncertainty via dropout. We show later that this confers a mechanism to select the relative weighting of task losses in a pixel-wise fashion. 
 
 \section{Methods}
-We propose a probabilistic dual-task CNN-based algorithm which takes an MRI image, and simultaneously estimates the distribution over the corresponding CT image and the segmentation probability of the OARs. We use a heteroscedastic noise model and binary dropout to account for \textit{intrinsic} and \textit{parameter} uncertainty, respectively, and show that we obtain not only a measure of uncertainty over prediction, but also a mechanism for data-driven adaptation of weightings of task losses, which is integral for benefiting from the multi-task learning framework. We employ a patch-based approach to perform both tasks, in which the input MR image is split into smaller overlapping patches that are processed independently. For each input patch $\mathbf{x}$, our dual-task model estimates the conditional distributions $p(\mathbf{y}_i|\mathbf{x})$ for tasks $i=1,2$ where $\mathbf{y}_1$ and $\mathbf{y}_2$ denote the Hounsfield Unit and class probabilities of OARs at the center of the input patch. At inference, the probability maps over the synCT and OARs are obtained by stitching together outputs from appropriately shifted versions of the input patches.
+We introduce a probabilistic bi-task CNN architecture which takes an MR image, and simultaneously estimates the distributions over the corresponding CT image and the segmentation probability of the OARs. Analogous to the methods introduced in Chapter~\ref{chapter:deepuncertainty}, we use a Gaussian heteroscedastic noise model \cite{nix1994estimating} and binary dropout \cite{srivastava2014dropout} to account for \textit{intrinsic} and \textit{parameter} uncertainty, respectively, and show that we obtain not only a measure of uncertainty over prediction, but also a mechanism for data-driven adaptation of weightings of task losses, which is integral for benefiting from the multi-task learning framework. As before, to address the memory burden of 3D medical images, we employ a patch-based approach to perform both tasks, in which the input MR image is split into smaller overlapping patches that are processed independently. For each input patch $\mathbf{x}$, our dual-task model estimates the conditional distributions $p(\mathbf{y}_i|\mathbf{x})$ for tasks $i=1,2$ where $\mathbf{y}_1$ and $\mathbf{y}_2$ denote the Hounsfield Unit and class probabilities of OARs at the center of the input patch. At inference, the probability maps over the synCT and OARs are obtained by stitching together outputs from appropriately shifted versions of the input patches.
 
-\subsection{Dual-task architecture}
-We perform multi-task learning with hard-parameter sharing \cite{Caruana1993MultitaskLA}. The model shares the initial few layers across the two tasks and branches out into four task-specific networks with separate parameters (Fig.\ref{fig:diagram}). There are two networks per task, where one aims to performs CT synthesis (regression) or OAR segmentation, and the remaining models \emph{intrinsic} uncertainty associated to the data and the task.
+\subsection{Bi-task architecture}
+Here we use a standard multi-task learning architecture with hard-parameter sharing \cite{Caruana1993MultitaskLA} where the model shares initial few layers across the two tasks and branches out into four task-specific components with separate parameters as illustrated in Fig.\ref{fig:diagram}. There are two components per task, where one aims to performs CT synthesis (regression) or OAR segmentation, and the remaining models \emph{intrinsic} uncertainty associated to the data and the task.
 	\begin{figure}[!b]
 		\centering
 \includegraphics[height=0.185\textwidth]{chapter_5/figures/final_for_ryu_MT.pdf}
@@ -77,54 +77,82 @@ The final layer of the shared representation is split into two task-specific com
 %A successful probabilistic radiotherapy planning requires both the high quality OAR segmentation, and the Hounsfield Unit prediction along with its associated uncertainty. %\textcolor{green}{some motivation for modelling uncertainty.}
 %to better simulate the expected dose delivery . 
 \subsection{Task weighting with heteroscedastic uncertainty.}
-Previous probabilistic multitask learning methods based on deep learning \cite{kendall2017multi} assumed constant intrinsic uncertainty in respective tasks. In our context, this means that the inherent ambiguity present in synthesis or segmentation tasks do not depend on the spatial locations within an image volume. This is a highly unrealistic assumption as these tasks can be more challenging on some anatomical structures (e.g. tissue boundaries) than others. In order to capture potential spatial variation in intrinsic uncertainty, we adapt the \emph{heteroscedastic} (data-dependent) noise model to our multitask learning problem.   
+Previous probabilistic multitask learning methods based on deep learning \cite{kendall2017multi} assumed constant intrinsic uncertainty in respective tasks. In our context, this means that the inherent ambiguity present in synthesis or segmentation tasks do not depend on the spatial locations within an image volume. This is a highly unrealistic assumption since these tasks can be more challenging on some anatomical structures (e.g. tissue boundaries) than others as evidenced by previous work \cite{asman2011robust}. In order to capture potential spatial variation in intrinsic uncertainty, we adapt the \emph{heteroscedastic} (data-dependent) noise model to our multitask learning problem.   
 
 In particular, for the CT synthesis task, we define our likelihood as a normal distribution $p\left(\text{\textbf{y}}_{1}|\mathbf{W},\mathbf{x}\right) = \mathcal{N}(f^{\text{\textbf{W}}}_1(\text{\textbf{x}}), \sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2})$
 where mean $f^{\text{\textbf{W}}}_1(\text{\textbf{x}})$ and variance $\sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2}$ are modelled by the regression output and uncertainty branch as functions of the input patch $\mathbf{x}$ (see Fig.\ref{fig:diagram}). We define the task loss for CT synthesis to be the negative log-likelihood $\mathcal{L}_{1}(\text{\textbf{y}}_{1},\mathbf{x};\mathbf{W})= \frac{1}{2\sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2}}||\text{\textbf{y}}_{1}-f^{\text{\textbf{W}}}_1(\text{\textbf{x}})||^{2} + \text{log}\sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2}$. This loss encourages assigning high-uncertainty to regions of high errors, enhancing the robustness of the network against noisy labels and outliers, which are prevalent at organ boundaries especially close to the bone.
 %This objective acts as a learned loss attenuation since the network can learn to attenuate the effect of erroneous predictions by predicting higher uncertainty in these regions. This is of particular importance when regressing voxel intensities at organ boundaries especially close the bone, which are prone to errors.
 % (version 2) We introduce the \emph{heteroscedastic} noise model to approximate the variation in intrinsic uncertainty across the image. In contrast to \emph{homoscedatic} uncertainty ($\sigma_{i}$) which is assumed constant across the image, \emph{heteroscedasticity} is data-dependent ($\bm{\sigma}_{i}(\text{\textbf{x}})$). For the CT synthesis task, we define our likelihood as a normal distribution with mean given by the regression output $p\left(\text{\textbf{y}}_{1}|\mathbf{W},\mathbf{x}\right) = \mathcal{N}(f^{\text{\textbf{W}}}_1(\text{\textbf{x}}), \sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2})$. The negative log-likelihood is given by $-\text{log}\,p\left(\text{\textbf{y}}_{1}|\mathbf{W},\mathbf{x}\right) = \frac{1}{2\sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})}||\text{\textbf{y}}_{1}-f_{1}(\text{\textbf{x}})^{\text{\textbf{W}}}||^{2} + \text{log}\sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2}$. This likelihood acts as a learned loss attenuation since the network can learn to attenuate the effect of erroneous predictions by predicting higher uncertainty in these regions. This is of particular importance when regressing voxel intensities at organ boundaries especially close the bone, which are prone to errors.
 
-For the segmentation, we define the classification likelihood as softmax function of scaled logits i.e. $p\left(\text{\textbf{y}}_{2}|\textbf{W},\mathbf{x}\right) = \text{Softmax}\big{(}f_{2}^{\text{\textbf{W}}}(\text{\textbf{x}})/2\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2\big{)}$ where the segmentation output $f_{2}^{\text{\textbf{W}}}(\text{\textbf{x}})$ is scaled by the uncertainty term $\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2$ before softmax (Fig.\ref{fig:diagram}). As the uncertainty term $\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})$ increases, the Softmax output approaches a uniform distribution, which corresponds to the maximum entropy discrete distribution. We simplify the scaled Softmax likelihood by considering an approximation in \cite{kendall2017multi} 
-$$\frac{1}{\sigma^{2}}\sum_{c'}\text{exp}(\frac{1}{2\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2}f^{\text{\textbf{W}}}_{2,c'}(\text{\textbf{x}})) \approx \left(\sum_{c'}\text{exp}(f^{\mathbf{W}}_{2,c'}(\text{\textbf{x}}))\right)^{1/2\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2}$$ where $c'$ is denotes a segmentation class. This yields the NLL task-loss of the form $\mathcal{L}_{2}(\text{\textbf{y}}_{2}=c,\mathbf{x};\mathbf{W}) \approx \frac{1}{2\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2} \text{CE}(f_{2}^{\text{\textbf{W}}}(\text{\textbf{x}}),\text{\textbf{y}}_{2}=c)+ \text{log}\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2$, where CE denotes cross-entropy.
+For the segmentation, we define the classification likelihood as softmax function of scaled logits i.e. $p\left(\text{\textbf{y}}_{2}|\textbf{W},\mathbf{x}\right) = \text{Softmax}\big{(}f_{2}^{\text{\textbf{W}}}(\text{\textbf{x}})/\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2\big{)}$ where the segmentation output $f_{2}^{\text{\textbf{W}}}(\text{\textbf{x}})$ is scaled by the uncertainty term $\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2$ before softmax (Fig.\ref{fig:diagram}). As the uncertainty term $\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})$ increases, the Softmax output approaches a uniform distribution, which corresponds to the maximum entropy discrete distribution. We simplify the scaled Softmax likelihood by considering an approximation used in \cite{kendall2017multi} 
+$$\frac{1}{\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2}\sum_{c'}\text{exp}(\frac{1}{\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2}f^{\text{\textbf{W}}}_{2,c'}(\text{\textbf{x}})) \approx \left(\sum_{c'}\text{exp}(f^{\mathbf{W}}_{2,c'}(\text{\textbf{x}}))\right)^{1/\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2}$$ where $c'$ is denotes a segmentation class. This approximation becomes an equality
+when $\sigma^{\mathbf{W}}_{2}\rightarrow 1$. This has the advantage of simplifying the
+optimisation objective, as well as empirically improving results. This yields the NLL task-loss of the form $\mathcal{L}_{2}(\text{\textbf{y}}_{2}=c,\mathbf{x};\mathbf{W}) \approx \frac{1}{\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2} \text{CE}(f_{2}^{\text{\textbf{W}}}(\text{\textbf{x}}),\text{\textbf{y}}_{2}=c)+ \text{log}\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2$, where CE denotes cross-entropy.
 %(f^{\textbf{W}},\textbf{y}}_{2}) + \text{log}\sigma_{2}^{2}(\text{\textbf{x}})
 %$\bm{\mathcal{L}}_{2}(\text{\textbf{y}}_{2},\mathbf{x};\mathbf{W}) \approx -\frac{1}{2\sigma^{2}_{2}(\text{\textbf{x}})} \text{log}\left(\text{softmax}(f^{\text{\textbf{W}}}(\text{\textbf{x}}))\right) + \text{log}\sigma_{2}^{2}(\text{\textbf{x}})$. Consequently, the multi-task loss with heteroscedastic weighting that is minimised is:
 Finally, assuming that the two tasks $\text{\textbf{y}}_{1},\text{\textbf{y}}_{2}$ are statistically independent given the input image $\mathbf{x}$,  the joint likelihood factorises over tasks  $p\left(\text{\textbf{y}}_{1},\text{\textbf{y}}_{2}|\mathbf{W},\mathbf{x}\right)=p\left(\text{\textbf{y}}_{1}|\mathbf{W},\mathbf{x}\right)p\left(\text{\textbf{y}}_{2}|\mathbf{W},\mathbf{x}\right)$, and thus we can derive the NLL loss for the dual-task model as
 \begin{align}
 \mathcal{L}(\textbf{y}_{1},\textbf{y}_{2}=c,\mathbf{x};\mathbf{W})
 & = - \text{log } p\left(\text{\textbf{y}}_{1},\text{\textbf{y}}_{2}|\mathbf{W},\mathbf{x}\right)\\
-&=\frac{||\text{\textbf{y}}_{1}-f^{\text{\textbf{W}}}_1(\text{\textbf{x}})||^{2}}{2\sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2}} + \frac{\text{CE}(f_{2}^{\text{\textbf{W}}}(\text{\textbf{x}}),\text{\textbf{y}}_{2}=c)}{2\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2} + \text{log}\Big{(}\sigma^{\mathbf{W}}_{1}(\text{\textbf{x}})^2\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2\Big{)}\;
+&=\frac{||\text{\textbf{y}}_{1}-f^{\text{\textbf{W}}}_1(\text{\textbf{x}})||^{2}}{2\sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2}} + \frac{\text{CE}(f_{2}^{\text{\textbf{W}}}(\text{\textbf{x}}),\text{\textbf{y}}_{2}=c)}{\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2} + \text{log}\Big{(}\sigma^{\mathbf{W}}_{1}(\text{\textbf{x}})^2\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2\Big{)}\;
 \end{align}
 % \begin{equation}
 % \mathcal{L}(\textbf{y}_{1},\textbf{y}_{2}=c,\mathbf{x};\mathbf{W}) = \sum_{i} \frac{1}{\sigma^{\mathbf{W}}_{i}(\text{\textbf{x}})^2}(\textbf{y}_{i},\mathbf{x};\mathbf{W}) + \text{log}\sigma^{\mathbf{W}}_{i}(\text{\textbf{x}})^2 \;
 % \end{equation}
-where the MSE and CE terms are weighted by the inverse of heteroscedastic intrinsic uncertainty terms $\sigma^{\mathbf{W}}_{i}(\text{\textbf{x}})^2$, that enables automatic weighting of task losses on a per-sample basis. The log-term controls the spread. 
+where the MSE and CE terms are weighted by the inverse of heteroscedastic intrinsic uncertainty terms $\sigma^{\mathbf{W}}_{i}(\text{\textbf{x}})^2$, that enables automatic weighting of task losses on a per-sample basis. The log-term controls the spread. By contrast, the previous approches resort to spatially constant \cite{kendall2017multi} or manually specified weighting of task losses  \cite{moeskops2016deep,tanno2018autodvt}. 
 
-\subsection{Parameter uncertainty with approximate Bayesian inference.} In data-scarce situations, the choice of best parameters is ambiguous, and resorting to a single estimate without regularisation often leads to overfitting. Gal et al.\cite{gal2016dropout} have shown that dropout improves the generalisation of a NN by accounting for \textit{parameter} uncertainty through an approximation of the posterior distribution over its weights $q(\mathbf{W}) \approx (\mathbf{W}|\mathbf{X},\mathbf{Y_1},\mathbf{Y_2})$ where $\mathbf{X} = \{\mathbf{x}^{(1)}, ..., \mathbf{x}^{(N)}\}$, $\mathbf{Y}_1 = \{\mathbf{y}_1^{(1)}, ..., \mathbf{y}_1^{(N)}\}$, $\mathbf{Y}_2	 = \{\mathbf{y}_2^{(1)}, ..., \mathbf{y}_2^{(N)}\}$ denote the training data. In this work, we also use dropout in our model to assess the benefit of modelling parameter uncertainty in the context of our multitask learning problem.
-
-\paragraph{During training,} for each input (or minibatch), network weights are drawn from the approximate posterior $w' \sim q(\textbf{\text{W}})$ to obtain the multi-task output (predictive mean and predictive variance), $\textbf{f}^{w'}(\text{\textbf{x}}):=[f^{w'}_1(\text{\textbf{x}}),f^{w'}_2(\text{\textbf{x}}), \sigma_{1}^{w'}(\text{\textbf{x}})^{2},\sigma_{2}^{w'}(\text{\textbf{x}})^{2}]$.
-
-\textcolor{red}{
-Full variational objective is: 
+\subsection{Parameter uncertainty with approximate Bayesian inference.} Analogous to Chapter~\ref{chapter:deepuncertainty}, we approximate the posterior distribution over the network weights using variational inference, and assess the benefit of modelling parameter uncertainty in the context of our multitask learning problem. However, here we instead use the standard binary dropout \cite{srivastava2014dropout} following its Bayesian interpretation introduced by Gal et al.\cite{gal2016dropout}. Let $q(\mathbf{W})$ denote the variational distribution we use to approiximate the true posterior $p(\mathbf{W}|\mathbf{X},\mathbf{Y_1},\mathbf{Y_2})$ where $\mathbf{X} = \{\mathbf{x}^{(1)}, ..., \mathbf{x}^{(N)}\}$, $\mathbf{Y}_1 = \{\mathbf{y}_1^{(1)}, ..., \mathbf{y}_1^{(N)}\}$, $\mathbf{Y}_2	 = \{\mathbf{y}_2^{(1)}, ..., \mathbf{y}_2^{(N)}\}$ is the training data. During training, we minimise the following variational objective similarly to eq.~\eqref{eq:loss_elbo_sr}:  
  \begin{equation}
-\mathcal{L}_{\phi} (\mathcal{D}) =  \sum_{(\mathbf{x}_i,\mathbf{y}_i)\in\mathcal{D}} \Big{(}  \mathbb{E}_{q_{\phi}(\text{\textbf{W}})}[- \text{log }p(\mathbf{y}_i|\mathbf{x}_i,\text{\textbf{W}})]   +  \text{KL} (q_{\phi}(\theta)||p(\theta))\Big{)}
-\end{equation}
-The prior term is simply the L2 weight decay \cite{gal2015dropout}. On the other hand, the first term (referred to as the reconstruction term) cannot be computed exactly, thus we employ the following MC approximation by sampling $S$ samples of network parameters from the posterior $\text{\textbf{W}}^{(s)} \sim q_{\phi}(\text{\textbf{W}})$:
-\begin{align}\label{eq:reconstruction}
-\mathbb{E}_{q_{\phi}(\text{\textbf{W}})}[- \text{log }p(\textbf{y}_{1},\textbf{y}_{2}|\mathbf{x},\text{\textbf{W}})] 
-&\approx \frac{1}{S}\sum_{s=1}^{S} - \text{log }p(\textbf{y}_{1},\textbf{y}_{2}|\mathbf{x},\text{\textbf{W}}^{(s)}) \\
-&  =\frac{||\text{\textbf{y}}_{1}-f^{\text{\textbf{W}}}_1(\text{\textbf{x}})||^{2}}{2\sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2}} + \frac{\text{CE}(f_{2}^{\text{\textbf{W}}}(\text{\textbf{x}}),\text{\textbf{y}}_{2}=c)}{2\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2} + \text{log}\Big{(}\sigma^{\mathbf{W}}_{1}(\text{\textbf{x}})^2\sigma^{\mathbf{W}}_{2}(\text{\textbf{x}})^2\Big{)}
+ \mathcal{L}(\mathcal{D};\mathbf{W}) =  \sum_{(\mathbf{x}^{(i)},\mathbf{y}_1^{(i)},\mathbf{y}_2^{(i)})\in\mathcal{D}} \Big{(}  \mathbb{E}_{q_{\phi}(\text{\textbf{W}})}[- \text{log }p(\mathbf{y}_1^{(i)},\mathbf{y}_2^{(i)}|\mathbf{x}^{(i)},\text{\textbf{W}})]   +  \text{KL} (q(\text{\textbf{W}})||p(\text{\textbf{W}}))\Big{)}
+ \end{equation}
+ 
+The second term (referred to as the prior term) is simply given by the L2 weight decay \cite{gal2015dropout}. On the other hand, the first term (referred to as the reconstruction term) cannot be computed exactly, thus we employ the following MC approximation by drawing $S$ samples of network parameters from the approximate posterior $\text{\textbf{W}}^{(s)} \sim q_{\phi}(\text{\textbf{W}})$:
+\begin{align*}\label{eq:reconstruction}
+\mathbb{E}_{q_{\phi}(\text{\textbf{W}})}[- \text{log }p(\textbf{y}_{1},\textbf{y}_{2}=c|\mathbf{x},\text{\textbf{W}}^{(s)})] 
+&\approx \frac{1}{S}\sum_{s=1}^{S} - \text{log }p(\textbf{y}_{1},\textbf{y}_{2}=c|\mathbf{x},\text{\textbf{W}}^{(s)}) \\
+&\propto 
+\frac{\sum_{s=1}^{S}\sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2}||\text{\textbf{y}}_{1}-f^{\text{\textbf{W}}}_1(\text{\textbf{x}})||^{2}}{2\sum_{s=1}^{S}\sigma_{1}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2}} \\
+&+\frac{\sum_{s=1}^{S}\sigma_{2}^{\text{\textbf{W}}}(\text{\textbf{x}})^{2}\text{CE}(f_{2}^{\text{\textbf{W}}^{(s)}}(\text{\textbf{x}}),\text{\textbf{y}}_{2}=c)}{\sum_{s=1}^{S}\sigma^{\mathbf{W}^{(s)}}_{2}(\text{\textbf{x}})^2} \\
+&+\sum_{s=1}^{S}\text{log}\Big{(}\sigma^{\mathbf{W}^{(s)}}_{1}(\text{\textbf{x}})^2\sigma^{\mathbf{W}^{(s)}}_{2}(\text{\textbf{x}})^2\Big{)} 
+\end{align*}
+where the first two terms correspond to the weighted average of the respective task loss functions weighted by the corresponding intrinsic uncertainty. We should also note the slight abuse of notation here; we use $\propto$ to denote the equality up to additive constants. In our experiments we found that the number of samples $S$ per datapoint can be set to 1 as long as the minibatch size was large enough. 
+
+%For each input (or minibatch), we approximate the  reconstruction term using MC approximation by draing network weights from the approximate posterior $w' \sim q(\textbf{\text{W}})$: 
+%
+%to obtain the multi-task output (predictive mean and predictive variance), $\textbf{f}^{w'}(\text{\textbf{x}}):=[f^{w'}_1(\text{\textbf{x}}),f^{w'}_2(\text{\textbf{x}}), \sigma_{1}^{w'}(\text{\textbf{x}})^{2},\sigma_{2}^{w'}(\text{\textbf{x}})^{2}]$.
+
+%\textcolor{red}{
+%We minimize the KL divergence between the approximate posterior $q_{\phi}(\mathcal{W})$ and $p(\mathcal{W}|\textbf{X}, \mathbf{Y}^{(1)}, \mathbf{Y}^{(2)})$. Assuming that the joint likelihood over the two tasks factorizes, we have the following optimization objective:
+%\begin{equation}\label{eq:variational_loss}
+%\mathcal{L}_{\text{MC}}(\phi) = -\frac{N}{M}\sum_{i=1}^{M} \Big{[}\text{log } p(y^{(1)}_i|\mathbf{x}_i, \mathcal{W}_i) + \text{log }p(y^{(2)}_i|\mathbf{x}_i, \mathcal{W}_i)\Big{]} \\ + \sum_{l=1}^{L}\sum_{k=1}^{K_l}\text{KL}(q_{\phi_{lk}}(\mathbf{W}^{(l),k})||p(\mathbf{W}^{(l),k}))
+%\end{equation}
+%where $M$ is the size of the mini-batch, $N$ is the total number of training data points, and $\mathcal{W}_i$ denotes a set of model parameters sampled from $q_{\phi}(\mathcal{W})$. The last KL term regularizes the deviation of the approximate posterior from the prior $p(\mathbf{W}^{(l),k})=\mathcal{N}(0, \mathbf{I}/l^{2})$ where $l>0$. Adapting the approximation presented in \cite{gal2016uncertainty} to our scenario, we obtain:
+%\begin{equation}\label{eq:KL}
+%\text{KL}(q_{\phi_{lk}}(\mathbf{W}^{(l),k})||p(\mathbf{W}^{(l),k})) \propto \frac{l^2}{2}||\mathbf{M}^{(l),k}||^{2}
+%_{2} - \mathcal{H}(\mathbf{p}^{(l),k})
+%\end{equation}
+%where $\mathcal{H}(\mathbf{p}^{(l),k})=-\sum_{i\in \{1,2,s\}}p^{(l),k}_i\text{log }p^{(l),k}_i$ is the entropy of the grouping probabilities. While the first term performs the L2-weight norm, the second term pulls the grouping probabilities towards the uniform distribution. Plugging eq.\eqref{eq:KL} into eq.\eqref{eq:variational_loss} yields the overall loss: 
+%\begin{equation}\label{eq:total_loss}
+%\mathcal{L}_{\text{MC}}(\phi) = -\frac{N}{M}\sum_{i=1}^{M} \left[\log\text{\,} p\left(y^{(1)}_i|\mathbf{x}_i, \mathcal{W}_i\right) + \log\text{\,} p\left(y^{(2)}_i|\mathbf{x}_i, \mathcal{W}_i\right)\right] \\ + \lambda_{1} \cdot \sum_{l=1}^{L}\sum_{k=1}^{K_l}||\mathbf{M}^{(l),k}||^{2} - \lambda_{2} \cdot \sum_{l=1}^{L}\sum_{k=1}^{K_l}\mathcal{H}(\mathbf{p}^{(l),k})
+%\end{equation}
+%where $\lambda_1>0, \lambda_2>0$ are regularization coefficients. }
+
+
+
+At test time, for each input patch $\textbf{\text{x}}$ in a MR scan, we collect output samples (the mean and variance terms) $\{\textbf{f}^{\,w^{(t)}}(\text{\textbf{x}})\}_{t=1}^{\text{T}}$ where $\textbf{f}^{w'}(\text{\textbf{x}}):=[f^{w'}_1(\text{\textbf{x}}),f^{w'}_2(\text{\textbf{x}}), \sigma_{1}^{w'}(\text{\textbf{x}})^{2},\sigma_{2}^{w'}(\text{\textbf{x}})^{2}]$ by performing $T$ stochastic forward-passes with $\{w^{(t)}\}_{t=1}^{\text{T}}\sim q(\mathbf{W})$. 
+To compute the final estimates of synCT and segmentation of OARs, we calculate the mean predictions over the $T$ samples for the respective tasks: 
+
+\begin{equation*}
+\hat{\mu}_{\mathbf{y}_j|\mathbf{x}} = \frac{1}{T}\sum_{t=1}^T f^{w^{(t)}}_{j}(\text{\textbf{x}}), \quad j \in \{1,2\}
+ \end{equation*}
+
+Finally, we estimate the intrinsic and parameter components of the predictive uncertainty in both tasks by considering the approximations given by eq.~\eqref{eq:sampler_mean} and eq.~\eqref{eq:sampler_var}: 
+\begin{align}
+\widehat{\Delta}_{m}(\mathbf{y}_j)  &=\frac{1}{T} \sum_{t=1}^{T} f^{w^{(t)}}_{j}(\text{\textbf{x}}) f^{w^{(t)}}_{j}(\text{\textbf{x}})^{\text{T}} -\hat{\mu}_{\mathbf{y}_j|\mathbf{x}} \hat{\mu}_{\mathbf{y}_j|\mathbf{x}}^{\text{T}}\\ 
+\widehat{\Delta}_{i}(\mathbf{y}_j)  &= \frac{1}{T} \sum_{t=1}^T \sigma^{w^{(t)}}_{j}(\text{\textbf{x}})^{2}
 \end{align}
-} 
+where $ j \in \{1,2\}$ denotes the task index. As before, the total predictive uncertainty is the sum of the above intrinsic and parameter components. 
 
-
-
-
-
-
-
-
-
-\paragraph{At test time,} for each input patch $\textbf{\text{x}}$ in a MR scan, we collect output samples $\{\textbf{f}^{\,w^{(t)}}(\text{\textbf{x}})\}_{t=1}^{\text{T}}$ by performing $T$ stochastic forward-passes with $\{w^{(t)}\}_{t=1}^{\text{T}}\sim q(\mathbf{W})$. For the regression, we calculate the expectation over the $T$ samples in addition to the variance, which is the \emph{parameter} uncertainty. For the segmentation, we compute the expectation of class probabilities to obtain the final labels. The \emph{parameter} uncertainty in the segmentation is obtained by considering variance of the stochastic class probabilities. The final predictive uncertainty is the sum of the \emph{intrinsic} and \emph{parameter} uncertainties.
 %$[\hat{\textbf{\text{y}}}_{1},\hat{\textbf{\text{y}}}_{2},\bm{\hat{\sigma}}^{2}_{1},\bm{\hat{\sigma}}^{2}_{2}]=f^{\bm{\hat{\text{W}}}}(\text{\textbf{x}})$
 % At test time, given an input patch in MR scan $\textbf{\text{x}}$, we estimate the predictive distribution $q(\hat{\textbf{\text{y}}}|\hat{\textbf{\text{x}}})$ by sampling from $q(\textbf{\text{W}})$ with $T$ stochastic-samples. For the regression, we calculate the expectation over the $T$ samples in addition to the variance, which is the \emph{parameter} uncertainty. For the segmentation, we perform consider the expectation of class probabilities to obtain the final labels. \emph{Parameter} uncertainty in the segmentation is obtained by considering variance of the stochastic class probabilities. The final predictive uncertainty is the sum of the \emph{intrinsic} and \emph{parameter} uncertainties. This reduces to the the \emph{parameter} uncertainty when no heteroscedastic noise is modelled. 
 % During training, network weights are drawn from the approximate posterior $\hat{\text{W}} \sim q(\textbf{\text{W}})$ to obtain the multi-task output with predictive mean and predictive variance $[\hat{\textbf{\text{y}}}_{1},\hat{\textbf{\text{y}}}_{2},\bm{\hat{\sigma}}^{2}_{1},\bm{\hat{\sigma}}^{2}_{2}]=f^{\bm{\hat{\text{W}}}}(\text{\textbf{x}})$. 
@@ -138,7 +166,7 @@ The prior term is simply the L2 weight decay \cite{gal2015dropout}. On the other
 We validated on $15$ prostate cancer patients, who each had a T2-weighted MR image (3T, $1.46\times1.46\times5$mm$^{3}$) and a CT image (140kVp, $0.98\times0.98\times1.5$mm$^{3}$) acquired on the day. Organ delineation was performed by a clinician with labels for the left and right femur head, bone, prostate, rectum and bladder. All images were resampled to isotropic resolution. The CT scans were spatially aligned with the T2 scans using the method of Burgos et al. \cite{ninon2017}. In the segmentation, we predicted labels for the background, left/right femur head, prostate, rectum and bladder. The bone region was used for quantifying the synCT.
 
 \subsection{Network architectures and training}\label{sec:imp_details} 
-We trained our model on randomly selected 2D axial slices and reconstructed the 3D volume at test time. The representation network was composed of a convolutional layer followed by $3$ sets of twice repeated dilated convolutions with dilation factors $[1,2,4]$ and a final convolutional layer. Each layer ($l$) used a $3 \times 3$ kernel with features $f_{R}=[64, 64, 128, 256, 2048]$. Each task-specific branch was a set of $5$ convolutional layers of size $[256_{l=1, 2, 3, 4},n_{i,l=5}]$ where $n_{i,l=5}$ is equal to $1$ for regression and $\bm{\sigma}$ and equal to the number of segmentation classes. The first two layers were $3 \times 3$ kernels whilst the final convolutional layers were fully connected. A Bernouilli drop-out mask with probability $p=0.5$ was applied on the final layer of the representation network. We minimised the loss using ADAM with a learning rate $10^{-3}$ and trained for $19,000$ iterations. For the stochastic sampling, we performed model inference $10$ times at iterations $18000$ and $19000$ leading to a set of $T=20$ samples. 
+We trained our model on randomly selected 2D axial slices and reconstructed the 3D volume at test time. The representation network was composed of a convolutional layer followed by $3$ sets of twice repeated dilated convolutions \cite{yu2015multi} with dilation factors $[1,2,4]$ and a final convolutional layer. Each layer ($l$) used a $3 \times 3$ kernel with features $f_{R}=[64, 64, 128, 256, 2048]$. Each task-specific branch was a set of $5$ convolutional layers of size $[256_{l=1, 2, 3, 4},n_{i,l=5}]$ where $n_{i,l=5}$ is equal to $1$ for regression and $\bm{\sigma}$ and equal to the number of segmentation classes. The first two layers were $3 \times 3$ kernels whilst the final convolutional layers were fully connected. A Bernouilli drop-out mask with probability $p=0.5$ was applied on the final layer of the representation network. We minimised the loss using the ADAM optimiser \cite{kingma2014adam} with a learning rate $10^{-3}$ and trained for $19,000$ iterations. For the stochastic sampling, we performed model inference $10$ times at iterations $18000$ and $19000$ leading to a set of $T=20$ samples. 
 
 \section{Results}
 
@@ -148,7 +176,7 @@ We trained our model on randomly selected 2D axial slices and reconstructed the 
 
 
 \subsection{Experimental set-up}
-We performed a 3-fold cross-validation. Statistics over all hold-out sets are reported. We considered four separate models; 1) baseline networks for regression/segmentation (M1), 2) baseline network with drop-out for regression/segmentation (M2a), 3) the baseline with drop-out and heteroscedastic noise (M2b), 4) multi-task network using homoscedastic task weighting (M3) \cite{kendall2017multi} and 5) multi-task network using task-specific heteroscedastic noise and drop-out (M4). The baseline networks used only the representation network with $\nicefrac{1}{2}f_{R}$ and a fully-connected layer for the final output. We also compared our results against the current state of the art in atlas propagation (AP) \cite{ninon2017}, which was validated on the same dataset.
+We performed a 3-fold cross-validation. Statistics over all hold-out sets are reported. We considered four separate models;  (M1) baseline networks for regression/segmentation, (M2a) baseline network with drop-out for regression/segmentation,  (M2b) the baseline with drop-out and heteroscedastic noise, (M3) multi-task network using homoscedastic task weighting  \cite{kendall2017multi} and (M4) multi-task network using task-specific heteroscedastic noise and drop-out. The baseline networks used only the representation network with $\nicefrac{1}{2}f_{R}$ and a fully-connected layer for the final output. We also compared our results against the current state of the art in atlas propagation (AP) \cite{ninon2017}, which was validated on the same dataset.
 
 \subsection{Model performance}
 \begin{table}[!b]
@@ -182,52 +210,72 @@ M4 (ours) & - & - & 0.91(0.02) & 0.91(0.02) & 0.70(0.06) & 0.74(0.12) & 0.93(0.0
 \label{tab:table}
 \vspace{-10mm}
 \end{table}
-We calculated the Mean Absolute Error (MAE) between the predicted and reference scans across the body and at each organ (Tab. \ref{tab:table}). The fuzzy DICE score between the probabilistic segmentation and the reference was calculated for the segmentation (Tab. \ref{tab:table}). Best performance was in our presented method (M4) for the regression across all segmentation masks except at the bladder. Application of the multi-task heteroscedastic network with drop-out (M4) produced the most consistent synCT across all models with the lowest average MAE and the lowest variation across patients ($43.3\pm2.9$ versus $45.7\pm4.6$ \cite{ninon2017} and $44.3\pm3.1$ \cite{kendall2017multi}). This was significant lower when compared to M1 ($p<0.001$) and M2 ($p<0.001$). This was also observed at the bone and prostate ($p<0.001$). Whilst differences at $p<0.05$ levels of significance was not observed versus M2b and M3, the consistent lower MAE and standard deviation across patients in M4 demonstrates the added benefit of modelling heteroscedastic noise and the inductive transfer from the segmentation task. Moreover, we performed better than the current state of the art in atlas propagation \cite{ninon2017}. despite equivalence with the state of the art (Tab. \ref{tab:table}), we did not observe any significant differences between our model and the baselines despite an improvement in mean DICE at the prostate and rectum ($0.70\pm0.06$ and $0.74\pm0.12$) versus the baseline M1 ($0.67\pm0.12$, $0.70\pm0.15$). The \emph{intrinsic uncertainty} (Fig. \ref{fig:diagram2}) models the uncertainty specific to the data and thus penalises regions of high error leading to an under-segmentation yet with higher confidence in the result.
 
-\begin{figure}[!t]
-		\centering
-\includegraphics[width=\linewidth]{chapter_5/figures/figure_1_res.pdf}
-		\caption{Example output from the proposed network. The heteroscedastic intrinsic and the parameter uncertainty both correlate strongly with regions of high contrast (bone in the regression), organ boundary (segmentation) and errors in the output.} 
+An example of the model output is shown in Fig.~\ref{fig:diagram2}. We calculated the Mean Absolute Error (MAE) between the predicted and reference scans across the body and at each organ (Tab. \ref{tab:table}). The fuzzy DICE score between the probabilistic segmentation and the reference was calculated for the segmentation (Tab. \ref{tab:table}). Best performance was in our presented method (M4) for the regression across all segmentation masks except at the bladder. Application of the multi-task heteroscedastic network with drop-out (M4) produced the most consistent synCT across all models with the lowest average MAE and the lowest variation across patients ($43.3\pm2.9$ versus $45.7\pm4.6$ \cite{ninon2017} and $44.3\pm3.1$ \cite{kendall2017multi}). This was significantly lower when compared to M1 ($p<0.001$) and M2 ($p<0.001$). This was also observed at the bone and prostate ($p<0.001$). Whilst differences at $p<0.05$ levels of significance was not observed versus M2b and M3, the consistently lower MAE and standard deviation across patients in M4 demonstrates the added benefit of modelling heteroscedastic noise and the inductive transfer from the segmentation task. Moreover, we performed better than the current state of the art in atlas propagation \cite{ninon2017}. Despite equivalence with the state of the art (Tab. \ref{tab:table}), we did not observe any significant differences between our model and the baselines despite an improvement in mean DICE at the smaller organs such as prostate and rectum ($0.70\pm0.06$ and $0.74\pm0.12$) versus the baseline M1 ($0.67\pm0.12$, $0.70\pm0.15$). \textcolor{red}{The \emph{intrinsic uncertainty} (Fig. \ref{fig:diagram2}) captures the uncertainty specific to the data and thus penalises regions of high error, leading to an under-segmentation yet with higher confidence in the result.}
 
-		\label{fig:diagram2}
-        \vspace{-2mm}
-\end{figure}
+%\begin{figure}[!t]
+%		\centering
+%\includegraphics[width=\linewidth]{chapter_5/figures/figure_1_res.pdf}
+%		\caption{Example output from the proposed network. The heteroscedastic intrinsic and the parameter uncertainty both correlate strongly with regions of high contrast (bone in the regression), organ boundary (segmentation) and errors in the output.} 
+%
+%		\label{fig:diagram2}
+%        \vspace{-2mm}
+%\end{figure}
+%
 
-\subsection{Uncertainty estimation for radiotherapy}
-We tested the ability of the multi-task heteroscedastic network to better predict associated uncertainties in the synCT error. To verify that our network produces clinically viable samples for treatment planning, we quantified the distribution of regression z-scores for the multi-task heteroscedastic and homoscedastic models. In the former, the total predictive uncertainty is the sum of the \emph{intrinsic} and \emph{parameter} uncertainties, which is used to normalise the error between the synCT and the reference. This should lead to a better approximation of the variance in the model. In contrast, the total uncertainty in the latter reduces to the variance of the stochastic test-time samples. This is likely to lead to a mis-calibrated variance. A $\chi^{2}$ goodness of fit test was performed, showing that the homoscedastic z-score distribution is not normally distributed ($0.82 \pm 0.54$, $p<0.01$) in contrast to the heteroscedastic model ($0.04 \pm 0.84$, $p>0.05$), which has overestimated the variance. This is apparent in Fig. \ref{fig:diag3} where there is greater confidence in the synCT produced by our model in contrast the homoscedastic case.
-
-The predictive uncertainty can be exploited for quality assurance (Fig. \ref{fig:diagram4}). There may be issues whereupon time differences have caused variations in bladder and rectum filling across MR and CT scans causing patient variability in the training data. This is exemplified by large errors in the synCT at the rectum (Fig. \ref{fig:diagram4}) and quantified by large localised z-scores (Fig. \ref{fig:diagram4}g), which correlate strongly with the \emph{intrinsic} and \emph{parameter} uncertainty across tasks.
-
-\begin{figure}[!t]
-  \centering
-	\begin{subfigure}[]{0.75\linewidth}
-		\caption{Comparison of error quantification}	
-		\includegraphics[width=\linewidth]{chapter_5/figures/fig_z_1.pdf}
-	\end{subfigure}
-	\begin{subfigure}[]{0.7\linewidth}
-		\caption{z-score distribution}
-		\includegraphics[width=\linewidth]{chapter_5/figures/fig_z_2.png}
-	\end{subfigure}
-	\caption{a) synCTs and z-scores for the same subject between M4 (top) and M3 (bottom) models. b) z-score distribution of all patients ($15$) between both models.}
-	\label{fig:diag3}
-\end{figure}
 
 \begin{figure}[!t]
 	\centering
-	\includegraphics[width=\linewidth]{chapter_5/figures/figure_unc_2.pdf}
-	\caption{Uncertainty in areas prone to errors. a) T2 with reference segmentation, b) synCT with errors at the rectum, c) parameter uncertainty in synCT, d) intrinsic uncertainty in the segmentation, e) intrinsic uncertainty in the regression, f) total predictive uncertainty in the regression and g) error in HU (range [-750HU, 750HU]).} 
+	{\includegraphics[height=0.21\textwidth]{chapter_5/figures/new_figure_1a.pdf}}%
+	\hspace{3pt}
+	{\includegraphics[height=0.21\textwidth]{chapter_5/figures/new_figure_1b.pdf}}%
+	\caption{Example output from the proposed network. The propagated \textit{intrinsic} and \textit{parameter} uncertainty both correlate with regions of high contrast (bone in the regression, organ boundary for segmentation). Note the correlation between model error and the predicted uncertainty.}
+	\label{fig:diagram2}
+\end{figure}
+
+
+\subsection{Uncertainty estimation for radiotherapy}
+We tested the ability of the multi-task heteroscedastic network to better predict associated uncertainties in the synCT error. To verify that our network produces clinically viable samples for treatment planning, we quantified the distribution of regression z-scores for the multi-task heteroscedastic and homoscedastic models. In the former, the total predictive uncertainty is the sum of the propagated \emph{intrinsic} and \emph{parameter} uncertainties, which is used to normalise the error between the synCT and the reference. This should lead to a better approximation of the variance in the model. In contrast, the total uncertainty in the latter reduces to the variance of the stochastic test-time samples. This is likely to lead to a mis-calibrated variance. A $\chi^{2}$ goodness of fit test was performed, showing that the homoscedastic z-score distribution is not normally distributed ($0.82 \pm 0.54$, $p<0.01$) in contrast to the heteroscedastic model ($0.04 \pm 0.84$, $p>0.05$). This is apparent in Fig. \ref{fig:diag3} where there is greater confidence in the synCT produced by our model in contrast the homoscedastic case.
+
+The predictive uncertainty can be exploited for quality assurance (Fig. \ref{fig:diagram4}). There may be issues whereupon time differences have caused variations in bladder and rectum filling across MR and CT scans causing patient variability in the training data. This is exemplified by large errors in the synCT at the rectum (Fig. \ref{fig:diagram4}) and quantified by large localised z-scores (Fig. \ref{fig:diagram4}g), which correlate strongly with the propagated \emph{intrinsic} and \emph{parameter} uncertainty across tasks.
+
+\begin{figure}[!t]
+	\centering
+	{\includegraphics[trim=0mm 0mm 0mm 0mm,clip=true,height=0.29\textwidth,keepaspectratio]{chapter_5/figures/new_fig_z_1.pdf}}
+	\hspace{0.01\textwidth}
+	{\includegraphics[trim=0mm 0mm 0mm 0mm,clip=true,height=0.29\textwidth,keepaspectratio]{chapter_5/figures/fig_z_2.png}}
+	\caption{Analysis of uncertainty estimation. a) synCTs and z-scores for the a subject between M4 (top) and M3 (bottom) models. b) z-score distribution of all patients ($15$) between both models.}
+	\label{fig:diag3}
+\end{figure}
+
+%\begin{figure}[!t]
+%  \centering
+%	\begin{subfigure}[]{0.75\linewidth}
+%		\caption{Comparison of error quantification}	
+%		\includegraphics[width=\linewidth]{chapter_5/figures/fig_z_1.pdf}
+%	\end{subfigure}
+%	\begin{subfigure}[]{0.7\linewidth}
+%		\caption{z-score distribution}
+%		\includegraphics[width=\linewidth]{chapter_5/figures/fig_z_2.png}
+%	\end{subfigure}
+%	\caption{a) synCTs and z-scores for the same subject between M4 (top) and M3 (bottom) models. b) z-score distribution of all patients ($15$) between both models.}
+%	\label{fig:diag3}
+%\end{figure}
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\linewidth]{chapter_5/figures/new_qa.pdf}
+	\caption{Uncertainty in problematic areas. a) T2 with reference segmentation, b) synCT with localised errors at the rectum, c) propagated intrinsic uncertainty in synCT, d) propagated parameter uncertainty in synCT, e) total predictive uncertainty and f) error in HU (range [-750HU, 750HU]).} 
 	\label{fig:diagram4}
 \end{figure}
 
 \section{Conclusions}
-
-\textcolor{red}{Applications of uncertainty information for quality assurance: mention that the future work will study the downstream utility of the uncertainty information to design a safer treatment planning of radiotherapy. For example, you could cite \cite{sands2015utilisation,tilly2019probabilistic}.}
-
-\textcolor{red}{Also mention that as already discussed in the discussion section of Chapter~\ref{chapter:deepuncertainty}, the limitations of the introduced uncertainty modelling techniques, such as, the unimodality of the likelihood and the inflexibility of the posterior distributions, are equally applicable here. }
-
-We have proposed a probabilistic dual-network that combines uncertainty modelling with multi-task learning. Our network extends prior work in multi-task learning by integrating heteroscedastic uncertainty modelling to naturally weight task losses and maximize inductive transfer between tasks. We have demonstrated the applicability of our network in the context of MR-only radiotherapy treatment planning.  The model simultaneously provides the generation of synCTs, the segmentation of OARs and quantification of predictive uncertainty in both tasks. We have shown that a multi-task framework with heteroscedastic noise modelling leads to more accurate and consistent synCTs with a constraint on anatomical consistency with the segmentations. Importantly, we have demonstrated that the output of our network leads to consistent anatomically correct stochastic synCT samples that can potentially be effective in treatment planning. 
-
-
+%
+%\textcolor{red}{Applications of uncertainty information for quality assurance: mention that the future work will study the downstream utility of the uncertainty information to design a safer treatment planning of radiotherapy. For example, you could cite \cite{sands2015utilisation,tilly2019probabilistic}.}
+%
+%\textcolor{red}{Also mention that as already discussed in the discussion section of Chapter~\ref{chapter:deepuncertainty}, the limitations of the introduced uncertainty modelling techniques, such as, the unimodality of the likelihood and the inflexibility of the posterior distributions, are equally applicable here. }
+We have adapted the methods of uncertainty modelling introduced in Chapter~\ref{chapter:deepuncertainty} to the multi-task learning setting. Our network extends prior work in multi-task learning by integrating heteroscedastic uncertainty modelling to naturally weight task losses and thus facilitate inductive transfer between tasks. We have demonstrated the applicability of our network in the context of MR-only radiotherapy treatment planning where the synthetic CT scan (SynCT) and the segmentation of OARs are simultaneuously generated from the input MR image. We have shown that accounting for uncertainty information leads to more accurate and consistent synCTs with a constraint on anatomical consistency with the segmentations. Importantly, we have demonstrated that the output of our network leads to consistent anatomically correct stochastic synCT samples that can potentially be effective in treatment planning. Furthermore, we have also shown that the estimates of predictive uncertainty with our method is more calibrated than the equivalent model with homoscedastic noise model. In the future work, we will evaluate the downstream utility of such uncertainty information in the predicted synCT and OAR segmentation in designing a safer treatment planning of radiotherapy e.g., \cite{sands2015utilisation,tilly2019probabilistic}.
+ 
 
 
 
