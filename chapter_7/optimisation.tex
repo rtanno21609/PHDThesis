@@ -1,11 +1,40 @@
 \section{Optimisation}\label{sec:learning}
-Training of an ANT proceeds in two stages: 1) \textit{growth phase} during which the model architecture is learned based on \textit{local} optimisation, and 2) \textit{refinement phase} which further tunes the parameters of the model discovered in the first phase based on \textit{global} optimisation. We include a pseudocode of the training algorithm in Supp.~Sec.~A. %First, we describe a backpropagation-based algorithm \cite{rumelhart1986learning} for learning parameters in $\mathbb{O}$ given a fixed topology $\mathbb{T}$, which forms the optimisation backbone for both the growth and refinement phases. We then describe a method for learning the model topology, $\mathbb{T}$, and fine-tune it. 
+Training of an ANT proceeds in two stages: 1) \textit{growth phase} during which the model architecture is learned based on \textit{local} optimisation, and 2) \textit{refinement phase} which further tunes the parameters of the model discovered in the first phase based on \textit{global} optimisation. Algorithm~\ref{alg:growt} shows a pseudocode of the training algorithm.
+
+\begin{algorithm}
+	\caption{ANT Optimisation}
+	\label{alg:growth}
+	\footnotesize
+	\begin{algorithmic}
+		%\Require Topology $\mathbb{T}$, parameters $\theta$
+		\State Initialise topology $\mathbb{T}$ and parameters $\mathbb{O}$\Comment{$\mathbb{T}$ is set to a root node with one solver and one transformer}
+		\State Optimise parameters in $\mathbb{O}$ via gradient descent on NLL \Comment{Learning root classifier}
+		\State Set the root node ``suboptimal"
+		
+		\While{true} \Comment{Growth of $\mathbb{T}$ begins}
+		\State Freeze all parameters $\mathbb{O}$
+		\State Pick next ``suboptimal'' leaf node $l\in\mathcal{N}_{leaf}$ in the breadth-first order
+		%\State Add (1) linear classifier to $leaf$ and train new parameters?
+		\State Add (1) router to $l$ and train new parameters \Comment{Split data}
+		\State Add (2) transformer to $l$ and train new parameters\Comment{Deepen transform}
+		\State Add (1) or (2) to $\mathbb{T}$ if validation error decreases, otherwise set $l$ to ``optimal''
+		\State Add any new modules to $\mathbb{O}$ 
+		%\State $b\gets r$
+		%\State $r\gets a\bmod b$
+		\If{no ``suboptimal'' leaves remain}
+		\State Break
+		\EndIf
+		\EndWhile
+		\State Unfreeze and train all parameters in $\mathbb{O}$\Comment{Global refinement with fixed $\mathbb{T}$}
+	\end{algorithmic}
+\end{algorithm}
+
+ %First, we describe a backpropagation-based algorithm \cite{rumelhart1986learning} for learning parameters in $\mathbb{O}$ given a fixed topology $\mathbb{T}$, which forms the optimisation backbone for both the growth and refinement phases. We then describe a method for learning the model topology, $\mathbb{T}$, and fine-tune it. 
 
 % --------- optimising the parameters in operational modules ------------
 \subsection{Loss function: optimising parameters of \texorpdfstring{$\mathbb{O}$}{O}}\label{sec:graddescent}
 % \subsection{Loss function: optimising parameters for fixed architecture \texorpdfstring{}{O}}\label{sec:graddescent}
 For both phases, we use the negative log-likelihood (NLL) as the common objective function to minimise: 
-
 $$-\text{log }p(\mathbf{Y}|\mathbf{X}, \Theta) = -\sum_{n=1}^N\text{log }(\sum_{l=1}^{L} \pi_{l}^{\boldsymbol{\theta}, \boldsymbol{\psi}}(\mathbf{x}^{(n)})\,
 p_{l}^{\boldsymbol{\phi}, \boldsymbol{\psi}}(\mathbf{y}^{(n)}))$$ where $\mathbf{X} = \{\mathbf{x}^{(1)}, ..., \mathbf{x}^{(N)}\}$, $\mathbf{Y} = \{\mathbf{y}^{(1)}, ..., \mathbf{y}^{(N)}\}$ denote the training inputs and targets. As all component modules (routers, transformers and solvers) are differentiable with respect to their parameters $\Theta = (\boldsymbol{\theta}, \boldsymbol{\psi}, \boldsymbol{\phi})$, we can use gradient-based optimisation. Given an ANT with fixed topology  $\mathbb{T}$, we use backpropagation \cite{rumelhart1986learning} for gradient computation and use gradient descent to minimise the NLL for learning the parameters.
 

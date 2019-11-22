@@ -6,6 +6,14 @@
 
 \documentclass[12pt,a4paper,twoside]{book}
 
+\usepackage{titlesec}    
+\titleformat{\chapter}[display]
+{\normalfont%
+	\huge% %change this size to your needs for the first line
+	\bfseries}{\chaptertitlename\ \thechapter}{15pt}{%
+	\Huge %change this size to your needs for the second line
+}
+
 \usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
 \usepackage{graphicx}
 \usepackage{etex} % for fixing error: no room for a new \dimension
@@ -34,7 +42,7 @@
 %\usepackage[giveninits=true,hyperref]{biblatex}
 %\bibliography{citations} % or
 
-\usepackage[raggedright]{titlesec} % for section titles not to exceed page margins
+%\usepackage[raggedright]{titlesec} % for section titles not to exceed page margins
 
 \usepackage[nomessages]{fp}% http://ctan.org/pkg/fp
 \usepackage{python} % allows to run pythonrvisors code inside latex
@@ -118,9 +126,10 @@
 \usepackage[margin=1in,headheight=14pt]{geometry}
 
 % \usepackage{algpseudocode} % for writing pseudocode & algorithms
-\usepackage[linesnumbered]{algorithm2e}
-\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
-\SetCommentSty{mycommfont}
+\usepackage{algorithm,algpseudocode}
+%\usepackage[linesnumbered]{algorithm2e}
+%\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+%\SetCommentSty{mycommfont}
 
 \usepackage{enumitem} % for nested enumerate numbers 1 1.1 1.1.1
 \usepackage{pgfgantt} % for grantt charts

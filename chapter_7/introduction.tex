@@ -1,5 +1,12 @@
 \section{Introduction}
-Neural networks (NNs) and decision trees (DTs) are both powerful classes of machine learning models with proven successes in academic and commercial applications. The two approaches, however, typically come with mutually exclusive benefits and limitations.
+Neural networks (NNs) and decision trees (DTs) are both powerful classes of machine learning models with proven successes in academic and commercial applications. The two approaches, however, typically come with mutually exclusive benefits and limitations, as illustrated in Fig.~\ref{fig:pros_and_cons}.
+
+\begin{figure*}[ht]
+	\center
+	\includegraphics[width=0.85\linewidth]{chapter_7/figures/pros_and_cons.png}
+	\caption{\small Comparison of two machine learning paradigms. }
+	\label{fig:pros_and_cons}
+\end{figure*}
 
 %DNNs are characterised by learning hierarchical representation of data \cite{zeiler2014visualizing,bengio2013deep}. In the supervised learning setting, DNNs are capable of learning complex non-linear transformations to apply to input data, so a simple linear model can adequately perform the predictive task of interest.
 NNs are characterised by learning hierarchical representations of data through the composition of nonlinear transformations \cite{zeiler2014visualizing,bengio2013deep}, % In classification, for example, the final representations of different classes are trained to become linearly separable.
@@ -17,11 +24,12 @@ ANTs represent routing decisions and root-to-leaf computational paths within the
 
 % (RYu) During which each leaf node of the tree optimises the choice between "going deeper" and partioning the data until meeting some termination criteria. The proposed method generalises many previous works that attempted the same unification \cite{rota2014neural,kontschieder2015deep,ioannou2016decision,frosst2017distilling} and address their limitations (see Table. \ref{table:comparison}).
 \begin{itemize}
-	\item \textbf{Representation learning}: as each root-to-leaf path in an ANT is an NN, features can be learned end-to-end with gradient-based optimisation. Combined with the tree structure, an ANT can learn such features which are hierarchically shared and separated. %The training algorithm is also amenable to SGD.
+	\item \textbf{Representation learning}: as each root-to-leaf path in an ANT is an NN, features can be learned end-to-end with gradient-based optimisation. Combined with the tree structure, an ANT can learn such features which are hierarchically shared and separated. The training algorithm is also amenable to SGD.
 	
 	\item \textbf{Architecture learning}: by progressively growing ANTs, the architecture adapts to the availability and complexity of data, embodying Occam’s razor. %; a priori, we have no reason to believe models must be excessively deep to handle both simple and complex data. 
 	The growth procedure can be viewed as architecture search with a hard constraint over the model class.
     \item \textbf{Lightweight inference}: at inference time, ANTs perform conditional computation, selecting a single root-to-leaf path on the tree on a per-sample basis, activating only a subset of the parameters of the model. 
+    
 %	\item\textbf{Representation learning}: By formulating ANTs as tree-structured NNs, features can be learned end-to-end using the backpropagation algorithm \cite{rumelhart1986learning}. Each node and edge can include standard deep learning building blocks, such as convolutional layers. Crucially, transformed features are propagated down the ANT, allowing both decision and leaf nodes to benefit from learning hierarchical features.
 %	\item\textbf{Tree structure}: The tree structure of ANTs can automatically learn hierarchical grouping over the data, based on the end task e.g. specialisation of each branch to a meaningful category of data. An orthogonal benefit is that of conditional computation---by partitioning data, only one root-to-leaf path of an ANT needs to be computed during inference per sample, reducing space and time requirements in comparison to standard NNs. 
 %    \item\textbf{Automatic model selection}: By progressively growing ANTs, the architecture is automatically selected as a function of the data, embodying Occam's razor. This can be seen as performing neural architecture search with a hard constraint over the class of possible models. % By utilising stopping criteria, the number of parameters is naturally limited by the amount and complexity of the data. The training procedure naturally embodies Occam's razor, with smaller models chosen when little labelled data is available. % As a consequence of automatic model selection and capacity control, DANTs adapt to the amount of data available, including small amounts of data.

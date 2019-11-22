@@ -87,19 +87,19 @@
 %\title{Learning From Noisy Labels By \\
 %Regularized Estimation Of Annotator Confusion}
 
-\textcolor{red}{Here you can add to the motivation based on Ben's outlook on the present availability of data to train ML models \cite{harvey2019standardised} which is nicely summarised in the following sentence: "Medical imaging data is now extremely abundant due to over two decades of digitisation of imaging protocols and data storage formats. However, clean, well-curated data, that is amenable to machine learning, is relatively scarce, and AI developers are paradoxically data starved". Also, have a look at "Quality and Curation of Medical Images and Data: Opportunities, Applications and Risks" \cite{van2019quality} in the same book. Variability in lables is an established problem in radiology e.g. inter-rater variability in the range 74-85\% for glioblastoma \cite{menze2014multimodal}, datasets can contain incorrect segmentations \cite{wachinger2015brainprint}. }
+%\textcolor{red}{Here you can add to the motivation based on Ben's outlook on the present availability of data to train ML models \cite{harvey2019standardised} which is nicely summarised in the following sentence: "Medical imaging data is now extremely abundant due to over two decades of digitisation of imaging protocols and data storage formats. However, clean, well-curated data, that is amenable to machine learning, is relatively scarce, and AI developers are paradoxically data starved". Also, have a look at "Quality and Curation of Medical Images and Data: Opportunities, Applications and Risks" \cite{van2019quality} in the same book. Variability in lables is an established problem in radiology e.g. inter-rater variability in the range 74-85\% for glioblastoma \cite{menze2014multimodal}, datasets can contain incorrect segmentations \cite{wachinger2015brainprint}. }
 
-
-
-The predictive performance of supervised learning algorithms depends on the quality of labels. In a typical label collection process, multiple annotators provide subjective noisy estimates of the ``truth" under the influence of their varying skill-levels and biases. Blindly treating these noisy labels as the ground truth limits the accuracy of learning algorithms in the presence of strong disagreement. This problem is critical for applications in domains such as medical imaging where both the annotation cost and inter-observer variability are high. In this work, we present a method for simultaneously learning the individual annotator model and the underlying true label distribution, using only noisy observations. Each annotator is modeled by a confusion matrix that is jointly estimated along with the classifier predictions. We propose to add a regularization term to the loss function that encourages convergence to the true annotator confusion matrix. We provide a theoretical argument as to how the regularization is essential to our approach both for the case of single annotator and multiple annotators. Despite the simplicity of the idea, experiments on image classification tasks with both simulated and real labels show that our method either outperforms or performs on par with the state-of-the-art methods and is capable of estimating the skills of annotators even with a single label available per image.  
+%------------------ Abstract ------------------------------------
+\paragraph{Abstract: }
+The predictive performance of supervised learning algorithms depends on the quality of labels. In a typical label collection process, multiple annotators provide subjective noisy estimates of the ``truth" under the influence of their varying skill-levels and biases. Blindly treating these noisy labels as the ground truth limits the accuracy of learning algorithms in the presence of strong disagreement. This problem is critical for applications in domains such as medical imaging where both the annotation cost and inter-observer variability are high. In this work, we present a method for simultaneously learning the individual annotator model and the underlying true label distribution, using only noisy observations. Each annotator is modeled by a confusion matrix that is jointly estimated along with the classifier predictions. We propose to add a regularization term to the loss function that encourages convergence to the true annotator confusion matrix. We provide a theoretical argument as to how the regularization is essential to our approach both for the case of single annotator and multiple annotators. Despite the simplicity of the idea, experiments on image classification tasks with both simulated and real labels show that our method either outperforms or performs on par with the state-of-the-art methods and is capable of estimating the skills of annotators even with a single label available per image. This chapter is based on the publication \cite{tanno2019learning}. 
  
 
 \section{Introduction}
-In many practical applications, supervised learning algorithms are trained on noisy labels obtained from multiple annotators of varying skill levels and biases. When there is a substantial amount of disagreement in the labels, conventional training algorithms that treat such labels as the ``truth" lead to models with limited predictive performance. To mitigate such variation, practitioners typically abide by the principle of ``wisdom of crowds" \cite{surowiecki2005wisdom} and aggregate labels by computing the majority vote. However, this approach has limited efficacy in applications where the number of annotations is modest or the tasks are ambiguous. For example,  vision applications in medical image analysis \cite{litjens2017survey} require annotations from clinical experts, which incur high costs and often suffer from high inter-reader variability \cite{watadani2013interobserver,rosenkrantz2013comparison,lazarus2006bi,warfield2004simultaneous}. 
+In many practical applications, supervised learning algorithms are trained on noisy labels obtained from multiple annotators of varying skill levels and biases. When there is a substantial amount of disagreement in the labels, conventional training algorithms that treat such labels as the ``truth" lead to models with limited predictive performance. To mitigate such variation, practitioners typically abide by the principle of  ``wisdom of crowds" \cite{surowiecki2005wisdom} and aggregate labels by computing the majority vote. However, this approach has limited efficacy in applications where the number of annotations is modest or the tasks are ambiguous. In particular,  many vision applications in medical image analysis \cite{litjens2017survey} require annotations from clinical experts, which incur high costs and commonly suffer from high inter-reader variability \cite{watadani2013interobserver,rosenkrantz2013comparison,lazarus2006bi,warfield2004simultaneous} --- e.g., the average variability in the range 74-85\% has been reported for glioblastoma segmentation \cite{menze2014multimodal}. While medical imaging data is now extremely abundant due to over two decades of digitisation, the world still remains relatively short of access to clean data with well-curated labels, that is amenable to machine learning \cite{harvey2019standardised}, necessitating an intelligent method to learn robustly from noisy annotations. 
 
-However, if the exact process by which each annotator generates the labels was known, we could correct the annotations accordingly and thus train our model on a cleaner set of data. Furthermore, this additional knowledge of the annotators' skills can be utilized to decide on which examples to be labeled by which annotators \cite{welinder2010online,long2013active,long2015multi}. Therefore, methods that can accurately model the label noise of annotators are useful for improving not only the accuracy of the trained model, but also the quality of labels in the future. 
+In theory, even in the presence of large label noise, if the exact process by which each annotator generates the labels was known, we could correct the annotations accordingly and thus train our model on a cleaner set of data. Furthermore, this additional knowledge of the annotators' skills can be utilized to decide on which examples to be labeled by which annotators \cite{welinder2010online,long2013active,long2015multi}. Therefore, methods that can accurately model the label noise of annotators are useful for improving not only the accuracy of the trained model, but also the quality of labels in the future. 
 
-Previous work proposed various methods for jointly estimating the skills of the annotators and the ground truth (GT) labels. We categorize these methods into two groups: (1) \textit{two-stage} approach and (2) \textit{simultaneous} approach. Methods in the first category perform label aggregation and training of a supervised learning model in two separate steps. The noisy labels $\widetilde{\mathbf{Y}}$ are first aggregated by building a probabilistic model of annotators. The observable variables are the noisy labels $\widetilde{\mathbf{Y}}$, and the latent variables/parameters to be estimated are the annotator skills and GT labels $\mathbf{Y}$. Then, a machine learning model is trained on the pairs of aggregated labels $\mathbf{Y}$ and input examples $\mathbf{X}$ (e.g. images) to perform the task of interest. The initial attempt was made in \cite{dawid1979maximum} in the early 1970s and more recently, numerous lines of research \cite{smyth1995inferring,warfield2004simultaneous,whitehill2009whose,welinder2010multidimensional,rodrigues2013learning} proposed extensions of this work e.g. by estimating the difficulty of each example. However, in all these cases, information about the raw inputs $\mathbf{X}$ is completely neglected in the generative model of noisy labels used in the aggregation step, and this highly limits the quality of estimated true labels in practice.
+Previous work, therefore, proposed various methods for jointly estimating the skills of the annotators and the ground truth (GT) labels. We categorize these methods into two groups: (1) \textit{two-stage} approach and (2) \textit{simultaneous} approach. Methods in the first category perform label aggregation and training of a supervised learning model in two separate steps. The noisy labels $\widetilde{\mathbf{Y}}$ are first aggregated by building a probabilistic model of annotators. The observable variables are the noisy labels $\widetilde{\mathbf{Y}}$, and the latent variables/parameters to be estimated are the annotator skills and GT labels $\mathbf{Y}$. Then, a machine learning model is trained on the pairs of aggregated labels $\mathbf{Y}$ and input examples $\mathbf{X}$ (e.g. images) to perform the task of interest. The initial attempt was made in \cite{dawid1979maximum} in the early 1970s and more recently, numerous lines of research \cite{smyth1995inferring,warfield2004simultaneous,whitehill2009whose,welinder2010multidimensional,rodrigues2013learning} proposed extensions of this work e.g. by estimating the difficulty of each example. However, in all these cases, information about the raw inputs $\mathbf{X}$ is completely neglected in the generative model of noisy labels used in the aggregation step, and this highly limits the quality of estimated true labels in practice.
 
 The \textit{simultaneous} approaches \cite{raykar2009supervised,yan2010modeling,branson2017lean,van2018lean} address this issue by integrating the prediction of the supervised learning model (i.e. distribution $p(\mathbf{Y}|\mathbf{X})$) into the probabilistic model of noisy labels, and have been shown to improve the predictive performance. These methods employ variants of the expectation-maximization (EM) algorithm during training, and require a reasonable number of labels for each example. However, in most real world applications, it is practically prohibitive to collect a large number of labels per example, and this requirement limits their applications. A notable exception is the Model Boostrapped EM (MBEM) algorithm presented in \cite{khetan2017learning} that is capable of learning even with little label redundancy. 
 
@@ -110,7 +110,7 @@ The \textit{simultaneous} approaches \cite{raykar2009supervised,yan2010modeling,
 % Mention that \cite{raykar2009supervised,raykar2010learning,yan2010modeling,branson2017lean} were limited to binary classification problems.
 
 
-In this paper, we propose a more effective alternative to these EM-based approaches for jointly modeling the annotator skills and GT label distribution. Our method separates the annotation noise from true labels by
+In this chapter, we propose a more effective alternative to these EM-based approaches for jointly modeling the annotator skills and GT label distribution. Our method separates the annotation noise from true labels by
 (1) ensuring high fidelity with the data by minimizing the cross entropy loss and (2) encouraging the estimated annotators to be maximally unreliable by minimizing the trace of the estimated confusion matrices. Our method is also simpler to implement, only requiring an addition of a regularization term to the cross-entropy loss. Furthermore, we provide a theoretical result that such regularization is capable of recovering the annotation noise as long as the average confusion matrix (CM) over annotators is diagonally dominant. 
 
 Experiments on image classification tasks with both simulated and real noisy labels demonstrate that our method, despite being much simpler, leads to better or comparable performance with MBEM \cite{khetan2017learning} and generalized EM \cite{raykar2009supervised,raykar2010learning}, and is capable of recovering CMs even when there is only one label available per example. We simulated a diverse range of annotator types on MNIST and CIFAR10 data sets while we used a ultrasound dataset for cardiac view classification to test the efficacy in a real-world application. We also show importance of modeling individual annotators by comparing against various modern noise-robust methods \cite{reed2014training,sukhbaatar2014training,goldberger2016training,guan2017said}, when the inter-annotator variability is high. 
@@ -215,6 +215,103 @@ where $\mathcal{S}(\mathbf{x})$ denotes the set of all labels available for imag
 
 Numerous previous work have considered the same observation model, but proposed various optimization schemes. The original work \cite{raykar2009supervised,raykar2010learning} employed the generalized EM algorithm to estimate $\{\theta, \hat{\mathbf{A}}^{(1)}, ..., \hat{\mathbf{A}}^{(R)}\}$, and more recent work  \cite{branson2017lean,van2018lean} employed variants of hard-EM to optimize the same model. Khetan et al.,\cite{khetan2017learning} proposed a method called model-bootstrapped EM (MBEM) in which the predictions of the base neural network classifier are used in the M-step update of CMs to learn from singly labelled data, which was not viable with the prior work. However, in all of the above EM-based methods, each M-step for the parameters of NN is not available in closed form and thus performed via gradient descent. This means that every M-step requires a training of the CNN classifier, rendering each iteration of EM expensive. A naive solution to this is to perform only few iterations of gradient descent in each E-step, however, this could limit the performance if sufficient convergence is not achieved. Our approach directly maximizes the likelihood with the trace regularizer and does not suffer from these issues. In Sec.~4, we show empirically this approach leads to an improvement both in terms of accuracy and convergence rate over the previous methods on noisy labels with high inter-annotator variability. %In the next section, we provide a rationale for adding the trace term to the loss function and how this helps separate annotation noise from the ground truth label distribution.
 
+We also provide pseudo-codes of our method (Algorithm 2), generalized EM \cite{raykar2009supervised} (Algorithm 3) and model-bootstrapped EM \cite{khetan2017learning} (Algorithm 4) to clarify the differences between different methods for jointly learning the true label distribution and confusion matrices of annotators in eq.~\eqref{eq:model_likelihood} in the main text. Given the training set $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$, each example may not be labelled by all the annotators. In such cases, for ease of notation, we assign pseudo class $\tilde{y}^{(r)}_{n}=-1$ to fill the missing labels. The comparison between these three algorithms illustrates the implementational simplicity of our method, despite the comparable or superior performance demonstrated on all three datasets. 
+
+\begin{algorithm}
+	\caption{Our method}
+	\label{alg:ourmethod}
+		\small
+	\begin{algorithmic}
+		%\Require Topology $\mathbb{T}$, parameters $\theta$
+		\State \textbf{Inputs}: $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$,
+		$\lambda:$ scale of trace regularizer
+		\State \textbf{Initialize the confusion matrices $\{\hat{\mathbf{A}}^{(r)}\}_{r=1}^{R}$ to identity matrices}
+		\State \textbf{Initialize the parameters of the base classifier $\theta$}
+		\State \textbf{Learn $\theta$ and $\{\hat{\mathbf{A}}^{(r)}\}_{r=1}^{R}$ by performing minibatch SGD on the combined loss}:
+		\vspace{-2mm}
+		$$\theta, \{\hat{\mathbf{A}}^{(r)}\}_{r=1}^{R} \longleftarrow \text{argmin}_{\theta, \{\hat{\mathbf{A}}^{(r)}\}} \Big{[}\sum_{i=1}^{N}\sum_{r=1}^{R} \mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot \text{CE}(\hat{\mathbf{A}}^{(r)}\hat{\textbf{p}}_{\theta}(\mathbf{x}_i), \tilde{y}^{(r)}_{i})  + \lambda \sum_{r=1}^{R}\text{tr}(\hat{\textbf{A}}^{(r)}) \Big{]}$$ 
+		\vspace{-3mm}
+		\State \textbf{Return:   } $\hat{\mathbf{p}}_{\theta}$ and $\{\hat{\mathbf{A}}^{(r)}\}_{r=1}^R$
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Generalized EM \cite{raykar2009supervised}}
+	\label{alg:generalised_em}
+	\small
+	\begin{algorithmic}
+		%\Require Topology $\mathbb{T}$, parameters $\theta$
+		\State \textbf{Inputs}: $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$,
+		$T:$ \# EM steps, $G:$ \# SGD in each M-step
+		
+		\State \textbf{Initialize posterior distribution by the mean labels}: for $j=1,..., L, n=1,...,N$
+		\vspace{-2mm}
+		$$q_{nj} ^{(0)}: = p(y_{n}=j|\textbf{x}_{n}, \{\tilde{y}^{(r)}_{n}\}_r, \theta^{(0)}) \longleftarrow R^{-1}\sum_{r=1}^R \mathbbm{1}(\tilde{y}_{i}^{(r)}=j) $$
+		\vspace{-3mm}
+		
+		\State \textbf{Initialize the parameters of the base classifier $\theta$}
+		\State \textbf{Repeat $T$ times:}
+		\State $\,\,\,\,\,\,\,\,$ \textbf{M-step for $\theta$}. Learn the base classifier  $\hat{\mathbf{p}}_{\theta}$ by performing minibatch SGD for $G$ iterations 
+		\vspace{-2mm}
+		$$\theta^{(t+1)} \longleftarrow \text{argmin}_{\theta}\Big{[}-\sum_{n=1}^{N}\sum_{l=1}^{L}q_{nj} ^{(t)}\cdot \text{log } p(y_{n}=l|\mathbf{x}_{n}, \theta) \Big{]}$$ 
+		\vspace{-3mm}
+		
+		\State $\,\,\,\,\,\,\,\,$ \textbf{M-step for $\{\hat{\mathbf{A}}^{(r)}\}_{r=1}^{R}$}. Estimate the confusion matrices 
+		\vspace{-2mm}
+		$$\hat{a}_{ji}^{(r),t+1} \longleftarrow \frac{\sum_{n=1}^{N}\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot \mathbbm{1}(\tilde{y}^{(r)}_{n}=i)\cdot q_{nj} ^{(t)}}{\sum_{n=1}^{N} \mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot q_{nj} ^{(t)}}$$ 
+		\vspace{-3mm}
+		\State $\,\,\,\,\,\,\,\,$  \textbf{E-step}. Estimate the posterior label distribution
+		\vspace{-2mm}
+		$$q_{nj} ^{(t+1)} \longleftarrow \frac{ p(y_{n}=j|\mathbf{x}_{n}, \theta^{(t+1)})\cdot\prod_{r=1}^{R}\big{(}\hat{a}^{(r),t+1}_{j\tilde{y}^{(r)}_{n}}\big{)}^{\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)}}{\sum_{l=1}^L p(y_{n}=l|\mathbf{x}_{n}, \theta^{(t+1)})\cdot\prod_{r=1}^{R}\big{(}\hat{a}^{(r),t+1}_{l\tilde{y}^{(r)}_{n}}\big{)}^{\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)}}$$
+		\vspace{-3mm}
+		\State \textbf{Return:   } $\hat{\mathbf{p}}_{\theta^{(T)}}$ and $\{\hat{\mathbf{A}}^{(r),T}\}_{r=1}^R$
+	\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}
+	\caption{Model-Bootstrapped EM \cite{khetan2017learning}}
+	\label{alg:generalised_em}
+	\small
+	\begin{algorithmic}
+		%\Require Topology $\mathbb{T}$, parameters $\theta$
+		\State \textbf{Inputs}: $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$,
+		$T:$ \# EM steps, $G:$ \# SGD in each M-step
+		
+		\State \textbf{Initialize posterior distribution by the mean labels}: for $j=1,..., L, n=1,...,N$
+		\vspace{-2mm}
+		$$q_{nj} ^{(0)}: = p(y_{n}=j|\textbf{x}_{n}, \{\tilde{y}^{(r)}_{n}\}_r, \theta^{(0)}) \longleftarrow R^{-1}\sum_{r=1}^R \mathbbm{1}(\tilde{y}_{i}^{(r)}=j) $$
+		\vspace{-3mm}
+		\State \textbf{Initialize the parameters of the base classifier $\theta$}
+		\State \textbf{Repeat $T$ times:}
+		\State $\,\,\,\,\,\,\,\,$ \textbf{M-step for $\theta$}. Learn the base classifier  $\hat{\mathbf{p}}_{\theta}$ by performing minibatch SGD for $G$ iterations 
+		\vspace{-2mm}
+		$$\theta^{(t+1)} \longleftarrow \text{argmin}_{\theta}\Big{[}-\sum_{n=1}^{N}\sum_{l=1}^{L}q_{nj} ^{(t)}\cdot \text{log } p(y_{n}=l|\mathbf{x}_{n}, \theta)\Big{]}$$ 
+		\vspace{-3mm}
+		\State $\,\,\,\,\,\,\,\,$ \textbf{Predict on training examples.} for $n=1,...,N$:
+		\vspace{-2mm}
+		$$c_{n} \longleftarrow \text{argmax}_{l\in\{1,...,L\}}\text{ }p(y_{n}=l|\mathbf{x}_{n}, \theta^{(t+1)}) $$
+		\vspace{-3mm}
+		\State $\,\,\,\,\,\,\,\,$ \textbf{M-step for $\{\hat{\mathbf{A}}^{(r)}\}_{r=1}^{R}$}. Estimate the CMs. For $i,j=1,...,L$ and $r=1,...,R$:
+		\vspace{-2mm}
+		$$\hat{a}_{ji}^{(r),t+1} \longleftarrow \frac{\sum_{n=1}^{N}\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot \mathbbm{1}(\tilde{y}^{(r)}_{n}=i)\cdot \mathbbm{1}(c_{n}=j)}{\sum_{n=1}^{N} \mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot \mathbbm{1}(c_{n}=j)}$$ 
+		\vspace{-3mm}
+		\State $\,\,\,\,\,\,\,\,$ \textbf{Update prior label distribution.} for $l=1,...,L$:
+		\vspace{-3mm}
+		$$p_{l} \longleftarrow N^{-1}\sum_{n=1}^N \mathbbm{1}(c_{n}=l) $$
+		\vspace{-3mm}
+		\State $\,\,\,\,\,\,\,\,$  \textbf{E-step}. Estimate the posterior label distribution
+		\vspace{-2mm}
+		$$q_{nj} ^{(t+1)} \longleftarrow \frac{p_{j}\cdot\prod_{r=1}^{R}\big{(}\hat{a}^{(r),t+1}_{j\tilde{y}^{(r)}_{n}}\big{)}^{\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)}}{\sum_{l=1}^L p_{l}\cdot\prod_{r=1}^{R}\big{(}\hat{a}^{(r),t+1}_{l\tilde{y}^{(r)}_{n}}\big{)}^{\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)}}$$
+		\vspace{-3mm}
+		\State \textbf{Return:   } $\hat{\mathbf{p}}_{\theta^{(T)}}$ and $\{\hat{\mathbf{A}}^{(r),T}\}_{r=1}^R$
+	\end{algorithmic}
+\end{algorithm}
+
+
+
+
+\clearpage
 \subsection{Motivation for Trace Regularization}\label{sec:theorems}
 Here we intend to motivate the addition of the trace regularizer in eq.~\ref{eq:objective_sparse}. In the last section, we saw that minimizing cross-entropy loss alone encourages $\hat{\textbf{A}}^{(r)}\textbf{P}\rightarrow \textbf{A}^{(r)}$. Therefore, if we could devise a regularizer which, when minimized, uniquely ensures the convergence $\hat{\textbf{A}}^{(r)}\rightarrow\textbf{A}^{(r)}$, then this would make $\textbf{P}$ tend to the identity matrix, implying that the base model fully captures the true label distribution i.e. $\text{argmax}_{k}[\hat{\textbf{p}(\mathbf{x})}_{\theta}]_{k} =  y\,\, \forall \mathbf{x}$. We describe below the trace regularizer is indeed a such regularizer when both $\hat{\mathbf{A}}^{(r)}$ and $\mathbf{A}^{(r)}$ satisfy some conditions. We first show this result assuming that there is a single annotator, and then extend to the scenario with multiple annotators.  
 
@@ -248,7 +345,7 @@ for all $i\in\{1,...,L\}$. It therefore follows that $\text{tr}(\textbf{A})\leq 
 % By eq. \ref{eq:side1} and \ref{eq:side2}, we obtain the inequality $\sum_{ij}(\hat{a}_{ij}-a_{ij})p_{ji}\geq 0$. As $p_{ij}\geq 0$ for all $i,j$, \textcolor{red}{we can derive that elements of estimated CMs }
 \end{proof}
 
-We note that the above result was also mentioned in \cite{sukhbaatar2014training} in a more general context of label noise modelling (that neglects annotator information). Here we further augment their proof by showing the uniqueness of solutions (i.e.  $\text{tr}(\textbf{A})= \text{tr}(\hat{\textbf{A}})	\Rightarrow \textbf{A} = \hat{\textbf{A}}$). In addition, the trace regularization was never used in practice in \cite{sukhbaatar2014training} --- for implementation reason, the Frobenius norm was used in all their experiments.  We now extend this to the multiple annotator regime. We will show later that minimizing the mean trace of all annotators indeed enhances the estimation quality of both CM and true label distributions, particularly in the presence of high annotator disagreement. 
+We note that the above result was also mentioned in \cite{sukhbaatar2014training} in a more general context of label noise modelling (that neglects annotator information). Here we further augment their proof by showing the uniqueness of solutions (i.e.  $\text{tr}(\textbf{A})= \text{tr}(\hat{\textbf{A}})	\Rightarrow \textbf{A} = \hat{\textbf{A}}$). We also note that the trace regularization was, in fact, never used in practice in \cite{sukhbaatar2014training} --- for implementation reason, the Frobenius norm was used in all their experiments.  We now extend this to the multiple annotator regime. We will show later that minimizing the mean trace of all annotators indeed enhances the estimation quality of both CM and true label distributions, particularly in the presence of high annotator disagreement. 
 
 \begin{theorem}[Multiple Annotators]\label{theorem:main}
 Let $\hat{\textbf{A}}^{(r)}$ be the estimated CM of annotator $r$. If $\hat{\textbf{A}}^{(r)}\textbf{P}=\textbf{A}^{(r)}$ for $r=1,...,R$, and the average true and estimated CMs $\textbf{A}^{*}:=R^{-1}\sum_{r=1}^R\textbf{A}^{(r)}$ and $\hat{\textbf{A}}^{*}:=R^{-1}\sum_{r=1}^R\hat{\textbf{A}}^{(r)}$ are diagonally dominant, then  $\textbf{A}^{(1)}, ..., \textbf{A}^{(R)} = \text{argmin }_{\hat{\textbf{A}}^{(1)}, ..., \hat{\textbf{A}}^{(R)}}\Big{[}\text{tr}(\hat{\textbf{A}}^{*})\Big{]}$ and such solutions are unique. In other words, when the trace of the mean CM is minimized, the estimation of respective annotator's CMs match the true values. 
@@ -272,7 +369,7 @@ The above result shows that if each estimated annotator's distribution $\hat{\te
 
 
 %%%%%%%%%%%%%%%%%%%%%% Evaluation %%%%%%%%%%%%%%%%%%%%%%%%%\newpa
-\section{Experiments}
+\section{Experiments and Results}
 % In this section, we compare our method against a set of reasonable baselines. We show the benefits of applying our model in both synthetic and real settings. Particularly, we demonstrate 1) advantage of having a simpler optimization scheme compared to EM, 2) importance of modeling multiple annotators and 3) the applicability of the model in a challenging real world application.
 
 We now aim to verify the proposed method on various image recognition tasks. Particularly, we demonstrate (1) advantage of our simpler optimization scheme compared to EM-based approaches (Sec.~\ref{sec:comparison_with_em}), (2) importance of modeling multiple annotators (Sec.~\ref{sec:other_baselines}) and (3) the applicability of the model in a challenging real world application (Sec.~\ref{sec:us_experiments}). We address the first two questions by testing the proposed method on MNIST and CIFAR-10 datasets with a diverse set of simulated annotators. To answer the final question, we evaluate our approach on the task of cardiac view classification using ultrasound images where the labels are noisy and sparse, and are acquired from multiple annotators of varying levels of expertise. 
@@ -282,13 +379,41 @@ We now aim to verify the proposed method on various image recognition tasks. Par
 
 % We aim to address the first two questions by testing the proposed method on MNIST and CIFAR-10 datasets with a diverse set of simulated annotators. To answer the final question, we evaluate our approach on the task of cardiac view classification using ultrasound images where the labels are noisy and sparse, and are acquired from multiple annotators of varying levels of expertise. 
 
+\subsection{Datasets, training and architectures}
+\paragraph{Datasets. } We evaluated our method on three classification datasets: MNIST digit classification dataset \cite{lecun1998gradient}; CIFAR-10 object recognition dataset \cite{krizhevsky2009learning}; the cardiac view classification (CVC) dataset from a handheld ultra-sound probe. The MNIST dataset consists of $60,000$ training and $10,000$ testing examples, all of which are $28\times28$ grayscale images of digits from $0$ to $9$. The CIFAR-10 dataset consists of $50,000$ training and $10,000$ testing examples, all of which are $32\times32$ coloured natural images drawn from $10$ classes. The CVC data set contains $26,2000$ training and $20,000$ test examples, which are grayscale images of size $96\times96$ from $6$ different cardiac views. Each image is labelled by a subset of $8$ annotators ($6$ sonographers and $2$ non-experts).  
+\vspace{-2mm}
+\paragraph{Training. } For all experiments, we employ the same training scheme unless otherwise stated. We optimize parameters using Adam \cite{kingma2014adam} with initial learning rate of $10^{-3}$ and $\beta = [0.9, 0.999]$, with minibatches of size $50$ and train for $200$ epochs. For our method, we set the scale of the trace regularization to $\lambda=0.01$. For the training of the EM-based approaches (Model-Bootstrapped EM \cite{khetan2017learning} and generalized EM \cite{raykar2009supervised}), we train the base classifier for $200$ epochs in total over the course of the EM steps, following the same protocol above. For CIFAR-10, we performed two iterations of EM algorithm ($T=2$) and $100$ epochs worth of gradient descent steps during each E-step to update the parameters of the base classifier ($G=100$ epochs), following the original implementation in \cite{khetan2017learning}. For the experiments on the CVC data set, we run more rounds of EM with $T=10$ and $G=20 $ epochs. In all cases, we hold out $10\%$ of training images as a validation set and best model is selected based on the validation accuracy over the course of training. No data augmentation is performed during training in all three data sets. We note that for CIFAR-10, we, in addition, decreased the learning rate by a factor of $10$ at every multiple of $50$ in a similar fashion to the schedule used in \cite{Huang2017LearningDR,he2016deep,springenberg2014striving}.
+\vspace{-2mm}
+\paragraph{Architectures. } For MNIST, the base classifier was defined as a CNN architecture comprised of $4$ convolution layers, each with $3\times3$ kernels follower by Relu. The number of kerners in respective layers are $\{32, 32, 64, 64\}$. After the first two convolution layers, we perform $2\times2$ max-pooling, and after the last one, we further down-sample the features with Global Average Pooling (GAP) prior to the final fully connected layer. For the CVC dataset, we employed the same architecture, but with increased number of kernels i.e. $\{128, 128, 128, 128\}$. For CIFAR-10, we used a 50-layer ResNet \cite{he2016deep}.
+
+
+
 \subsection{Set-Up}
 We focus on a regime in which models have only access to noisy labels from multiple annotators. For MNIST and CIFAR-10 data sets, we simulate noisy labels from a range of annotators with different skill levels and biases.
 
-\paragraph{MNIST Experiments.} We consider two different models of annotator types: (i) \textit{pairwise-flipper}: each annotator is correct with probability $p$ or flips the label of each class to another label (the flipping target is chosen uniformly at random for each class), (ii) \textit{hammer-spammer}: each annotator is always correct with probability $p$ or otherwise chooses labels uniformly at random \cite{khetan2017learning}. For each annotator type and skill level $p$, we create a group of $5$ annotators by generating CMs from the associated distribution (illustration of CMs are given in the supplementary material). Given the GT labels, we generate noisy labels as defined by the CM per annotator. These noisy labels are used during training.
+\paragraph{MNIST Experiments.} We consider two different models of annotator types: (i) \textit{pairwise-flipper}: each annotator is correct with probability $p$ or flips the label of each class to another label (the flipping target is chosen uniformly at random for each class), (ii) \textit{hammer-spammer}: each annotator is always correct with probability $p$ or otherwise chooses labels uniformly at random \cite{khetan2017learning}. Example confusion matrices for both cases are shown in Fig.~\ref{fig:annotator_groups}.
 
+For each annotator type and skill level $p$, we create a group of $5$ annotators by generating confusion matrices (CMs) from the associated distribution. More specifically, each CM is generated by perturbing the mean skill level $p$ by injecting a small Gaussian noise $\epsilon \sim \text{Normal}(0, 0.01)$ and choosing the flipping target class randomly in the case of a \textit{pairwise-flipper}. Given the GT labels, we generate noisy labels as defined by the CM per annotator. These noisy labels are used during training.
+
+\begin{figure}[ht!]
+	\center
+	% \vspace{-5mm}
+	\begin{subfigure}[]{1.0\linewidth}
+		\caption{Pairwise-flippers with mean skill-level $p=0.3$}
+		\includegraphics[width=\linewidth]{chapter_4/figures/pairwise_flipper_example.png}
+	\end{subfigure}
+	\begin{subfigure}[]{1.0\linewidth}
+		\caption{Spammer-hammers skill-level $p=0.5$}
+		\includegraphics[width=\linewidth]{chapter_4/figures/hammer_spammer_example.png}
+	\end{subfigure}
+ 	\caption{Examples of annotator groups. The value of diagonal entries are fixed constant for each annotator and is drawn from $\text{Normal}(p, 10^{-2})$.}
+	\label{fig:annotator_groups}
+	% 	\vspace{-5mm}
+	
+\end{figure}
 
 % For each annotator, we perturb the mean skill level by injecting a small Gaussian noise and chooses the flipping target class randomly in the case of a \textit{pairwise-flipper}. \textcolor{red}{More details and a set of example CMs for both cases are given in the supplementary material.} Given the ground truth class labels, we synthesize noisy labels from each annotator according to its CM, and use them as the training data to learn the CM model eq.~\ref{eq:model_likelihood}. It should be noted that in all cases the algorithms have only access to the noisy labels and the identity of annotators that generate them i.e. which expert produced which label, but not the CMs. 
+
 
 \paragraph{CIFAR-10 Experiments.} We consider a diverse group of $4$ annotators with different patterns of CMs as shown in Fig.~\ref{fig:recover_cms}: (i) is a ``hammer-spammer" as defined above, (ii) tends to mix up semantically similar categories of images e.g. cats and dogs, and automobiles and trucks, (iii) is likely to confuse ``neighbouring" classes and (iv) is an adversarial annotator who has a wrong association of class names to object categories. On average, labels generated by these annotators are correct only $45\%$ of the time.
 
@@ -302,9 +427,19 @@ In synthetic experiments, we assume that equal number of labels are generated by
 	\begin{subfigure}[]{0.49\linewidth}
 		\includegraphics[width=\linewidth]{chapter_4/figures/figures_new/figure_3_cd.png}
 	\end{subfigure}
-	\caption{\small Comparison between our method, generalized EM, MBEM trained on noisy labels on MNIST from ``pairwise flippers" for a range of mean skill level $p$. (a), (b) show classification accuracy in two cases, one where all annotators label each example and the other where only one label is available per example. (c), (d) quantify the CM recovery error as the annotator-wise average of the normalized Frobenius norm between each ground truth CM and its estimate. The shaded areas represent the cases where the average CM over the annotators are not diagonally dominant. }
+
+	\begin{subfigure}[]{0.49\linewidth}
+	\includegraphics[width=\linewidth]{chapter_4/figures/figures_new/figure_01.png}
+	\end{subfigure}
+	\begin{subfigure}[]{0.49\linewidth}
+	\includegraphics[width=\linewidth]{chapter_4/figures/figures_new/figure_02.png}
+	\end{subfigure}
+
+	\caption{\small Comparison between our method, generalized EM, MBEM trained on noisy labels on MNIST from ``pairwise flippers" (Top row) and ``hammer-spammers" (Bottom row) for a range of mean skill level $p$. (a), (b) show classification accuracy in two cases, one where all annotators label each example and the other where only one label is available per example. (c), (d) quantify the CM recovery error as the annotator-wise average of the normalized Frobenius norm between each ground truth CM and its estimate. The shaded areas represent the cases where the average CM over the annotators are not diagonally dominant. }
 	\label{fig:pairwise_flips}
 \end{figure}
+
+
 %%%%%%%%%%
 \begin{figure}[t]
 	\center
@@ -314,28 +449,54 @@ In synthetic experiments, we assume that equal number of labels are generated by
 \end{figure}
 
 
+
+
+
 \subsection{Comparing with EM-based Approaches} \label{sec:comparison_with_em}
 This section examines the ability of our method in learning the CMs of annotators and the GT label distribution on MNIST and CIFAR-10. In particular, we compare against two prior methods: (1) generalized EM \cite{raykar2010learning}, the first method for end-to-end training of the CM model in the presence of multiple annotators, and (2) Model Bootstrapped EM (MBEM) \cite{khetan2017learning}, the present state-of-the-art method. We analyze the performance in two cases, one in which all labels from $5$ annotators are available for each image (``dense labels"), and another where only one randomly selected annotator labels each example (``1 label per image"). We quantify the error of CM estimation by the average Frobenius norm between each CM and its estimate over the annotators, and this metric is normalized to be in the range $[0,1]$ by dividing by the number of classes $L$ i.e. $R^{-1}L^{-1}\sum_{r}\sum_{i,j}||a^{(r)}_{ij}-\hat{a}^{(r)}_{ij}||^2$.
 
 
 
 %\textcolor{red}{Where should I describe the model details and experiment set-ups? May be have another section or put in the appendix if short of space?.}
-\paragraph{Performance Comparison.} Fig.~\ref{fig:pairwise_flips} compares the classification accuracy and the error of CM estimation on MNIST for a range of mean skill-levels $p$ where labels are generated by a group of 5 ``pairwise-flippers". The ``oracle" model is the idealistic scenario where CMs of the annotators are a priori known to the model while ``annotators" indicate the average labeling accuracy of each annotator group.
+\paragraph{Performance Comparison.} Fig.~\ref{fig:pairwise_flips} compares the classification accuracy and the error of CM estimation on MNIST for a range of mean skill-levels $p$ where labels are generated by a group of 5 ``pairwise-flippers" and "hammer-spammers". The ``oracle" model is the idealistic scenario where CMs of the annotators are a priori known to the model while ``annotators" indicate the average labeling accuracy of each annotator group.
 
-Fig.~\ref{fig:pairwise_flips} shows a strong correlation between the classification accuracy and the error of CM estimation. We observe our model displays consistently better or comparable performance in terms of both classification accuracy and estimation of CMs with dense labels (Fig.~\ref{fig:pairwise_flips}(a) and (c)). When each example receives only one label from one of the annotators, we observe the same trend as long as the mean CMs are diagonally dominant (Fig.~\ref{fig:pairwise_flips}(b,d)). We also observe that when the diagonal dominance holds, all three methods perform better than the annotators. On the other hand, when the diagonal dominance does not hold (see the grey regions), all models undergo a steep drop in classification accuracy due to the inability to estimate CMs accurately as reflected in Fig.~\ref{fig:pairwise_flips}(c,d), which is consistent with Theorem.~\ref{theorem:main}. Fig.~\ref{fig:diagonal_dominance_violation} also visualizes the average of the estimated CMs at this break point. We also note that with only one label per image, the generalized EM algorithm  \cite{raykar2009supervised,raykar2010learning} is not capable of recovering CMs at all and predict identity matrices (Fig.~\ref{fig:diagonal_dominance_violation}), which renders the model equivalent to a vanilla classifier directly trained on noisy labels. A similar set of results in the ``spammer-hammer" case are also available in the supplementary materials.
+The top row in Fig.~\ref{fig:pairwise_flips} shows a strong correlation between the classification accuracy and the error of CM estimation. We observe our model displays consistently better or comparable performance in terms of both classification accuracy and estimation of CMs with dense labels (Fig.~\ref{fig:pairwise_flips}(a) and (c)). When each example receives only one label from one of the annotators, we observe the same trend as long as the mean CMs are diagonally dominant (Fig.~\ref{fig:pairwise_flips}(b,d)). We also observe that when the diagonal dominance holds, all three methods perform better than the annotators. On the other hand, when the diagonal dominance does not hold (see the grey regions), all models undergo a steep drop in classification accuracy due to the inability to estimate CMs accurately as reflected in Fig.~\ref{fig:pairwise_flips}(c,d), which is consistent with Theorem.~\ref{theorem:main}. Fig.~\ref{fig:diagonal_dominance_violation} also visualizes the average of the estimated CMs at this break point. We also note that with only one label per image, the generalized EM algorithm  \cite{raykar2009supervised,raykar2010learning} is not capable of recovering CMs at all and predict identity matrices (Fig.~\ref{fig:diagonal_dominance_violation}), which renders the model equivalent to a vanilla classifier directly trained on noisy labels. A similar set of results are also obrained in the ``spammer-hammer" case as shown in the second row of Fig.~\ref{fig:pairwise_flips}. 
+
 % This effectively means that our model and MBEM show lower classification accuracy than the vanilla CNN when the diagonal dominance does not hold, and this can be explained by the fact that wrong specification of CMs lead to 
 
-On CIFAR-10 dataset, Tab.~\ref{tab:cifar10} shows that our method outperforms MBEM and the generalized EM in terms of both classification accuracy and CM estimation by a large margin. In addition, the standard deviations of these metrics are generally smaller for our method than for the baselines. Fig.~\ref{fig:recover_cms} illustrates that our method can estimate CMs of the 4 very different annotators even when each image receives only one label. Interestingly, Tab.~\ref{tab:cifar10} shows that even removing the trace norm can achieve reasonably high classification accuracy and low CM estimation error. We believe this is because of the unexplained robustness of a deep CNN to label noise. Nevertheless, adding the trace norm improves the performance, and we also observe on MNIST that such improvement is pronounced in the presence of larger noise (see supplementary materials).
+On CIFAR-10 dataset, Tab.~\ref{tab:cifar10} shows that our method outperforms MBEM and the generalized EM in terms of both classification accuracy and CM estimation by a large margin. In addition, the standard deviations of these metrics are generally smaller for our method than for the baselines. Fig.~\ref{fig:recover_cms} illustrates that our method can estimate CMs of the 4 very different annotators even when each image receives only one label. 
+
+\paragraph{Ablation of Trace Regularization.}
+
+Interestingly, Tab.~\ref{tab:cifar10} shows that even removing the trace norm can achieve reasonably high classification accuracy and low CM estimation error. We believe that this is due to the natural robustness of CNN classifiers to label noise; an accurate estimation of the label distribution $\hat{\textbf{p}}_\theta$ regularizes the estimation of confusion matrices $\{\hat{\textbf{A}}^{(r)}\}_{r=1}^R$. Nevertheless, adding the trace norm still improves the performance. 
+
+We observe on MNIST that such improvement is much pronounced in the presence of larger noise. We compare our method on MNIST against the case where the trace norm regularization is removed (results on CIFAR-10 and CVC datasets are given in the main text). Fig.~\ref{fig:ablation_trace} shows that adding the trace norm generally improves the performance in terms of both classification accuracy and CM estimation error, and such improvement is pronounced in the presence of larger noise i.e. lower skill levels of annotators. We also observe that when the noise level is low, our model still attains very high accuracy even without trace norm regularization. This can be explained by the natural robustness of the CNN classifier; if the amount of label noise is sufficiently small, the base classifier is still capable of learning the true label distribution well. This, in turn, allows the model to separate annotation noise from true label distribution, improving the quality of CM estimation and thus the overall performance. However, in the presence of large label noise, having trace-norm regularization shows evident benefits. 
+
+Lastly, we note that our method, without the trace norm, performs almost as poorly as the naive classifier on the real-world medical imaging dataset (Fig.~\ref{fig:us_experiments} (d)).
+
+
+\begin{figure}[ht]
+	\center
+	% 	\vspace{-2mm}
+	\hfill
+	\begin{subfigure}[]{0.49\linewidth}
+		\includegraphics[width=\linewidth]{chapter_4/figures/figures_new/figure_04.png}
+	\end{subfigure}
+	\begin{subfigure}[]{0.49\linewidth}
+		\includegraphics[width=\linewidth]{chapter_4/figures/figures_new/figure_05.png}
+	\end{subfigure}
+	
+	\caption{Comparison between our method with and without trace norm  on MNIST. Results for two annotator groups, consisting of ``hammer-spammers" and ``pairwise-flippers" are shown for a range of mean skill level $p$.  }
+	\label{fig:ablation_trace}
+	% 	\vspace{-2mm}
+\end{figure}
 
 
 
-%%%%%%%%%%%%%% ARDAVAN %%%%%%%%%%%%%%
-
-
-\begin{table}
-    \begin{subtable}[t]{\linewidth}
-	    \centering
-         \caption{Dense labels}
+\begin{table}[h]
+	\scriptsize
+    \begin{subtable}[t]{0.45\linewidth}
+	     \caption{Dense labels}
         \begin{tabular}{lcc}
             \hline
                 \toprule
@@ -354,10 +515,8 @@ On CIFAR-10 dataset, Tab.~\ref{tab:cifar10} shows that our method outperforms MB
         \hline
         \end{tabular}
     \end{subtable}
-
-    \begin{subtable}[t]{\linewidth}
-    \centering
-    \vspace{5mm}
+	\hfil
+    \begin{subtable}[t]{0.45\linewidth}
     \caption{1 label per image}
         \begin{tabular}{lcc}
         \hline
@@ -414,19 +573,7 @@ We next study the robustness of our method against the generalized EM and MBEM t
 	\label{fig:robustness_to_hyperparams}
 \end{figure}
 
-\begin{figure}[ht]
-    \vspace{-1mm}
-	\begin{center}
-		%\framebox[4.0in]{$\;$}
-		\includegraphics[width=\linewidth]{chapter_4/figures/figures_new/figure_6.png}
-	\end{center}
- 	\vspace{-7mm}
 
-	\caption{\small Classification accuracy on MNIST of different noise-robust models as a function of the mean annotator skill level $p$ in two cases. Here, for each mean skill-level $p$, a group of $5$ ``pairwise flippers" is formed and used to generate labels. (a). each example receives labels from all the annotators. (b). each example is labelled by only 1 randomly selected annotator. }
-	\label{fig:accuracy_vs_noise_levels}
-	\vspace{-4mm}
-
-\end{figure}
 
 
 % \textbf{Datasets}: MNIST/CIFAR10 \& COCO(?) with simulated annnotator noise.
@@ -455,77 +602,87 @@ We next study the robustness of our method against the generalized EM and MBEM t
 % \end{figure*}
 
 
-\label{sec:us_experiments}
-\begin{figure}[h]
-% 	
-	\center
-	\begin{subfigure}[]{\linewidth}
-		\caption{Different classes of cardiac views}
-    	\vspace{-3mm}	
-		\includegraphics[width=\linewidth]{chapter_4/figures/figure_cardiac_views_02.png}
-	\end{subfigure}
-	\hspace{30mm}
-	\hfill
-	\begin{subfigure}[]{0.45\linewidth}
-    	\vspace{3mm}
-		\caption{Skill estimation}
-    	\vspace{-3mm}		
-		\includegraphics[width=0.9\linewidth]{chapter_4/figures/figure_real_us_annotator_clustering_03.png}
-	\end{subfigure}
-	\hspace{0mm}
-	\begin{subfigure}[]{0.75\linewidth}
-    	\vspace{3mm}
-		 \caption{Learned CMs}
-    	\vspace{-3mm}
-		\includegraphics[width=\linewidth]{chapter_4/figures/figure_real_us_cms_visualization_02.png}
-	\end{subfigure}
-
-	\begin{subfigure}[]{0.55\linewidth}
-		\vspace{3mm}
-	    \caption{Performance comparison}
-	    \begin{tabular}{|c|c c|} 
-             \hline
-             Method & Accuracy & CM error \\ 
-             \hline
-             Ours & $\bf{75.57\pm 0.16}$ &  $\bf{11.48 \pm 0.48}$ \\ 
-             w/o trace norm & $70.99 \pm 3.31$ & $15.22 \pm0.94$  \\ 
-             MBEM \cite{khetan2017learning} & $73.91\pm 0.11$ & $12.18\pm0.29$ \\ 
-            %  EM \cite{raykar2009supervised} & x & x \\ 
-             WDN \cite{guan2017said} & $59.15 \pm 1.60$ & - \\ 
-             Single-CM \cite{sukhbaatar2014training} & $74.38\pm0.29$ & - \\ 
-             Soft-bootstrap \cite{reed2014training} & $72.99\pm 0.17$ & - \\ 
-             Vanilla CNN & $70.95\pm 0.44$ & -\\ 
-             \hline
-        \end{tabular}
-        
-	\end{subfigure}
-	\caption{\small Results on the cardiac view classification dataset: (a) illustrates examples of different cardiac view images. (b) plots the estimated skill level of each annotator (average of the diagonal elements of its estimated CM)  against the ground truth (c) compares the estimated CMs of the two least skilled and two most skilled annotators according the GT labels (d) summarizes the classification accuracy and error of CM estimation for different methods. }
-	\label{fig:us_experiments}
-\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Value of Modelling Individual Annotators}
 
+\begin{figure}[ht!]
+	\begin{center}
+		%\framebox[4.0in]{$\;$}
+		\includegraphics[width=0.8\linewidth]{chapter_4/figures/figures_new/figure_6.png}
+	\end{center}
+	\begin{center}
+		%\framebox[4.0in]{$\;$}
+		\includegraphics[width=0.8\linewidth]{chapter_4/figures/figures_new/figure_03.png}
+	\end{center}
+	\vspace{-2mm}
+	
+	\caption{\small Classification accuracy on MNIST of different noise-robust models as a function of the mean annotator skill level $p$ in two cases. (Top row): For each mean skill-level $p$, a group of $5$ ``pairwise flippers" is formed and used to generate labels. (a). each example receives labels from all the annotators. (b). each example is labelled by only 1 randomly selected annotator. (Bottom row): the equivalent results for a group of $5$ ``hammer-spammers" with varying mean skill-levels are presented. }
+	\label{fig:accuracy_vs_noise_levels}
+	\vspace{-4mm}
+\end{figure}
+
 \label{sec:other_baselines}
 Now, we compare the performance of our method against the prior work that aim to improve robustness to noisy labels without explicitly modelling the individual annotators. The first baseline is the vanilla classifier trained on the majority vote labels. We also compare against the noise robust approaches proposed in \cite{reed2014training} and \cite{sukhbaatar2014training}. Reed \textit{et al.} \cite{reed2014training} adds to the cross-entropy loss a label consistency term based on the negative entropy of the softmax outputs, and we used the default hyper-parameter $\beta = 0.95$ for comparison. Sukhbaatar \textit{et al.} \cite{sukhbaatar2014training} explicitly accounts for the label noise with a single CM, but does not model individual annotators. We add the trace-norm of the same scaling used in our method ($\lambda=0.01$) to the loss function for training. We also include Weighted Doctor Net architecture (WDN) \cite{guan2017said} in the comparison, a recent method that models the annotators individually and then learns averaging weights for combining them. It should be noted that this model considers a different observation model of the labels and does not explicitly model the true label distribution. When we have access to multiple labels per example, with the exception of WDN, we aggregated the labels by computing the majority vote and trained all models. This is because we observed a consistent improvement on validation accuracy (thus poses a tougher challenge against our method) and this would be a more realistic utilization of such data set. For both MNIST and CIFAR-10 experiments, we test on the same set of simulated labels as used in Sec.~\ref{sec:comparison_with_em}. 
 
-
-Fig.~\ref{fig:accuracy_vs_noise_levels} shows better or comparable classification accuracy than all the baselines when the diagonal dominance of the mean CM holds. In particular, our methods show significant improvement when the mean skill level of the annotators are relatively low (e.g. $p=0.3$ and $0.35$). The results are pronounced in the case with only one label available per image for which the baseline methods undergo a steep drop in accuracy (see Fig.~\ref{fig:accuracy_vs_noise_levels}(b)). Results in the ``spammer-hammer" case are available in the supplementary material. Similarly on CIFAR-10 data set, Tab.~\ref{tab:cifar10} shows that our method improves the classification accuracy upon the baselines. Such improvement is pronounced in the case of sparse labels. On the other hand, a vanilla CNN with only L2 weight decay overfits to the training data very quickly in the presence of such high noise. 
-
+Fig.~\ref{fig:accuracy_vs_noise_levels} shows better or comparable classification accuracy than all the baselines when the diagonal dominance of the mean CM holds. In particular, our methods show significant improvement when the mean skill level of the annotators are relatively low (e.g. $p=0.3$ and $0.35$). The results are pronounced in the case with only one label available per image for which the baseline methods undergo a steep drop in accuracy (see Fig.~\ref{fig:accuracy_vs_noise_levels}(b)). Similarly on CIFAR-10 data set, Tab.~\ref{tab:cifar10} shows that our method improves the classification accuracy upon the baselines. Such improvement is pronounced in the case of sparse labels. On the other hand, a vanilla CNN with only L2 weight decay overfits to the training data very quickly in the presence of such high noise. 
 
 
+\newpage
 
-% \textbf{Experiments}: \begin{enumerate}
-% 	\item (MNIST: 70\% done, CIFAR10: 0\%, COCO: 0\%): \textbf{Comparison of classification performance against other robust noise methods which don't model annotators;  \cite{guan2017said}, \cite{sukhbaatar2014training}, \cite{reed2014training}, naive CNN.} Test in two different types of annotator groups; (i) random flips (each annotator corrupts labels randomly) \& (ii) pairwise flips (each annotator flips the label to another chosen class). See Fig. \ref{fig:accuracy_vs_noise_levels}.  \textcolor{red}{TODO: (a) need to implement and include \cite{reed2014training,khetan2017learning}, (b) repeat the experiment with 1 label per image. }
-% \end{enumerate}
-
-\vspace{-2mm}
 \subsection{Experiments on Cardiac View Classification}
-\vspace{-2mm}
-
 Lastly, we illustrate the results of our approach for a real data set with sparse and noisy labels from the medical domain. This data set consists of images of the cardiac region in different views, acquired using a hand-held ultrasound probe. The task is to classify a given ultrasound image into one of six different view classes (see Fig.~\ref{fig:us_experiments}(a)). The process of obtaining a cardiac view label is crucial for guiding the user to the correct locations of measurements, and affects the quality of the downstream cardiac tasks. 
 %$\{A2C, A3C, A4C, A5C, PSAX, PLAX\}$
+
+\label{sec:us_experiments}
+\begin{figure}[h]
+	% 	
+	\center
+	\begin{subfigure}[]{\linewidth}
+		\caption{Different classes of cardiac views}
+		\vspace{-3mm}	
+		\includegraphics[width=\linewidth]{chapter_4/figures/figure_cardiac_views_02.png}
+	\end{subfigure}
+	\hspace{30mm}
+	\hfill
+	\begin{subfigure}[]{0.45\linewidth}
+		\vspace{3mm}
+		\caption{Skill estimation}
+		\vspace{-3mm}		
+		\includegraphics[width=0.9\linewidth]{chapter_4/figures/figure_real_us_annotator_clustering_03.png}
+	\end{subfigure}
+	\hspace{0mm}
+	\begin{subfigure}[]{0.75\linewidth}
+		\vspace{3mm}
+		\caption{Learned CMs}
+		\vspace{-3mm}
+		\includegraphics[width=\linewidth]{chapter_4/figures/figure_real_us_cms_visualization_02.png}
+	\end{subfigure}
+	
+	\begin{subfigure}[]{0.55\linewidth}
+		\vspace{3mm}
+		\caption{Performance comparison}
+		\begin{tabular}{|c|c c|} 
+			\hline
+			Method & Accuracy & CM error \\ 
+			\hline
+			Ours & $\bf{75.57\pm 0.16}$ &  $\bf{11.48 \pm 0.48}$ \\ 
+			w/o trace norm & $70.99 \pm 3.31$ & $15.22 \pm0.94$  \\ 
+			MBEM \cite{khetan2017learning} & $73.91\pm 0.11$ & $12.18\pm0.29$ \\ 
+			%  EM \cite{raykar2009supervised} & x & x \\ 
+			WDN \cite{guan2017said} & $59.15 \pm 1.60$ & - \\ 
+			Single-CM \cite{sukhbaatar2014training} & $74.38\pm0.29$ & - \\ 
+			Soft-bootstrap \cite{reed2014training} & $72.99\pm 0.17$ & - \\ 
+			Vanilla CNN & $70.95\pm 0.44$ & -\\ 
+			\hline
+		\end{tabular}
+		
+	\end{subfigure}
+	\caption{\small Results on the cardiac view classification dataset: (a) illustrates examples of different cardiac view images. (b) plots the estimated skill level of each annotator (average of the diagonal elements of its estimated CM)  against the ground truth (c) compares the estimated CMs of the two least skilled and two most skilled annotators according the GT labels (d) summarizes the classification accuracy and error of CM estimation for different methods. }
+	\label{fig:us_experiments}
+\end{figure}
+
 
 A committee of sonographers (with varying levels of experience) were tasked with providing the cardiac view labels to a large volume of ultra-sound images, and each example is only labelled by a subset of them. To acquire ground truth in this setting, we chose those samples where the three most experienced sonographers agreed on a given label. The resulting data set consists of noisy labels provided by the remaining less experienced $6$ sonographers for a total of $240,000$ training images and $22,000$ validation images. In addition, we also acquired labels from two non-expert users and included in the training data. 
 
@@ -535,247 +692,22 @@ We estimated the skill-level of each annotator by computing the average value of
 
 % (previous version)
 % For each image, a committee of trained sonographers (with varying levels of experience) were tasked with providing the cardiac view label. To acquire ground truth in this setting, we chose those samples where the more experienced sonographers agreed on a given label. The resulting dataset consisted of noisy labels provided by the other six sonographers for a total of 240000 training images and 22000 validation images. In addition to the labels from sonographers, we also acquired labels from two non-expert users that are both noisy and sparse i.e. they label only a subset of the six classes. The experiments performed in this section illustrate how our model can both achieve better accuracy and can recover individual annotator CMs. 
-\vspace{-2mm}
+
 \section{Discussion and Conclusion}
-\vspace{-2mm}
 
 We introduced a new theoretically grounded algorithm for simultaneously recovering the label noise of multiple annotators and the ground truth label distribution. Our method enjoys implementation simplicity, requiring only adding a regularization term to the loss function. Experiments on both synthetic and real data sets have shown superior performance over the common EM-based methods in terms of both classification accuracy and the quality of confusion matrix estimation. Comparison against the other modern noise-robust methods demonstrates that the modelling individual annotators improves robustness to label noise. Furthermore, the method is capable of estimating annotation noise even when there is a single label per image. 
 
-Our work was primarily motivated by medical imaging applications for which the number of classes are mostly limited to below 10. However, future work shall consider imposing structures on the confusion matrices to broaden up the applicability to massively multi-class scenarios e.g. introducing taxonomy based sparsity \cite{van2018lean} and low-rank approximation. We also assumed that there is only one ground truth for each input; this no longer holds true when the input images are truly ambiguous---recent advances in modelling multi-modality of label distributions \cite{saeedi2017multimodal,kohl2018probabilistic} potentially facilitate relaxation of such assumption. Another limiting assumption is the image independence of the annotator's label noise. The majority of disagreement between annotators arise in the difficult cases. Integrating such input dependence of label noise \cite{yan2010modeling,xiao2015learning} is also a valuable next step.
+There are many exciting avenues of future research. Our work was primarily motivated by medical imaging applications for which the number of classes are mostly limited to below 10. However, future work shall consider imposing structures on the confusion matrices to broaden up the applicability to massively multi-class scenarios e.g. introducing taxonomy based sparsity \cite{van2018lean} and low-rank approximation. 
+
+We also assumed that there is only one ground truth for each input; this no longer holds true when the input images are truly ambiguous---recent advances in modelling multi-modality of label distributions \cite{saeedi2017multimodal,kohl2018probabilistic} potentially facilitate relaxation of such assumption. Another limiting assumption is the image independence of the annotator's label noise. The majority of disagreement between annotators arise in the difficult cases. Integrating such input dependence of label noise \cite{yan2010modeling,xiao2015learning} is also a valuable next step.
+
+Another simplification to note is that the annotators are assumed statistically independent. In many data collection processes, such assumption is not realistic (e.g., communication between experts may be encouraged to improve the quality of labels). Recently, Yuan et al., \cite{li2019exploiting} showed that modelling annotator correlations,  improves accuracy in high-noise crowdsourcing applications. Our model would certainly benefit from such approach but efficient training and inference schemes need to be considered. 
+
+Lastly, we are also interested in incorporating our approach into active learning schemes, where the current knowledge of the confusion matrices may be used to decide, not only which examples to annotate, but which annotator to route them to. Similarly, such information about annotators' characteristics could be potentially used for further education of less experienced annotators. We believe such applications of the human uncertainty modelling have utility in designing a more efficient data collection pipeline. 
+
+%\textcolor{red}{Other important future directions: (1) integrating uncertainty of human annotators into an active learning framework, (2) assuming the annotators are independent, (3) other tasks? 
+%}
 
 % In this work, we have made assumptions about the annotator noise models. Firstly, we assumed that the label noise of each annotator is independent of the input image. Secondly, the annotators were assumed to be independent. Thirdly, we assumed that there is only ground truth for a given input, which is certainly not true. 
 
 % Future work shall improve the estimation phase by incor- porating priors of the noise structure, for example assuming low rank T . Improvements on this direction may also widen the applicability to massively multi-class scenarios. It remains an open question whether instance-dependent noise may be included into our approach [42, 25]. Finally, we anticipate the use of our approach as a tool for pre-training models with noisy data from the Web, in the spirit of [17].
-
-
-%
-%
-%\appendix
-%\section{Data sets, training and architectures}
-%\textbf{Data sets. } In this work, we verified our method on three classification datasets: MNIST digit classification dataset \cite{lecun1998gradient}; CIFAR-10 object recognition dataset \cite{krizhevsky2009learning}; the cardiac view classification (CVC) dataset from a handheld ultra-sound probe. The MNIST dataset consists of $60,000$ training and $10,000$ testing examples, all of which are $28\times28$ grayscale images of digits from $0$ to $9$. The CIFAR-10 dataset consists of $50,000$ training and $10,000$ testing examples, all of which are $32\times32$ coloured natural images drawn from $10$ classes. The CVC data set contains $26,2000$ training and $20,000$ test examples, which are grayscale images of size $96\times96$ from $6$ different cardiac views. Each image is labelled by a subset of $8$ annotators ($6$ sonographers and $2$ non-experts).  
-%\\ \\
-%\textbf{Training. } For all experiments, we employ the same training scheme unless otherwise stated. We optimize parameters using Adam \cite{kingma2014adam} with initial learning rate of $10^{-3}$ and $\beta = [0.9, 0.999]$, with minibatches of size $50$ and train for $200$ epochs. For our method, we set the scale of the trace regularization to $\lambda=0.01$. For the training of the EM-based approaches (Model-Bootstrapped EM \cite{khetan2017learning} and generalized EM \cite{raykar2009supervised}), we train the base classifier for $200$ epochs in total over the course of the EM steps, following the same protocol above. For CIFAR-10, we performed two iterations of EM algorithm ($T=2$) and $100$ epochs worth of gradient descent steps during each E-step to update the parameters of the base classifier ($G=100$ epochs), following the original implementation in \cite{khetan2017learning}. For the experiments on the CVC data set, we run more rounds of EM with $T=10$ and $G=20 $ epochs. In all cases, we hold out $10\%$ of training images as a validation set and best model is selected based on the validation accuracy over the course of training. No data augmentation is performed during training in all three data sets. We note that for CIFAR-10, we, in addition, decreased the learning rate by a factor of $10$ at every multiple of $50$ in a similar fashion to the schedule used in \cite{Huang2017LearningDR,he2016deep,springenberg2014striving}.
-%\\ \\
-%\textbf{Architectures. } For MNIST, the base classifier was defined as a CNN architecture comprised of $4$ convolution layers, each with $3\times3$ kernels follower by Relu. The number of kerners in respective layers are $\{32, 32, 64, 64\}$. After the first two convolution layers, we perform $2\times2$ max-pooling, and after the last one, we further down-sample the features with Global Average Pooling (GAP) prior to the final fully connected layer. For the CVC dataset, we employed the same architecture, but with increased number of kernels i.e. $\{128, 128, 128, 128\}$. For CIFAR-10, we used a 50-layer ResNet \cite{he2016deep}.
-%
-%%%%%%%%%%%%%%%%
-%\section{Confusion matrices of \textit{pairwise-flippers} and \textit{hammer-spammers}}
-%For MNIST experiments, we considered two different models of annotator types: (i) \textit{pairwise-flipper} and (ii) \textit{hammer-spammer}. Example confusion matrices for both cases are shown in Fig.~\ref{fig:annotator_groups}.
-%For each annotator type and skill level $p$, we create a group of $5$ annotators by generating confusion matrices (CMs) from the associated distribution. More specifically, each CM is generated by perturbing the mean skill level $p$ by injecting a small Gaussian noise $\epsilon \sim \text{Normal}(0, 0.01)$ and choosing the flipping target class randomly in the case of a \textit{pairwise-flipper}. 
-%
-%% For each annotator, we perturb the mean skill level by injecting a small Gaussian noise and chooses the flipping target class randomly in the case of a \textit{pairwise-flipper}. \textcolor{red}{More details and a set of example CMs for both cases are given in the supplementary material.} Given the ground truth class labels, we synthesize noisy labels from each annotator according to its CM, and use them as the training data to learn the CM model eq.~\ref{eq:model_likelihood}. It should be noted that in all cases the algorithms have only access to the noisy labels and the identity of annotators that generate them i.e. which expert produced which label, but not the CMs. 
-%
-%\begin{figure}[ht]
-%\center
-%    % \vspace{-5mm}
-%    \begin{subfigure}[]{1.0\linewidth}
-%        \caption{Pairwise-flippers with mean skill-level $p=0.3$}
-%		\includegraphics[width=\linewidth]{figures/pairwise_flipper_example.png}
-%	\end{subfigure}
-%	\begin{subfigure}[]{1.0\linewidth}
-%		\caption{Spammer-hammers skill-level $p=0.5$}
-%		\includegraphics[width=\linewidth]{figures/hammer_spammer_example.png}
-%	\end{subfigure}
-%	\vspace{-2mm}
-%	\caption{Examples of annotator groups. The value of diagonal entries are fixed constant for each annotator and is drawn from $\text{Normal}(p, 10^{-2})$.}
-%	\label{fig:annotator_groups}
-%% 	\vspace{-5mm}
-%	
-%\end{figure}
-%
-%%%%%%%%%%%%%%%%
-%% \vspace{-5mm}
-%\section{Additional experiments on MNIST}
-%We present results of experiments on MNIST where models are trained on noisy labels from groups of 5 ``hammer-spammers" for a range of mean skil level $p$. Fig.~\ref{fig:random_flips} shows a comparison of our method against other EM-based approaches, while Fig.~\ref{fig:accuracy_vs_noise_levels} compares our method against other noise-robust methods without explicit modelling of individual annotators. Our method consistently achieves comparable or better accuracy with respect to the baselines. 
-%
-%\begin{figure}[ht]
-%	\center
-%	\vspace{-2mm}
-%	\hfill
-%	\begin{subfigure}[]{1.0\linewidth}
-%		\includegraphics[width=\linewidth]{figures/figures_new/figure_01.png}
-%	\end{subfigure}
-%	\begin{subfigure}[]{1.0\linewidth}
-%		\includegraphics[width=\linewidth]{figures/figures_new/figure_02.png}
-%	\end{subfigure}
-%	\vspace{-2mm}
-%	\caption{Comparison between our method, generalized EM, MBEM trained on noisy labels on MNIST from ``hammer-spammers" for a range of mean skill level $p$. (a), (b) show classification accuracy in two cases, one where all annotators label each example and the other where only one label is available per example. (c), (d) quantify the CM recovery error. The shaded areas represent the cases where the average CM over the annotators are not diagonally dominant. }
-%	\label{fig:random_flips}
-%	\vspace{-2mm}
-%\end{figure}
-%
-%\begin{figure}[ht]
-%	\begin{center}
-%		%\framebox[4.0in]{$\;$}
-%		\includegraphics[width=1.0\linewidth]{figures/figures_new/figure_03.png}
-%	\end{center}
-%% 	\vspace{-5mm}
-%    \caption{Classification accuracy on MNIST of different noise-robust models as a function of the mean annotator skill level $p$ in two cases. Here, for each mean skill-level $p$, a group of $5$ ``pairwise flippers" is formed and used to generate labels. (a). each example receives labels from all the annotators. (b). each example is labelled by only 1 randomly selected annotator. }
-%	\label{fig:accuracy_vs_noise_levels}
-%	\vspace{-5mm}
-%\end{figure}
-%
-%\section{Ablation study on trace regularization on MNIST}
-%We compare our method on MNIST against the case where the trace norm regularization is removed (results on CIFAR-10 and CVC datasets are given in the main text). Fig.~\ref{fig:ablation_trace} shows that adding the trace norm generally improves the performance in terms of both classification accuracy and CM estimation error, and such improvement is pronounced in the presence of larger noise i.e. lower skill levels of annotators. We also observe that when the noise level is low, our model still attains very high accuracy even without trace norm regularization. This can be explained by the natural robustness of the CNN classifier; if the amount of label noise is sufficiently small, the base classifier is still capable of learning the true label distribution well. This, in turn, allows the model to separate annotation noise from true label distribution, improving the quality of CM estimation and thus the overall performance. However, in the presence of large label noise, having trace-norm regularization shows evident benefits. 
-%
-%\begin{figure}[ht]
-%	\center
-%% 	\vspace{-2mm}
-%	\hfill
-%	\begin{subfigure}[]{1.0\linewidth}
-%		\includegraphics[width=\linewidth]{figures/figures_new/figure_04.png}
-%	\end{subfigure}
-%	\hfill
-%	\begin{subfigure}[]{1.0\linewidth}
-%		\includegraphics[width=\linewidth]{figures/figures_new/figure_05.png}
-%	\end{subfigure}
-%
-%	\caption{Comparison between our method with and without trace norm  on MNIST. Results for two annotator groups, consisting of ``hammer-spammers" and "pairwise-flippers" are shown for a range of mean skill level $p$.  }
-%	\label{fig:ablation_trace}
-%% 	\vspace{-2mm}
-%\end{figure}
-%
-%%%%%%%%%%%%%%%%
-%\section{Pseudo-codes of our method, generalized EM and MBEM}
-%% \vspace{-3mm}
-%Here we provide pseudo-codes of our method (Algorithm 1), generalized EM \cite{raykar2009supervised} (Algorithm 2) and model-bootstrapped EM \cite{khetan2017learning} (Algorithm 3) to clarify the differences between different methods for jointly learning the true label distribution and confusion matrices of annotators in eq.~2 in the main text. Given the training set $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$, each example may not be labelled by all the annotators. In such cases, for ease of notation, we assign pseudo class $\tilde{y}^{(r)}_{n}=-1$ to fill the missing labels. The comparison between these three algorithms illustrates the implementational simplicity of our method, despite the comparable or superior performance demonstrated on all three datasets. 
-%
-%\begin{algorithm*}
-%	\caption{Our method}
-%	\label{alg:ourmethod}
-%	\footnotesize
-%	\begin{algorithmic}
-%		%\Require Topology $\mathbb{T}$, parameters $\theta$
-%		\State \textbf{Inputs}: $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$,
-%$\lambda:$ scale of trace regularizer
-%		\State \textbf{Initialize the confusion matrices $\{\hat{\mathbf{A}}^{(r)}\}_{r=1}^{R}$ to identity matrices}
-%		\State \textbf{Initialize the parameters of the base classifier $\theta$}
-%		\State \textbf{Learn $\theta$ and $\{\hat{\mathbf{A}}^{(r)}\}_{r=1}^{R}$ by performing minibatch SGD on the combined loss}:
-%		\vspace{-2mm}
-%		$$\theta, \{\hat{\mathbf{A}}^{(r)}\}_{r=1}^{R} \longleftarrow \text{argmin}_{\theta, \{\hat{\mathbf{A}}^{(r)}\}} \Big{[}\sum_{i=1}^{N}\sum_{r=1}^{R} \mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot \text{CE}(\hat{\mathbf{A}}^{(r)}\hat{\textbf{p}}_{\theta}(\mathbf{x}_i), \tilde{y}^{(r)}_{i})  + \lambda \sum_{r=1}^{R}\text{tr}(\hat{\textbf{A}}^{(r)}) \Big{]}$$ 
-%	    \vspace{-3mm}
-%		\State \textbf{Return:   } $\hat{\mathbf{p}}_{\theta}$ and $\{\hat{\mathbf{A}}^{(r)}\}_{r=1}^R$
-%	\end{algorithmic}
-%\end{algorithm*}
-%\vspace{-5mm}
-%\begin{algorithm*}
-%	\caption{Generalized EM \cite{raykar2009supervised}}
-%	\label{alg:generalised_em}
-%	\footnotesize
-%	\begin{algorithmic}
-%		%\Require Topology $\mathbb{T}$, parameters $\theta$
-%		\State \textbf{Inputs}: $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$,
-%$T:$ \# EM steps, $G:$ \# SGD in each M-step
-%		
-%		\State \textbf{Initialize posterior distribution by the mean labels}: for $j=1,..., L, n=1,...,N$
-%		\vspace{-2mm}
-%			$$q_{nj} ^{(0)}: = p(y_{n}=j|\textbf{x}_{n}, \{\tilde{y}^{(r)}_{n}\}_r, \theta^{(0)}) \longleftarrow R^{-1}\sum_{r=1}^R \mathbbm{1}(\tilde{y}_{i}^{(r)}=j) $$
-%		\vspace{-3mm}
-%		
-%		\State \textbf{Initialize the parameters of the base classifier $\theta$}
-%		\State \textbf{Repeat $T$ times:}
-%		\State $\,\,\,\,\,\,\,\,$ \textbf{M-step for $\theta$}. Learn the base classifier  $\hat{\mathbf{p}}_{\theta}$ by performing minibatch SGD for $G$ iterations 
-%		\vspace{-2mm}
-%		$$\theta^{(t+1)} \longleftarrow \text{argmin}_{\theta}\Big{[}-\sum_{n=1}^{N}\sum_{l=1}^{L}q_{nj} ^{(t)}\cdot \text{log } p(y_{n}=l|\mathbf{x}_{n}, \theta) \Big{]}$$ 
-%	    \vspace{-3mm}
-%	    
-%		\State $\,\,\,\,\,\,\,\,$ \textbf{M-step for $\{\hat{\mathbf{A}}^{(r)}\}_{r=1}^{R}$}. Estimate the confusion matrices 
-%		\vspace{-2mm}
-%		$$\hat{a}_{ji}^{(r),t+1} \longleftarrow \frac{\sum_{n=1}^{N}\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot \mathbbm{1}(\tilde{y}^{(r)}_{n}=i)\cdot q_{nj} ^{(t)}}{\sum_{n=1}^{N} \mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot q_{nj} ^{(t)}}$$ 
-%		\vspace{-3mm}
-%		\State $\,\,\,\,\,\,\,\,$  \textbf{E-step}. Estimate the posterior label distribution
-%		\vspace{-2mm}
-%		$$q_{nj} ^{(t+1)} \longleftarrow \frac{ p(y_{n}=j|\mathbf{x}_{n}, \theta^{(t+1)})\cdot\prod_{r=1}^{R}\big{(}\hat{a}^{(r),t+1}_{j\tilde{y}^{(r)}_{n}}\big{)}^{\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)}}{\sum_{l=1}^L p(y_{n}=l|\mathbf{x}_{n}, \theta^{(t+1)})\cdot\prod_{r=1}^{R}\big{(}\hat{a}^{(r),t+1}_{l\tilde{y}^{(r)}_{n}}\big{)}^{\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)}}$$
-%        \vspace{-3mm}
-%		\State \textbf{Return:   } $\hat{\mathbf{p}}_{\theta^{(T)}}$ and $\{\hat{\mathbf{A}}^{(r),T}\}_{r=1}^R$
-%	\end{algorithmic}
-%\end{algorithm*}
-%\vspace{-5mm}
-%\begin{algorithm*}
-%	\caption{Model-Bootstrapped EM \cite{khetan2017learning}}
-%	\label{alg:generalised_em}
-%	\footnotesize
-%	\begin{algorithmic}
-%		%\Require Topology $\mathbb{T}$, parameters $\theta$
-%		\State \textbf{Inputs}: $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$,
-%$T:$ \# EM steps, $G:$ \# SGD in each M-step
-%		
-%		\State \textbf{Initialize posterior distribution by the mean labels}: for $j=1,..., L, n=1,...,N$
-%		\vspace{-2mm}
-%			$$q_{nj} ^{(0)}: = p(y_{n}=j|\textbf{x}_{n}, \{\tilde{y}^{(r)}_{n}\}_r, \theta^{(0)}) \longleftarrow R^{-1}\sum_{r=1}^R \mathbbm{1}(\tilde{y}_{i}^{(r)}=j) $$
-%		\vspace{-3mm}
-%		\State \textbf{Initialize the parameters of the base classifier $\theta$}
-%		\State \textbf{Repeat $T$ times:}
-%		\State $\,\,\,\,\,\,\,\,$ \textbf{M-step for $\theta$}. Learn the base classifier  $\hat{\mathbf{p}}_{\theta}$ by performing minibatch SGD for $G$ iterations 
-%		\vspace{-2mm}
-%		$$\theta^{(t+1)} \longleftarrow \text{argmin}_{\theta}\Big{[}-\sum_{n=1}^{N}\sum_{l=1}^{L}q_{nj} ^{(t)}\cdot \text{log } p(y_{n}=l|\mathbf{x}_{n}, \theta)\Big{]}$$ 
-%	    \vspace{-3mm}
-%	    \State $\,\,\,\,\,\,\,\,$ \textbf{Predict on training examples.} for $n=1,...,N$:
-%	    \vspace{-2mm}
-%	    $$c_{n} \longleftarrow \text{argmax}_{l\in\{1,...,L\}}\text{ }p(y_{n}=l|\mathbf{x}_{n}, \theta^{(t+1)}) $$
-%	    \vspace{-3mm}
-%		\State $\,\,\,\,\,\,\,\,$ \textbf{M-step for $\{\hat{\mathbf{A}}^{(r)}\}_{r=1}^{R}$}. Estimate the confusion matrices. For $i,j=1,...,L$ and $r=1,...,R$:
-%		\vspace{-2mm}
-%		$$\hat{a}_{ji}^{(r),t+1} \longleftarrow \frac{\sum_{n=1}^{N}\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot \mathbbm{1}(\tilde{y}^{(r)}_{n}=i)\cdot \mathbbm{1}(c_{n}=j)}{\sum_{n=1}^{N} \mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot \mathbbm{1}(c_{n}=j)}$$ 
-%		\vspace{-3mm}
-%		 \State $\,\,\,\,\,\,\,\,$ \textbf{Update prior label distribution.} for $l=1,...,L$:
-%	    \vspace{-3mm}
-%	    $$p_{l} \longleftarrow N^{-1}\sum_{n=1}^N \mathbbm{1}(c_{n}=l) $$
-%	    \vspace{-3mm}
-%		\State $\,\,\,\,\,\,\,\,$  \textbf{E-step}. Estimate the posterior label distribution
-%		\vspace{-2mm}
-%		$$q_{nj} ^{(t+1)} \longleftarrow \frac{p_{j}\cdot\prod_{r=1}^{R}\big{(}\hat{a}^{(r),t+1}_{j\tilde{y}^{(r)}_{n}}\big{)}^{\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)}}{\sum_{l=1}^L p_{l}\cdot\prod_{r=1}^{R}\big{(}\hat{a}^{(r),t+1}_{l\tilde{y}^{(r)}_{n}}\big{)}^{\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)}}$$
-%        \vspace{-3mm}
-%		\State \textbf{Return:   } $\hat{\mathbf{p}}_{\theta^{(T)}}$ and $\{\hat{\mathbf{A}}^{(r),T}\}_{r=1}^R$
-%	\end{algorithmic}
-%\end{algorithm*}
-%% \begin{algorithm}
-%% 	\caption{Model-Bootstrapped EM \cite{khetan2017learning}}
-%% 	\label{alg:generalised_em}
-%% 	\scriptsize
-%% 	\begin{algorithmic}
-%% 		%\Require Topology $\mathbb{T}$, parameters $\theta$
-%% 		\State \textbf{Inputs}: $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$,
-%% $T:$ \# EM steps, $G:$ \# SGD in each M-step
-%		
-%% 		\State \textbf{Initialize posterior distribution by the mean labels}: for $j=1,..., L, n=1,...,N$
-%% 		\vspace{-2mm}
-%% 			$$q_{nj} ^{(0)}: = p(y_{n}=j|\textbf{x}_{n}, \{\tilde{y}^{(r)}_{n}\}_r, \theta^{(0)}) \longleftarrow R^{-1}\sum_{r=1}^R \mathbbm{1}(\tilde{y}_{i}^{(r)}=j) $$
-%% 		\vspace{-3mm}
-%% 		\State \textbf{Initialize the parameters of the base classifier $\theta$}
-%% 		\State \textbf{Repeat $T$ times:}
-%% 		\State $\,\,\,\,\,\,\,\,$ \textbf{M-step for $\theta$}. Learn the base classifier  $\hat{\mathbf{p}}_{\theta}$ by performing minibatch SGD for $G$ iterations 
-%% 		\vspace{-2mm}
-%% 		$$\theta^{(t+1)} \longleftarrow \text{argmin}_{\theta}\Big{[}-\sum_{n=1}^{N}\sum_{l=1}^{L}q_{nj} ^{(t)}\cdot \text{log } p(y_{n}=l|\mathbf{x}_{n}, \theta)\Big{]}$$ 
-%% 	    \vspace{-3mm}
-%% 	    \State $\,\,\,\,\,\,\,\,$ \textbf{Predict on training examples.} for $n=1,...,N$:
-%% 	    \vspace{-2mm}
-%% 	    $$c_{n} \longleftarrow \text{argmax}_{l\in\{1,...,L\}}\text{ }p(y_{n}=l|\mathbf{x}_{n}, \theta^{(t+1)}) $$
-%% 	    \vspace{-3mm}
-%% 		\State $\,\,\,\,\,\,\,\,$ \textbf{M-step for $\{\hat{\mathbf{A}}^{(r)}}\}_{r=1}^{R}$}. Estimate the confusion matrices 
-%% 		\vspace{-2mm}
-%% 		$$\hat{a}_{ji}^{(r),t+1} \longleftarrow \frac{\sum_{n=1}^{N}\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot \mathbbm{1}(\tilde{y}^{(r)}_{n}=i)\cdot \mathbbm{1}(c_{n}=j)}{\sum_{n=1}^{N} \mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)\cdot \mathbbm{1}(c_{n}=j)}$$ 
-%% 		\vspace{-3mm}
-%		
-%% 		\State $\,\,\,\,\,\,\,\,$  \textbf{E-step}. Estimate the posterior label distribution
-%% 		\vspace{-2mm}
-%% 		$$q_{nj} ^{(t+1)} \longleftarrow \frac{ p(y_{n}=j|\mathbf{x}_{n}, \theta^{(t+1)})\cdot\prod_{r=1}^{R}\big{(}\hat{a}^{(r),t+1}_{j\tilde{y}^{(r)}_{n}}\big{)}^{\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)}}{\sum_{l=1}^L p(y_{n}=l|\mathbf{x}_{n}, \theta^{(t+1)})\cdot\prod_{r=1}^{R}\big{(}\hat{a}^{(r),t+1}_{l\tilde{y}^{(r)}_{n}}\big{)}^{\mathbbm{1}(\tilde{y}_{i}^{(r)} \neq -1)}}$$
-%%         \vspace{-3mm}
-%% 		\State \textbf{Return:   } $\hat{\mathbf{p}}_{\theta^{(T)}$ and $\{\hat{\mathbf{A}}^{(r),T}}\}_{r=1}^R$
-%% 	\end{algorithmic}
-%% \end{algorithm}
-%\clearpage
-%\newpage
-%\onecolumn
-%\section{TensorFlow codes}
-%\subsection{Probabilistic model and loss function}
-%
-%\lstinputlisting[language=Python, caption={Implementation of the probabilistic model and the proposed loss function given in eq.~\eqref{eq:objective_sparse}. The final loss is minimized to learn jointly the confusion matrices of the respective annotators and the parameters of the classifier. The details of the used functions are given in Sec.~\ref{sec:code_conf_mat} \&~\ref{sec:code_loss}} , label={lst:rectified relu}]{main_code.py}
-%
-%\subsection{Defining confusion matrices of annotators}\label{sec:code_conf_mat}
-%\lstinputlisting[language=Python, caption={The confusion matrices are defined as \texttt{tf.Variable}. The positivity of the elements of confusion matrices is ensured by passing them through a soft-plus function. }, label={lst:rectified relu}]{confmat.py}
-%
-%\newpage
-%\subsection{Cross-entropy loss with sparse and noisy labels}\label{sec:code_loss}
-%\lstinputlisting[language=Python, caption={Implementation of the cross entropy loss function. Here we use zero vectors as the ``one-hot'' representations of missing labels.}, label={lst:rectified relu}]{snippet.py}
-%

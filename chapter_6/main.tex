@@ -1,4 +1,4 @@
-\chapter{Uncertainty in Multitask Learning for MR-only Radiotherapy Planning II: Learning Strucutred Sparsity to Separate Task-specific and Shared Representation}\label{chapter:multitaskuncertainty_part2}
+\chapter{Uncertainty in Multitask Learning for MR-only Radiotherapy Planning (II): Stochastic Filter Groups for Learning Strucutred Sparsity}\label{chapter:multitaskuncertainty_part2}
 
 \paragraph{Abstract:} The performance of multi-task learning in Convolutional Neural Networks (CNNs) hinges on the design of feature sharing between tasks within the architecture. The number of possible sharing patterns are combinatorial in the depth of the network and the number of tasks, and thus hand-crafting an architecture, purely based on the human intuitions of task relationships can be time-consuming and suboptimal. In this chapter, we present a probabilistic approach to learning task-specific and shared representations in CNNs for multi-task learning. Specifically, we propose ``stochastic filter groups'' (SFG), a mechanism to assign convolution kernels in each layer to ``specialist'' or ``generalist'' groups, which are specific to or shared across different tasks, respectively. The SFG modules determine the connectivity between layers and the structures of task-specific and shared representations in the network. We employ variational inference to learn the posterior distribution over the possible grouping of kernels and network parameters. We demonstrate the utility of learning such structured sparsity in the architecture in the context of MR-only radiotherapy planning application (also considered in Chapter~\ref{chapter:multitaskuncertainty_part1}) as well as the age and gender prediction task on the UTKFace dataset \cite{zhifei2017cvpr}. This is based on the joint work \cite{sfg2019} with Felix Bragman. 
 
@@ -263,46 +263,6 @@ We note that the discrete sampling operation during filter group assignment (eq.
 % \end{figure}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\section{Data and implementation details}
-
-\subsection{Optimisation, regularisation and initialisation}
-All networks were trained with ADAM optimiser \cite{ADAM} with an initial learning rate of $10^{-3}$ and $\beta = [0.9, 0.999]$. We used values of $\lambda_1=10^{-6}$ and $\lambda_2=10^{-5}$ for the weight and entropy regularisation factors in Equation $(5)$ in Section $3.2$. All \emph{stochastic filter group} (SFG) modules were initialised with grouping probabilities \textbf{p}=[$0.2$, $0.6$, $0.2$] for every convolution kernel. Positivity of the grouping probabilities $\textbf{p}$ is enforced by passing the output through a \emph{softplus} function $f(x)=\text{ln}(1+e^{x})$ as in \cite{lakshminarayanan2017simple}. The scheduler $\tau = \text{max}(0.10, \exp(-rt))$ recommended in \cite{jang2016categorical} was used to anneal the Gumbel-Softmax temperature $\tau$ where $r$ is the annealing rate and $t$ is the current training iteration. We used $r=10^{-5}$ for our models.
-
-Hyper-parameters for the annealing rate and the entropy regularisation weight were obtained by analysis of the network performance on a secondary randomly split on the UTK dataset ($70/15/15$). They were then applied to all trained models (large and small dataset for UTKFace and medical imaging dataset).
-
-\subsection{UTKFace}
-For training the VGG networks (Section 4.1 - UTKFace network), we used the root-mean-squared-error (RMSE) for age regression and the cross entropy loss for gender classification. The labels for age were divided by $100$ prior to training. The input RGB images ($200$x$200$x$3$) were all normalised channel wise to have unit variance and zero mean prior to training and testing. A batch-size of $10$ was used. No augmentation was applied. We monitored performance during training using the validation set ($n=3554$) and trained up to $330$ epochs. We performed $150$ validation iterations every $1000$ iterations, leading to $1500$ predictions per validation iteration. Performance on the validation set was analysed and the iteration where Mean Absolute Error (MAE) was minimised and classification Accuracy was maximised was chosen for the test set.
-
-\subsection{Medical imaging dataset}
-We used T2-weighted Magnetic Resonance Imaging (MRI) scans (3T, 2D spin echo, TE/TR: 80/2500ms, voxel size 1.46x1.46x5mm$^{3}$) and Computed Tomography (CT) scans (140 kVp, voxel size 0.98x0.98x1.5 mm$^{3}$). The MR and CT scans were resampled to isotropic resolution (1.46mm$^{3}$). We performed intensity non-uniformity correction on the MR scans \cite{Tustison2010}.
-
-In the HighResNet networks (Section 4.1 - Medical imaging network), we used the RMSE loss for the regression task and the Dice + Cross-Entropy loss \cite{dicex} for the segmentation task. The CT scans were normalised using the transformation $\nicefrac{\text{CT}}{1024} + 1$. The original range of the CT voxel intensity was $[-1024,2500]$ with the background set to $-1024$. The input MRI scans were first normalised using histogram normalisation based on the $1^{st}$ and $99^{th}$ percentile \cite{Nyul2000}. The MRI scans were then normalised to zero mean and unit variance. At test time, input MRI scans were normalised using the histogram normalisation transformation obtained from the training set then normalised to have zero mean and unit variance. 
-
-All scans were of size $288$x$288$x$62$. We sub-sampled random patches from random axial slices of size $128$x$128$. We sampled from all axial slices in the volume ($n=62$). We trained up to $200,000$ iterations using a batch-size of $10$. We applied augmentation to the randomly sampled patches using random scaling factors in the range $[-10\%, 10\%]$ and random rotation angles in the range [$-10^\circ$, $10^\circ$]. The trained patches were zero-padded to increase their size to $136$x$136$. However, the loss during training was only calculated in non-padded regions.
-
-The inference iteration for the test set was determined when the performance metrics on the training set (Mean Absolute Error and Accuracy) first started to converge for at least $10,000$ iterations. In our model where the grouping probabilities were learned, the iteration when convergence in the update of the grouping probabilities was first observed was selected since performance generally increased as the grouping probabilities were updated. 
-
-\subsection{Implementation details}
-We used Tensorflow and implemented our models within the NiftyNet framework \cite{Gibson2018}. Models were trained on NVIDIA Titan Xp, P6000 and V100. All networks were trained in the Stochastic Filter Group paradigm. Single-task networks were trained by hard-coding the allocation of kernels to task $1$ and task $2$ i.e. $50$\% of kernels per layer were allocated to task $1$ and $50$\% were allocated to task $2$ with constant probabilities \textbf{p}=[1,0,0] and \textbf{p}=[0,0,1] respectively. The multi-task hard parameter sharing (MT hard-sharing) network was trained by hard-coding the allocation of kernels to the shared group i.e. $100$\% of kernel per layer were allocated to the shared group with constant probability \textbf{p}=[0, 1, 0]. The cross-stitch (CS) \cite{MisraCrossMTL16} networks were implemented in a similar fashion to the single-task networks, with CS modules applied to the output of the task-specific convolutional layers. The other baselines (MT-constant mask and MT-constant \textbf{p}=[\nicefrac{1}{3}, \nicefrac{1}{3}, \nicefrac{1}{3}]) were trained similarly.
-
-We used Batch-Normalisation \cite{ioffe2015batch} to help stabilise training. We observed that the deviation between population statistics and batch statistics can be high, and thus we did not use population statistic at test time. Rather, we normalised using batch-statistics instead, and this consistently lead to better predictive performance. We also used the Gumbel-Softmax approximation \cite{jang2016categorical} at test-time using the temperature value $\tau$ that corresponded to the iteration in $\tau$ annealing schedule.
-
-\section{CNN architectures and details}
-We include schematics and details of the single-task VGG11 \cite{vgg} and HighResNet \cite{wenqi} networks in Fig.~\ref{fig:supp_baselines}. In this work, we constructed multi-task architectures by augmenting these networks with the proposed SFG modules. We used the PReLU activation function \cite{prelu} in all networks. For the residual blocks used in the HighResNet networks in Fig.~\ref{fig:supp_baselines} (ii), we applied PReLU and batch-norm as pre-activation \cite{preactivation} to the convolutional layers. The SFG module was used to cluster the kernels in every coloured layer in Fig.~\ref{fig:supp_baselines}, and distinct sets of additional transformations (pooling operations for VGG and high-res blocks for HighResNet) were applied to the outputs of the respective filter groups $G_{1}, G_{2}, G_{s}$. For a fair comparison, the CS units \cite{MisraCrossMTL16} were added to the same set of layers.
-
-For clarification, the SFG layer number $n$ (e.g. SFG layer 2) corresponds to the $n^{th}$ layer with an SFG module. In the case of SFG-VGG11, each convolutional layer uses SFGs. The SFG layer number thus corresponds with layer number in the network. In the case of SFG-HighResNet, not every convolutional layer uses SFGs such as those within residual blocks. Consequently, SFG layer 1 corresponds to layer 1, SFG layer 2 is layer 6, SFG layer 3 is layer 11, SFG layer 4 is layer 16 and SFG layer 5 is layer 17.
-
-\begin{figure*}[h]
-	\centering
-	\includegraphics[width=0.80\textwidth]{chapter_6/figures_supp/supp_single_task.pdf}
-	\caption{Illustration of the single-task architectures, (i) VGG11 and (ii) HighResNet used for UTKFace and medical imaging dataset, respectively. In each architecture, the coloured components indicate the layers to which SFG or cross-stitch (CS) modules are applied when extended to the multi-task learning scenario, whilst the components in black denote the additional transformations applied to the outputs of respective filter groups or CS operations (see the description of black circles in the schematic provided in Fig.~5 of the main text)}. 
-	\label{fig:supp_baselines}
-\end{figure*}
-
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%% RESULTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiments}\label{sec:experiments}
@@ -326,10 +286,47 @@ We note that all four baselines can be considered special cases of an SFG-networ
 %\caption{Results on 5-layer VGG with half the number of kernels per layer. MT-VGG 1 is a multi-task architecture with hard-parameter sharing with VGG as the representation network. MT-VGG 2 and MT-VGG 3 correspond to networks (a) and (b) in Figure X. We report multiple results for our method: a) using constant $\tau=0.5$ temperature for the Gumbel-Softmax and an annealing rate determined by max$(0.05,\text{exp}(-rt))$ where $r$ is a hyper-parameter determined on the validation set and $t$ corresponds to current iteration number in training. Inference iteration for the testing set was determined by analysis of performance metrics on the validation set for each model.}
 %\end{table}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{Data preprocessing and implementation details}
+
+\subsection{Optimisation, regularisation and initialisation}
+All networks were trained with ADAM optimiser \cite{ADAM} with an initial learning rate of $10^{-3}$ and $\beta = [0.9, 0.999]$. We used values of $\lambda_1=10^{-6}$ and $\lambda_2=10^{-5}$ for the weight and entropy regularisation factors in Equation $(5)$ in Section $3.2$. All \emph{stochastic filter group} (SFG) modules were initialised with grouping probabilities \textbf{p}=[$0.2$, $0.6$, $0.2$] for every convolution kernel. Positivity of the grouping probabilities $\textbf{p}$ is enforced by passing the output through a \emph{softplus} function $f(x)=\text{ln}(1+e^{x})$ as in \cite{lakshminarayanan2017simple}. The scheduler $\tau = \text{max}(0.10, \exp(-rt))$ recommended in \cite{jang2016categorical} was used to anneal the Gumbel-Softmax temperature $\tau$ where $r$ is the annealing rate and $t$ is the current training iteration. We used $r=10^{-5}$ for our models.
+
+Hyper-parameters for the annealing rate and the entropy regularisation weight were obtained by analysis of the network performance on a secondary randomly split on the UTK dataset ($70/15/15$). They were then applied to all trained models (large and small dataset for UTKFace and medical imaging dataset).
+
+\subsection{UTKFace}
+For training the VGG networks (Section 4.1 - UTKFace network), we used the root-mean-squared-error (RMSE) for age regression and the cross entropy loss for gender classification. The labels for age were divided by $100$ prior to training. The input RGB images ($200$x$200$x$3$) were all normalised channel wise to have unit variance and zero mean prior to training and testing. A batch-size of $10$ was used. No augmentation was applied. We monitored performance during training using the validation set ($n=3554$) and trained up to $330$ epochs. We performed $150$ validation iterations every $1000$ iterations, leading to $1500$ predictions per validation iteration. Performance on the validation set was analysed and the iteration where Mean Absolute Error (MAE) was minimised and classification Accuracy was maximised was chosen for the test set.
+
+\subsection{Medical imaging dataset}
+We used T2-weighted Magnetic Resonance Imaging (MRI) scans (3T, 2D spin echo, TE/TR: 80/2500ms, voxel size 1.46x1.46x5mm$^{3}$) and Computed Tomography (CT) scans (140 kVp, voxel size 0.98x0.98x1.5 mm$^{3}$). The MR and CT scans were resampled to isotropic resolution (1.46mm$^{3}$). We performed intensity non-uniformity correction on the MR scans \cite{Tustison2010}.
+
+In the HighResNet networks (Section 4.1 - Medical imaging network), we used the RMSE loss for the regression task and the Dice + Cross-Entropy loss \cite{dicex} for the segmentation task. The CT scans were normalised using the transformation $\nicefrac{\text{CT}}{1024} + 1$. The original range of the CT voxel intensity was $[-1024,2500]$ with the background set to $-1024$. The input MRI scans were first normalised using histogram normalisation based on the $1^{st}$ and $99^{th}$ percentile \cite{Nyul2000}. The MRI scans were then normalised to zero mean and unit variance. At test time, input MRI scans were normalised using the histogram normalisation transformation obtained from the training set then normalised to have zero mean and unit variance. 
+
+All scans were of size $288$x$288$x$62$. We sub-sampled random patches from random axial slices of size $128$x$128$. We sampled from all axial slices in the volume ($n=62$). We trained up to $200,000$ iterations using a batch-size of $10$. We applied augmentation to the randomly sampled patches using random scaling factors in the range $[-10\%, 10\%]$ and random rotation angles in the range [$-10^\circ$, $10^\circ$]. The trained patches were zero-padded to increase their size to $136$x$136$. However, the loss during training was only calculated in non-padded regions.
+
+The inference iteration for the test set was determined when the performance metrics on the training set (Mean Absolute Error and Accuracy) first started to converge for at least $10,000$ iterations. In our model where the grouping probabilities were learned, the iteration when convergence in the update of the grouping probabilities was first observed was selected since performance generally increased as the grouping probabilities were updated. 
+
+\subsection{Implementation details}
+We used Tensorflow and implemented our models within the NiftyNet framework \cite{Gibson2018}. Models were trained on NVIDIA Titan Xp, P6000 and V100. All networks were trained in the Stochastic Filter Group paradigm. Single-task networks were trained by hard-coding the allocation of kernels to task $1$ and task $2$ i.e. $50$\% of kernels per layer were allocated to task $1$ and $50$\% were allocated to task $2$ with constant probabilities \textbf{p}=[1,0,0] and \textbf{p}=[0,0,1] respectively. The multi-task hard parameter sharing (MT hard-sharing) network was trained by hard-coding the allocation of kernels to the shared group i.e. $100$\% of kernel per layer were allocated to the shared group with constant probability \textbf{p}=[0, 1, 0]. The cross-stitch (CS) \cite{MisraCrossMTL16} networks were implemented in a similar fashion to the single-task networks, with CS modules applied to the output of the task-specific convolutional layers. The other baselines (MT-constant mask and MT-constant \textbf{p}=[\nicefrac{1}{3}, \nicefrac{1}{3}, \nicefrac{1}{3}]) were trained similarly.
+
+We used Batch-Normalisation \cite{ioffe2015batch} to help stabilise training. We observed that the deviation between population statistics and batch statistics can be high, and thus we did not use population statistic at test time. Rather, we normalised using batch-statistics instead, and this consistently lead to better predictive performance. We also used the Gumbel-Softmax approximation \cite{jang2016categorical} at test-time using the temperature value $\tau$ that corresponded to the iteration in $\tau$ annealing schedule.
+
+\subsection{CNN architecture details}
+We include schematics and details of the single-task VGG11 \cite{vgg} and HighResNet \cite{wenqi} networks in Fig.~\ref{fig:supp_baselines}. In this work, we constructed multi-task architectures by augmenting these networks with the proposed SFG modules. We used the PReLU activation function \cite{prelu} in all networks. For the residual blocks used in the HighResNet networks in Fig.~\ref{fig:supp_baselines} (ii), we applied PReLU and batch-norm as pre-activation \cite{preactivation} to the convolutional layers. The SFG module was used to cluster the kernels in every coloured layer in Fig.~\ref{fig:supp_baselines}, and distinct sets of additional transformations (pooling operations for VGG and high-res blocks for HighResNet) were applied to the outputs of the respective filter groups $G_{1}, G_{2}, G_{s}$. For a fair comparison, the CS units \cite{MisraCrossMTL16} were added to the same set of layers.
+
+For clarification, the SFG layer number $n$ (e.g. SFG layer 2) corresponds to the $n^{th}$ layer with an SFG module. In the case of SFG-VGG11, each convolutional layer uses SFGs. The SFG layer number thus corresponds with layer number in the network. In the case of SFG-HighResNet, not every convolutional layer uses SFGs such as those within residual blocks. Consequently, SFG layer 1 corresponds to layer 1, SFG layer 2 is layer 6, SFG layer 3 is layer 11, SFG layer 4 is layer 16 and SFG layer 5 is layer 17.
+
+\begin{figure*}[h]
+	\centering
+	\includegraphics[width=0.80\textwidth]{chapter_6/figures_supp/supp_single_task.pdf}
+	\caption{Illustration of the single-task architectures, (i) VGG11 and (ii) HighResNet used for UTKFace and medical imaging dataset, respectively. In each architecture, the coloured components indicate the layers to which SFG or cross-stitch (CS) modules are applied when extended to the multi-task learning scenario, whilst the components in black denote the additional transformations applied to the outputs of respective filter groups or CS operations (see the description of black circles in the schematic provided in Fig.~5 of the main text)}. 
+	\label{fig:supp_baselines}
+\end{figure*}
+
+
+
 \section{Results}
-
 \subsection{Age regression and gender prediction}
-
 Results on age prediction and gender classification on both datasets are presented in Tab.~ \ref{tab:big_data} and \ref{tab:small_data}. Our model (MT-SFG) achieved the best performance in comparison to the baselines in both data regimes. In both sets of experiments, our model outperformed the hard-parameter sharing (\emph{MT-hard sharing}) and constant allocation (\emph{MT-constant mask}). This demonstrates the advantage of learning to allocate kernels. In the \emph{MT-constant mask} model, kernels are equally allocated across groups. In contrast, our model is able to allocate kernels in varying proportions across different layers in the network (Fig.~ \ref{fig:LEARNED_A} - SFG-VGG11) to maximise inductive transfer. Moreover, our methods performed better than a model with constant, non-informative grouping probabilities (\emph{MT-constant} \textbf{p}$= [\nicefrac{1}{3}, \nicefrac{1}{3}, \nicefrac{1}{3}]$), displaying the importance of learning structured representations and connectivity across layers to yield good predictions.
 
 % hs - each task uses fewer number of parameters and we perform better
@@ -399,10 +396,10 @@ Results on age prediction and gender classification on both datasets are present
                 \toprule
                 Method   & Overall   &  Bones  & Organs &  Prostate & Bladder & Rectum  \\
                 \midrule
-                 One-task (HighResNet) \cite{wenqi} & $\,\,$ 25.76 (0.80)$\,\,$ & $\,\,$ 30.35 (0.58) $\,\,$  & $\,\,$ 38.04 (0.94) $\,\,$ & $\,\,$ 51.38 (0.79) $\,\,$ & $\,\,$ 33.34 (0.83)$\,\,$ & $\,\,$ 34.19 (0.31)$\,\,$  \\
+                 One-task  \cite{wenqi} & $\,\,$ 25.76 (0.80)$\,\,$ & $\,\,$ 30.35 (0.58) $\,\,$  & $\,\,$ 38.04 (0.94) $\,\,$ & $\,\,$ 51.38 (0.79) $\,\,$ & $\,\,$ 33.34 (0.83)$\,\,$ & $\,\,$ 34.19 (0.31)$\,\,$  \\
                 \multirow{1}{*}{MT-hard sharing }  & 26.31 (0.76) & 31.25 (0.61) & 39.19 (0.98) & 52.93 (0.95)  & 34.12 (0.82) & 34.15 (0.30) \\
                 \multirow{1}{*}{MT-constant mask}   &  $24.43 (0.57)$  & $29.10 (0.46)$  & $37.24 (0.86)$ & $50.48 (0.73) $  & $32.29 (1.01)$ & $33.44 (2.88)$  \\
-                \multirow{1}{*}{MT-constant \textbf{p}=[$\nicefrac{1}{3}$,$\nicefrac{1}{3}$,$\nicefrac{1}{3}$]}   & 26.64(0.54)  & 31.05 (0.55) & 39.11 (1.00)    & \cellcolor{blue!15} 53.20 (0.86)  & 34.34 (1.35) &  35.61 (0.35) \\
+                \multirow{1}{*}{MT-constant \textbf{p}=[$\frac{1}{3}$,$\frac{1}{3}$,$\frac{1}{3}$]}   & 26.64(0.54)  & 31.05 (0.55) & 39.11 (1.00)    & \cellcolor{blue!15} 53.20 (0.86)  & 34.34 (1.35) &  35.61 (0.35) \\
                 \multirow{1}{*}{Cross Stitch \cite{MisraCrossMTL16}}   & \cellcolor{red!15}  27.86 (1.05)  & \cellcolor{blue!15}  32.27 (0.55)  & \cellcolor{red!15}  40.45 (1.27)  & \cellcolor{red!15} 54.51 (1.01)     & \cellcolor{red!15}  36.81 (0.92) &  \cellcolor{red!15} 36.35 (0.38)     \\
                 \multirow{1}{*}{MT-SFG (ours)}  &   \cellcolor{blue!15} 27.74 (0.96) &  \cellcolor{red!15}  32.29 (0.59)&  \cellcolor{blue!15}  39.93 (1.09)& 53.01 (1.06)   &  \cellcolor{blue!15} 35.65 (0.44)& \cellcolor{blue!15} 35.65 (0.37)  \\
         \hline
@@ -424,12 +421,12 @@ Results on age prediction and gender classification on both datasets are present
                 Method & Overall  &   Left Femur Head &  Right Femur Head &  Prostate & Bladder & Rectum   \\
                 
                 \midrule
-                One-task (HighResNet) \cite{wenqi} & $0.848 (0.024)$ & 0.931 (0.012)  & \cellcolor{blue!15} 0.917 (0.013)   & 0.913 (0.013) & 0.739 (0.060)  & 0.741 (0.011)  \\
+                One-task \cite{wenqi} & $0.848 (0.024)$ & 0.931 (0.012)  & \cellcolor{blue!15} 0.917 (0.013)   & 0.913 (0.013) & 0.739 (0.060)  & 0.741 (0.011)  \\
                 
                 \multirow{1}{*}{MT-hard sharing }  & $0.829 (0.023)$ & \cellcolor{blue!15} 0.933 (0.009)  & 0.889 (0.044)    &  0.904 (0.016) & 0.685 (0.036)   &  0.732 (0.014) \\
                
                 \multirow{1}{*}{MT-constant mask}  & $0.774 (0.065)$ & 0.908 (0.012)  & 0.911 (0.015)    &0.806 (0.0541)   & 0.583 (0.178)  & 0.662 (0.019) \\
-                \multirow{1}{*}{MT-constant \textbf{p}=[$\nicefrac{1}{3}$,$\nicefrac{1}{3}$,$\nicefrac{1}{3}$]}   & $0.752 (0.056)$ &   0.917 (0.004)& \cellcolor{red!15} 0.917 (0.01)&0.729 (0.086)   & 0.560 (0.180)  &0.639 (0.012)\\
+                \multirow{1}{*}{MT-constant \textbf{p}=[$\frac{1}{3}$,$\frac{1}{3}$,$\frac{1}{3}$]}   & $0.752 (0.056)$ &   0.917 (0.004)& \cellcolor{red!15} 0.917 (0.01)&0.729 (0.086)   & 0.560 (0.180)  &0.639 (0.012)\\
                  \multirow{1}{*}{Cross Stitch \cite{MisraCrossMTL16}}  &\cellcolor{red!15}  0.854 (0.036) & 0.923 (0.008)   &  0.915 (0.013) &   \cellcolor{red!15} 0.933 (0.009)  &  \cellcolor{red!15} 0.761 (0.053)   &   \cellcolor{blue!15} 0.737 (0.015)\\
                  \multirow{1}{*}{MT-SFG (ours)}  &  \cellcolor{blue!15}  $0.852 (0.047)$ &  \cellcolor{red!15} 0.935 (0.007)  & 0.912 (0.013)   &  \cellcolor{blue!15} 0.923 (0.016)  &  \cellcolor{blue!15}  0.750 (0.062) &  \cellcolor{red!15} 0.758 (0.011) \\
         \hline
@@ -438,7 +435,6 @@ Results on age prediction and gender classification on both datasets are present
     \label{tab:seg}
     \end{subtable}
 
-\vspace{-3mm}
 \caption{\small Performance on the medical imaging dataset with best results in red, and the second best results in blue. The PSNR is reported for the CT-synthesis (synCT) across the whole volume (overall), at the bone regions, across all organ labels and individually at the prostate, bladder and rectum. For the segmentation, the average DICE score per patient across all semantic labels is computed. The standard deviations are computed over the test subject cohort. For our model, we perform $50$ stochastic forward passes at test-time by sampling the kernels from the approximated posterior distribution $q_{\phi}(\mathcal{W})$. We compute the average of all passes to obtain the synCT and calculate the mode of the segmentation labels for the final segmentation. We initialised our model with grouping probabilities \textbf{p}=[0.2, 0.6, 0.2]. Red cells indicate best performing and blue cells indicate second best models.}
 %\caption{Performance metrics for synthetic CT regression (synCT) and organ segmentation. We calculated the mean absolute error (MAE) for the regression and the average DICE score across segmented organs for the segmentation task (Seg). We report the mean ($\pm$ st.d.) across patients. Results for our method were acquired after hyper-parameter optimisation (Gumbel-Softmax anneal rate and entropy weighting) on a different randomly generated training set. Inference iteration for the testing set was determined after convergence of the training loss.}
 \label{tab:medicalimaging}
@@ -505,7 +501,7 @@ Results on CT image synthesis and organ segmentation from input MRI scans is det
  %   \label{fig:performance_on_small_data}
 %\end{figure}
 
-%st - 7.64/85.963
+%st - 7.64/85.963\dfrac{num}{den}
 %mt 8.18, 86.63
 
 
@@ -519,19 +515,42 @@ Results on CT image synthesis and organ segmentation from input MRI scans is det
 	\label{fig:activations}
 \end{figure*}
 
-Analysis of the grouping probabilities of a network embedded with SFG modules permits visualisation of the network connectivity and thus the learned MTL architecture. To analyse the group allocation of kernels at each layer, we computed the sum of class-wise probabilities per layer. Learned groupings for both SFG-VGG11 network trained on UTKFace and the SFG-HighResNet network trained on prostate scans are presented in Fig.~ \ref{fig:LEARNED_A}. These figures illustrate increasing task specialisation in the kernels with network depth. At the first layer, all kernels are classified as shared (\textbf{p}$=[0, 1, 0]$) as low-order features such as edge or contrast descriptors are generally learned earlier layers. In deeper layers, higher-order representations are learned, which describe various salient features specific to the tasks. This coincides with our network allocating kernels as task specific, as illustrated in Fig.~\ref{fig:activations}, where activations are stratified by allocated class per layer. %\textcolor{black}{Density plots of the learned kernel probabilities and trajectory maps displaying training dynamics, along with more examples of feature visualisations, are provided in supplementary materials.}
+Analysis of the grouping probabilities of a network embedded with SFG modules permits visualisation of the network connectivity and thus the learned MTL architecture. To analyse the group allocation of kernels at each layer, we computed the sum of class-wise probabilities per layer. Learned groupings for both SFG-VGG11 network trained on UTKFace and the SFG-HighResNet network trained on prostate scans are presented in Fig.~ \ref{fig:LEARNED_A}. These figures illustrate increasing task specialisation in the kernels with network depth. 
 
-Notably, the learned connectivity of both models shows striking similarities to hard-parameter sharing architectures commonly used in MTL. Generally, there is a set of shared layers, which aim to learn a feature set common to both tasks. Task-specific branches then learn a mapping from this feature space for task-specific predictions. Our models are able to automatically learn this structure whilst allowing asymmetric allocation of task-specific kernels with no priors on the network structure.
+Such behaviour can be also visually confirmed by looking at the activation maps of specialist and generalist kernels in the respective layers. To classify each kernel according to the group (task 1, task 2 or shared), we selected the group with the respective maximum assignment probability. The corresponding activation maps for various input images in the medical imaging dataset are then visualised. 
+
+We first analysed the activation maps generated by kernels with low entropy of $\mathbf{p}$ (i.e. highly confident group assignment). Fig.~\ref{fig:activations} shows that, at the first layer, all kernels are classified as shared (\textbf{p}$=[0, 1, 0]$), and account for low-order features such as edges or contrast of the images. On the other hand, at deeper layers, higher-order representations are learned, which describe various salient features specific to the tasks such as organs for segmentation, and bones for CT-synthesis. Note that the bones are generally the most difficult region to synthesise CT intensities from an input MR scan \cite{bragman2018multi}. More examples are given in Fig.~\ref{fig:act}.
 
 \begin{figure}[ht]
 	\center
-	\vspace{-3mm}
 	\includegraphics[width=1.0\linewidth]{chapter_6/figures/learned_a.pdf}
 	\caption{\small Learned kernel grouping in a) SFG-VGG11 network on UTKFace and b) SFG-HighResNet on medical scans. The proportions of task-1, shared and task-2 filter groups are shown in blue, green and pink. Within SFG-VGG11, task-1 age regression and task-2 is gender classification. For SFG-HighResNet, task-1 is CT synthesis and task-2 is organ segmentation. }
-	\vspace{-3mm}
     \label{fig:LEARNED_A}
 \end{figure}
 
+
+\begin{figure}[ht]
+	\centering
+	\vspace{-2mm}
+	\includegraphics[width=0.73\linewidth]{chapter_6/figures_supp/figure_1.pdf}
+	\vspace{-2mm}
+	\caption{\small Example activations for kernels with low entropy of $\mathbf{p}$ (i.e. group assignment with high confidence) for three input MR slices in the SFG-HighResNet multi-task network. Columns ``Shared'', ``Task 1'' \& ``Task 2'' display the results from the shared, CT-synthesis and organ-segmentation specific filter groups in respective layers. We illustrate activations stratified by group in layer $1$ (SFG layer 1), layer $16$ (SFG layer 4) and layer $17$ (SFG layer 5). }
+	\label{fig:act}
+	\vspace{-5mm}
+\end{figure}
+
+In addition, we also looked at activation maps from kernels with high entropy of $\mathbf{p}$ (i.e. highly uncertain group assignment) in Fig.~\ref{fig:act_unc}. In contrast to Fig.~\ref{fig:act}, the learned features do not appear to capture any meaningful structures for both synthesis and segmentation tasks. Of particular note is the dead kernel in the top row of the figure; displaying that a high uncertainty in group allocation correlates with non-informative features. 
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.7\linewidth]{chapter_6/figures_supp/uncertain_activation.pdf}
+	\caption{\small Example activations for kernels with high entropy (i.e. group assignment with low confidence) for three input MR slices in the SFG-HighResNet multi-task network.  Columns ``Shared'', ``Task 1'' \& ``Task 2'' display the results from the shared, CT-synthesis and organ-segmentation specific filter groups in respective layers. We illustrate activations stratified by group in layer $16$ (SFG layer 4) and layer $17$ (SFG layer 5). }
+	\label{fig:act_unc}
+\end{figure}
+
+Notably, the learned connectivity of both models shows striking similarities to hard-parameter sharing architectures commonly used in MTL. Generally, there is a set of shared layers, which aim to learn a feature set common to both tasks. Task-specific branches then learn a mapping from this feature space for task-specific predictions. Our models are able to automatically learn this structure whilst allowing asymmetric allocation of task-specific kernels with no priors on the network structure.
+
+\newpage
 \subsection{Learned grouping probability plots}
 Fig.~\ref{fig:fig_learned_A} and Fig.~\ref{fig:fig_learned_B} illustrate the density plots of the learned grouping probabilities $\mathbf{p}$ for each trained network. We also plot the training trajectories of grouping probabilities $\mathbf{p}$ of all kernels in each layer. These are colour coded by iteration number---blue for low and yellow for high iteration number. This shows that some grouping probabilities are quickly learned in comparison to others. 
 
@@ -554,14 +573,14 @@ Fig.~\ref{fig:fig_learned_A} and Fig.~\ref{fig:fig_learned_B} show that most ker
 
 
 \subsection{Effect of \textbf{p} initialisation}
-Fig.~\ref{fig:different_grouping} shows the layer-wise proportion of the learned kernel groups on the UTKFace dataset for four different initilization schemes of grouping probabilities $\mathbf{p}$: (i) ``dominantly shared'', with $\mathbf{p}=[0.2, 0.6, 0.2]$, (ii) ``dominantly task-specific'', with $\mathbf{p}=[0.45, 0.1, 0.45]$, (iii) ``random'', where $\mathbf{p}$ is drawn from $\text{Dirichlet}(1,1,1)$, (iv) ``start with MT-constant mask", where an equal number of kernels in each layer are set to probabilities of $\mathbf{p}= [1,0,0],[0,1,0]$ and $[0,0,1]$. In all cases, the same set of hyper-parameters, including the annealing rate of the temperature term in GSM approximation and the coefficient of the entropy regularizer $\mathcal{H}(\mathbf{p})$, were used during training. We observe that the kernel grouping of respective layers in (i), (ii) and (iii) all converge to a very similar configuration observed in Sec.~\ref{sec:learned_architecture}, highlighting the robustness of our method to different initialisations of $\mathbf{p}$. In case (iv), the learning of $p$ were much slower than the remaining cases, due to weaker gradients, and we speculate that a higher entropy regularizer is necessary to facilitate its convergence. 
+Fig.~\ref{fig:sensitivity_to_initialp} shows the layer-wise proportion of the learned kernel groups on the UTKFace dataset for four different initilization schemes of grouping probabilities $\mathbf{p}$: (i) ``dominantly shared'', with $\mathbf{p}=[0.2, 0.6, 0.2]$, (ii) ``dominantly task-specific'', with $\mathbf{p}=[0.45, 0.1, 0.45]$, (iii) ``random'', where $\mathbf{p}$ is drawn from $\text{Dirichlet}(1,1,1)$, (iv) ``start with MT-constant mask", where an equal number of kernels in each layer are set to probabilities of $\mathbf{p}= [1,0,0],[0,1,0]$ and $[0,0,1]$. In all cases, the same set of hyper-parameters, including the annealing rate of the temperature term in GSM approximation and the coefficient of the entropy regularizer $\mathcal{H}(\mathbf{p})$, were used during training. We observe that the kernel grouping of respective layers in (i), (ii) and (iii) all converge to a very similar configuration observed in Sec.~\ref{sec:learned_architecture}, highlighting the robustness of our method to different initialisations of $\mathbf{p}$. In case (iv), the learning of $p$ were much slower than the remaining cases, due to weaker gradients, and we speculate that a higher entropy regularizer is necessary to facilitate its convergence. 
 
 
 \begin{figure}[t!]
 	\center
-	\includegraphics[width= 0.7\linewidth]{chapter_6/figures/DIFFERENT_P.pdf}
-	\caption{Effect of the initial values of grouping probabilities $\mathbf{p}$ on the learned kernel allocation after convergence. }
-    \label{fig:performance_on_small_data}
+	\includegraphics[width= 0.75\linewidth]{chapter_6/figures/DIFFERENT_P.pdf}
+	\caption{Effect of the initial values of grouping probabilities $\mathbf{p}$ on the learned kernel allocation after convergence for the medical imaging dataset. The proportions of task-1, shared and task-2 filter groups are shown in blue, green and pink. }
+    \label{fig:sensitivity_to_initialp}
 \end{figure}
 
 
@@ -576,10 +595,6 @@ We analysed the dynamics of a network with SFG modules when trained with two dup
 	\caption{Top: density plots for the learned grouping probabilities at each SFG layer in a model where we trained on duplicate tasks i.e. task 1 is CT synthesis and task 2 is also CT synthesis. Bottom: trajectories of the grouping probabilities during training.}
 	\label{fig:duplicate}
 \end{figure}
-
-
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%% Discussion %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -599,33 +614,3 @@ Lastly, a network composed of SFG modules can be seen as a superset of numerous 
 %     \item No end to end training
 %     \item Learned parameters for sharing are useless in the context of exploiting sharing for new tasks
 % \end{enumerate}
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%% SUPPLEMENTARY MATERIALS %%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Extra visualisation of activations}
-Here we visualise the activation maps of additional specialist and generalist kernels on the medical imaging dataset. To classify each kernel according to the group (task 1, task 2 or shared), we selected the group with the respective maximum assignment probability. The corresponding activation maps for various input images in the medical imaging dataset can be viewed in Fig.~\ref{fig:act} and Fig.~\ref{fig:act_unc}. 
-
-We first analysed the activation maps generated by kernels with low entropy of $\mathbf{p}$ (i.e. highly confident group assignment). At the first layer, all kernels are classified as shared, and the examples in Fig.~\ref{fig:act} support that these kernels tend to account for low-order features such as edge and contrast of the images. On the other hand, at deeper layers, higher-order representations are learned, which describe various salient features specific to the tasks such as organs for segmentation, and bones for CT-synthesis. Note that the bones are generally the most difficult region to synthesise CT intensities from an input MR scan \cite{bragman2018multi}.
-
-Secondly, we looked at activation maps from kernels with high entropy of $\mathbf{p}$ (i.e. highly uncertain group assignment) in Fig.~\ref{fig:act_unc}. In contrast to Fig.~\ref{fig:act}, the learned features do not appear to capture any meaningful structures for both synthesis and segmentation tasks. Of particular note is the dead kernel in the top row of the figure; displaying that a high uncertainty in group allocation correlates with non-informative features. 
-
-\begin{figure}[h]
-    \centering
-    \vspace{-4mm}
-    \includegraphics[width=0.8\textwidth]{chapter_6/figures_supp/figure_1.pdf}
-    \vspace{-2mm}
-    \caption{Example activations for kernels with low entropy of $\mathbf{p}$ (i.e. group assignment with high confidence) for three input MR slices in the SFG-HighResNet multi-task network. Columns ``Shared'', ``Task 1'' \& ``Task 2'' display the results from the shared, CT-synthesis and organ-segmentation specific filter groups in respective layers. We illustrate activations stratified by group in layer $1$ (SFG layer 1), layer $16$ (SFG layer 4) and layer $17$ (SFG layer 5). }
-    \label{fig:act}
-    \vspace{-1mm}
-\end{figure}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.85\textwidth]{chapter_6/figures_supp/uncertain_activation.pdf}
-    \caption{Example activations for kernels with high entropy (i.e. group assignment with low confidence) for three input MR slices in the SFG-HighResNet multi-task network.  Columns ``Shared'', ``Task 1'' \& ``Task 2'' display the results from the shared, CT-synthesis and organ-segmentation specific filter groups in respective layers. We illustrate activations stratified by group in layer $16$ (SFG layer 4) and layer $17$ (SFG layer 5). }
-    \label{fig:act_unc}
-\end{figure}
