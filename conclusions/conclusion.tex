@@ -1,13 +1,55 @@
-\chapter{Conclusions} \label{chapter:conclusions}
+\chapter{Conclusions and Future Work} \label{chapter:conclusions}
 
-In this thesis I presented my work on uncertainty modelling in deep learning and decisions trees as well as applications to various merdical imaging problems. In this chapter I will present a summary of the thesis, along with future research directions. 
+This thesis has explored the utility of modelling and reasoning with different types of uncertainty in deep learning models in high-dimensional, challenging medical imaging applications where safety is critical. The paucity of methodological literature upon embarking on this journey in 2015 motivated the development of new algorithms presented in the thesis, many of which are attained by translating ideas from the established paradigm of probabilistic machine learning to the developing world of deep learning. While most of the research questions I have attempted to answer derive from specific applications, the resultant solutions are general and their applicability extends to other problems in medical imaging and beyond. This chapter is intended to summarise the key implications of the respective chapters in a wider context and finally discuss open questions and challenges that remain.
 
-\textcolor{red}{Yarin's thesis was only 3 pages!}
-\textcolor{red}{Mackay's thesis is full of good thoughts. More work is called for on the relationship between the evidence, cross–validation and generalisation ability to understand these results.}
 
 \section{Summary}
-\label{sec:conSum}
-Summarise the chapters. 
+\paragraph{Predictive uncertainty and its Constituents}
 
-\section{Future Research Directions}
-There are several future research directions that can be pursued after this work.
+Chapter~\ref{chapter:deepuncertainty} has investigated the importance of quantifying predictive uncertainty and its constituents (namely, aleatoric and parameter uncertainty) in the context of MRI super-resolution application. In particular we have demonstrated that rather simple attempts at modelling uncertainty (with the mean-field Gaussian likelihood and variational approximation of the weight posterior) confer tangible benefits such as 1) performance improvement: e.g., the generalisation to out-of-distribution data and robustness to input noise and outliers; 2) reliability assessment of prediction: e.g., certification of performance based on uncertainty-thresholding and detection of unfamiliar structures. Moreover, assuming sufficient flexibility of the model structure, we also introduce a way to decompose the predictive uncertainty into its orthogonal sources i.e. aleatoric and parameter uncertainty. Preliminary results indicate the potential utility of such decoupling in providing a quantitative ``explanations'' into the model's under-performance (e.g., if one observes high parameter and low parameter uncertainty around a certain image feature, then acquiring more training data of similar cases may be recommended). However, much work still is needed to design systematic means to elicit actionable insights from such uncertainty decomposition. 
+
+Chapter~\ref{chapter:multitaskuncertainty_part1} has shown that the same methods of uncertainty modelling could be naturally extended to the multi-task learning setting. Such adaptation leads to a mechanism which automatically determines, in a spatially adaptive fashion, the relative weighting between the task losses, which is a key determinant in the efficacy of multi-task learning. We demonstrate similar benefits in performance improvement and reliability assessment in another challenging multi-task image translation problem where the synthetic CT image and the segmentation of organs at risk are simultaneously predicted from the input MR image for the downstream radio-therapy planning. 
+
+\paragraph{Structural Uncertainty}
+Motivated by the observation that multi-task learning with deep learning hinges on the design of feature sharing between tasks within the architecture, Chapter~\ref{chapter:multitaskuncertainty_part2} develops a Bayesian approach to learning the connectivity structures in a given neural network. More specifically, the method circumvents the need of handcrafting an architecture by introducing a mechanism that learns probabilities to assign convolution kernels in each layer to ``specialist'' or ``generalist'' groups, which are specific to or shared across different tasks. Variational inference is employed to learn the posterior distribution over the possible grouping of kernels and network parameters, leading to the state-of-the-art performance in the radio-therapy planning application that is also addressed in Chapter~\ref{chapter:multitaskuncertainty_part1}. In all tested benchmarks, learning the grouping of kernels seems to enhance the overall performance, corroborating an important connection between the sparse structure and the representation quality in multi-task learning. 
+
+In contrast, Chapter~\ref{chapter:ant} moves away from the probabilistic treatment of architecture learning, and instead draws inspirations from deterministic algorithms used to grow the structure of decision trees. The proposed method, Adaptive Neural Trees (ANTs) progressively grows the structure of a neural network architecture from simple building blocks, and adapt to the given availability of data and the complexity of the task. Results on classification benchmarks show the growth procedure construct architectures of adequate size, leading to better generalisation, particularly in cases with limiting training data where overfitting is prominent with complex models. In a sense, the progressive architecture growth embodies the principles of Occam's razor \cite{rasmussen2001occam} which states preferences over simpler models when equal fidelity with data is observed. Another noteworthy aspect is the implications of the ANT's tree topology as a structural prior. Due to this strong structural constraint, a trained ANT can be construed as a hierarchical form of deep ensemble models \cite{lakshminarayanan2017simple} where the routing functions determine which transformations should be shared and specific to a given input data. Our results empirically demonstrate such structured sparsity achieves a better trade-off between accuracy and computation than standard densely distributed deep learning models, which indicates room for performance improvement that may be achieved by inducing appropriate sparse structures in over-parametrised models. 
+
+\paragraph{Annotation Uncertainty}
+In many medical imaging applications, acquiring reliable annotations is often challenging due to the high cost and rarity of highly experienced clinical experts. As a result, many medical imaging datasets in practice are contaminated with systematic annotation noise (a form of "measurement error") which are complex functions of biases (e.g., personality, hospital policies) and competence levels (e.g., amount of experiences) of individual human experts. However, annotation noise is commonly seen as a form of (irreducible) aleatoric uncertainty, and unwillingly accepted as a part of the training data without any additional measure. 
+
+Contrary to such popular stance, Chapter~\ref{chapter:humanuncertainty} develops a method that explicitly models the annotation noise  (e.g., biases and skill levels) of human experts, and thereby better infer the (possibly unobserved) true label distribution, from noisy labels alone, by ``inverting'' such noise models. A well-grounded and practical optimisation method is designed to disentangle the annotation noise and the true labels, leading to a considerable improvement in accuracy in a real-world classification task where the annotations are very noisy and sparse. Chapter.~\ref{chapter:humanuncertainty_segmentation} extends this idea to the more challenging task of semantic segmentation where every pixel in the input image is classified. The modified noise model combined with an effective optimisation algorithm improve substantially the robustness of the model to annotation noise in three established benchmarks in comparison with the blind approach based on the majority vote and more established label curation methods. These empirical evidence in both classification and segmentation suggest that if one has a good understanding of the noise behaviours present in the data, incorporating them explicitly into the model helps and even allow ones to learn a model that is more accurate than the available data. 
+
+
+\section{Open Challenges}
+There are several future research directions that can be pursued after this work. Challenges concerning the quality of 
+
+Perhaps refer the readers to Yingzhen's and Nalishik's thesis for good surveys of open challenges. 
+
+
+\subsection{Clinical translation of uncertainty estimates}
+
+\subsection{Robustness of predictive uncertainty under data shifts}
+Observed even in toy classification benchmarks: \cite{ovadia2019can}
+
+
+\subsection{Uncertainty Propagation}
+
+\subsection{Interpretability of Uncertainty} 
+Uncertainty is useful for yielding insights into failure cases. Decomposition of uncertainty into "actionable" components. Relation to the existing methods such as ANOVA and Borel Decomposition would be interesting. 
+
+\subsection{Lack of Benchmarks}
+Mention Google's recent benchmark. Importance of high-dimensional sysnthetic datasets. 
+Simulation of pathology e.g., https://brainweb.bic.mni.mcgill.ca/brainweb/
+
+\subsection{Scalability}
+
+\subsection{Structural Uncertainty: Model Selection}
+Model misspecificaion,  
+
+\subsection{Annotation and measurement noise} 
+Noise models, 
+
+\subsection{Under-explored Applications} 
+Continual learning (e.g., VAE), active learning, data adjudication (e.g., label cleansing/outlier removal), data acquisition (e.g., EDDI), causal inference, reinforcement learning (Exploration vs Exploitation)
+ 

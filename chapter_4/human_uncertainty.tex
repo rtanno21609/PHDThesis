@@ -628,9 +628,6 @@ Now, we compare the performance of our method against the prior work that aim to
 
 Fig.~\ref{fig:accuracy_vs_noise_levels} shows better or comparable classification accuracy than all the baselines when the diagonal dominance of the mean CM holds. In particular, our methods show significant improvement when the mean skill level of the annotators are relatively low (e.g. $p=0.3$ and $0.35$). The results are pronounced in the case with only one label available per image for which the baseline methods undergo a steep drop in accuracy (see Fig.~\ref{fig:accuracy_vs_noise_levels}(b)). Similarly on CIFAR-10 data set, Tab.~\ref{tab:cifar10} shows that our method improves the classification accuracy upon the baselines. Such improvement is pronounced in the case of sparse labels. On the other hand, a vanilla CNN with only L2 weight decay overfits to the training data very quickly in the presence of such high noise. 
 
-
-\newpage
-
 \subsection{Experiments on Cardiac View Classification}
 Lastly, we illustrate the results of our approach for a real data set with sparse and noisy labels from the medical domain. This data set consists of images of the cardiac region in different views, acquired using a hand-held ultrasound probe. The task is to classify a given ultrasound image into one of six different view classes (see Fig.~\ref{fig:us_experiments}(a)). The process of obtaining a cardiac view label is crucial for guiding the user to the correct locations of measurements, and affects the quality of the downstream cardiac tasks. 
 %$\{A2C, A3C, A4C, A5C, PSAX, PLAX\}$

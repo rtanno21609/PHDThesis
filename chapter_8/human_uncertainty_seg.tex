@@ -1,0 +1,447 @@
+%% This is file `medima-template.tex',
+%% 
+%% Copyright 2018 Elsevier Ltd
+%% 
+%% This file is part of the 'Elsarticle Bundle'.
+%% ---------------------------------------------
+%% 
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.2 of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.2 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%% 
+%% The list of all files belonging to the 'Elsarticle Bundle' is
+%% given in the file `manifest.txt'.
+%% 
+%% Template article for Elsevier's document class `elsarticle'
+%% with harvard style bibliographic references
+%%
+%% $Id: medima-template.tex 153 2018-12-01 11:38:32Z rishi $
+%% $URL: http://lenova.river-valley.com/svn/elsarticle/trunk/medima-template.tex $
+%%
+%% Use the option review to obtain double line spacing
+%\documentclass[times,review,preprint,authoryear]{elsarticle}
+
+%% Use the options `twocolumn,final' to obtain the final layout
+%% Use longtitle option to break abstract to multiple pages if overfull.
+%% For Review pdf (With double line spacing)
+%\documentclass[times,twocolumn,review]{elsarticle}
+%% For abstracts longer than one page.
+%\documentclass[times,twocolumn,review,longtitle]{elsarticle}
+%% For Review pdf without preprint line
+%\documentclass[times,twocolumn,review,nopreprintline]{elsarticle}
+%% Final pdf
+%\documentclass[times,twocolumn,final]{elsarticle}
+%%%
+%%\documentclass[times,twocolumn,final,longtitle]{elsarticle}
+%%%
+%
+%
+%%% Stylefile to load MEDIMA template
+%\usepackage{medima}
+%\usepackage{framed,multirow}
+%
+%%% The amssymb package provides various useful mathematical symbols
+%\usepackage{amssymb}
+%\usepackage{latexsym}
+%
+%\usepackage{amsmath}
+%\newtheorem{theorem}{Theorem}
+%\usepackage{bm}
+%\usepackage{dsfont}
+%\usepackage{marvosym}
+%\usepackage{lipsum}
+%\usepackage{hyperref}
+%\usepackage{graphicx}
+%\usepackage{subfigure}
+%\usepackage{booktabs}
+%\usepackage{comment}
+%\usepackage{amssymb}
+%\usepackage{bm}
+%\usepackage{url}
+%\usepackage{multirow}
+%\usepackage{array}
+%\usepackage{threeparttable}
+%\usepackage{physics}
+%\usepackage[ruled]{algorithm2e} 
+%\usepackage[noend]{algpseudocode}
+%\usepackage{color}
+%\usepackage{makecell}
+%\usepackage{colortbl}
+%\usepackage{rotating}
+%\usepackage[normalem]{ulem}
+%\DeclareMathOperator*{\argmin}{argmin}
+%\usepackage{nomencl}
+%\makenomenclature
+%
+%% Following three lines are needed for this document.
+%% If you are not loading colors or url, then these are
+%% not required.
+%\usepackage{url}
+%\usepackage{xcolor}
+%
+%\usepackage{hyperref}
+%
+%\definecolor{newcolor}{rgb}{.8,.349,.1}
+%
+%\journal{Medical Image Analysis}
+%
+%\begin{document}
+%
+%\verso{Le Zhang \textit{et~al.}}
+%
+%\begin{frontmatter}
+
+\chapter{Modelling Human Uncertainty for Segmentation} \label{chapter:humanuncertainty_segmentation}
+
+\paragraph{Abstract: }
+%We extend the methods of uncertainty modelling introduced in Chapter 2 to the multi-task learning setting. 
+Recent years have seen increasing use of supervised learning methods for segmentation tasks. However, the predictive performance of these algorithms depends on the quality of labels. This problem is particularly pertinent in the medical image domain, where both the annotation cost and inter-observer variability are high. In a typical label acquisition process, different human experts provide their estimates of the ``true'' segmentation labels under the influence of their own biases and competence levels. Treating these noisy labels blindly as the ground truth limits the performance that automatic segmentation algorithms can achieve. In this work, we present a method for jointly learning, from purely noisy observations alone, the reliability of individual annotators and the true segmentation label distributions, using two coupled CNNs. The separation of the two is achieved by encouraging the estimated annotators to be maximally unreliable while achieving high fidelity with the noisy training data. We first define a toy segmentation dataset based on MNIST and study the properties of the proposed algorithm. We then demonstrate the utility of the method on three public medical imaging segmentation datasets with simulated (when necessary) and real diverse annotations: 1) MSLSC (multiple-sclerosis lesions); 2) BraTS (brain tumours); 3) LIDC-IDRI (lung abnormalities). At last, we create a multiple sclerosis lesion dataset with manual segmentations from 4 different annotators (3 radiologists with different level skills and 1 experts to generate the ground truth). In all cases, our method outperforms competing methods and relevant baselines particularly in cases where the number of annotations is small and the amount of disagreement is large. The experiments also show strong ability to capture the complex spatial characteristics of annotators' mistakes.
+
+
+\section{Introduction}
+Segmentation of anatomical structures in medical images is known to suffer from high inter-reader variability \cite{lazarus2006bi,watadani2013interobserver,rosenkrantz2013comparison,menze2014multimodal,joskowicz2019inter}, influencing the performance of downstream supervised machine learning models. This problem is particularly prominent in the medical domain where the labelled data is commonly scarce due to the high cost of annotations. For instance, accurate identification of multiple sclerosis (MS) lesions in MRIs is difficult even for experienced experts due to variability in lesion location, size, shape and anatomical variability across patients \cite{zhang2019multiple}. Another example \cite{menze2014multimodal} reports the average inter-reader variability in the range 74-85\% for glioblastoma (a type of brain tumour) segmentation. Further aggravated by differences in biases and levels of expertise, segmentation annotations of structures in medical images suffer from high annotation variations \cite{kats2019soft}. In consequence, despite the present abundance of medical imaging data thanks to over two decades of digitisation, the world still remains relatively short of access to data with curated labels \cite{harvey2019standardised}, that is amenable to machine learning, necessitating intelligent methods to learn robustly from such noisy annotations.
+
+To mitigate inter-reader variations, different pre-processing techniques are commonly used to curate segmentation annotations by fusing labels from different experts. The most basic yet popular approach is based on the majority vote where the most representative opinion of the experts is treated as the ground truth (GT). A smarter version that accounts for similarity of classes has proven effective in aggregation of brain tumour segmentation labels \cite{menze2014multimodal}. A key limitation of such approaches, however, is that all experts are assumed to be equally reliable. Warfield \cite{warfield2004simultaneous} proposed a label fusion method, called STAPLE that explicitly models the reliability of individual experts and uses that information to ``weigh'' their opinions in the label aggregation step. After consistent demonstration of its superiority over the standard majority-vote pre-processing in multiple applications, STAPLE has become the go-to label fusion method in the creation of public medical image segmentation datasets e.g., ISLES \cite{winzeck2018isles}, MSSeg \cite{commowick2018objective}, Gleason'19 \cite{gleason2019} datasets. Asman later extended this approach in \cite{asman2011robust} by accounting for voxel-wise consensus to address the issue of under-estimation of annotators' reliability. In \cite{asman2012formulating}, another extension was proposed in order to model the reliability of annotators across different pixels in images. More recently, within the context of multi-atlas segmentation problems \cite{iglesias2013unified} where image registration is used to warp segments from labeled images (``atlases'') onto a new scan, STAPLE has been enhanced in multiple ways to encode the information of the underlying images into the label aggregation process. A notable example is STEP proposed in \cite{cardoso2013steps} who designed a strategy to further incorporate the local morphological similarity between atlases and target images, and different extensions of this approach such as \cite{asman2013non,akhondi2014logarithmic} have since been considered. However, these previous label fusion approaches have a common drawback---they critically lack a mechanism to integrate information across different training images. This fundamentally limits the remit of applications to cases where each image comes with a reasonable number of annotations from multiple experts, which can be prohibitively expensive in practice. Moreover, relatively simplistic functions are used to model the relationship between observed noisy annotations, true labels and reliability of experts, which may fail to capture complex characteristics of human annotators.
+
+In this work, we introduce the first instance of an end-to-end supervised segmentation method that jointly estimates, from noisy labels alone, the reliability of multiple human annotators and true segmentation labels. The proposed architecture %(Fig.~\ref{picture 2}) 
+consists of two coupled CNNs where one estimates the true segmentation probabilities and the other models the characteristics of individual annotators (e.g., tendency to over-segmentation, mix-up between different classes, etc) by estimating the pixel-wise confusion matrices (CMs) on a per image basis. Unlike STAPLE \cite{warfield2004simultaneous} and its variants, our method models, and disentangles with deep neural networks, the complex mappings from the input images to the annotator behaviours and to the true segmentation label. Furthermore, the parameters of the CNNs are ``global variables'' that are optimised across different image samples; this enables the model to disentangle robustly the annotators' mistakes and the true labels based on correlations between similar image samples, even when the number of available annotations is small per image (e.g., a single annotation per image). In contrast, this would not be possible with STAPLE \cite{warfield2004simultaneous} and its variants \cite{asman2012formulating,cardoso2013steps} where the annotators' parameters are estimated on every target image separately.
+
+For evaluation, we first simulate a diverse range of annotator types on the MNIST dataset by performing morphometric operations with Morpho-MNIST framework \cite{castro2019morphomnist}. Then we demonstrate the potential in several real-world medical imaging datasets, namely (i) MS lesion segmentation dataset (MSLSC) from the ISBI 2015 challenge \cite{styner20083d}, (ii) Brain tumour segmentation dataset (BraTS) \cite{menze2014multimodal} and (iii) Lung nodule segmentation dataset (LIDC-IDRI) \cite{armato2011lung}. We also create a MS lesion segmentation dataset with 4 different annotators (3 radiologists with different level skills and 1 expert to generate the ground truth) to evaluate our model's performance in real-world data. Experiments on all datasets demonstrate that our method consistently leads to better segmentation performance compared to widely adopted label-fusion methods and other relevant baselines, especially when the number of available labels for each image is low and the degree of annotator disagreement is high.
+
+\section{Related Work}
+The majority of algorithmic innovations in the space of \textit{label aggregation for segmentation} have uniquely originated from the medical imaging community, partly due to the prominence of the inter-reader variability problem in the field, and the wide-reaching values of reliable segmentation methods \cite{asman2012formulating}. The aforementioned methods based on the STAPLE-framework such as \cite{warfield2004simultaneous,asman2011robust,asman2012formulating,cardoso2013steps,weisenfeld2011learning,asman2013non,asman2013non,akhondi2014logarithmic,joskowicz2018automatic} are based on generative models of human behaviours, where the latent variables of interest are the unobserved true labels and the ``reliability'' of the respective annotators. Our method can be viewed as an instance of translation of the STAPLE-framework to the supervised learning paradigm. As such, our method produces a model that can segment test images without needing to acquire labels from annotators or atlases unlike STAPLE and its local variants. Another key difference is that our method is jointly trained on many different subjects while the STAPLE-variants are only fitted on a per-subject basis. This means that our method is able to learn from correlations between different subjects, which previous works have not attempted--- for example, our method uniquely can estimate the reliability and true labels even when there is only one label available per input image as shown later. 
+
+Our work also relates to a recent strand of methods that aim to generate a set of diverse and plausible segmentation proposals on a given image. Notably, probabilistic U-net \cite{kohl2018probabilistic} and its recent variants, PHiSeg \cite{baumgartner2019phiseg} have shown that the aforementioned inter-reader variations in segmentation labels can be modelled with sophisticated forms of probabilistic CNNs. Such approaches, however, fundamentally differ from ours in that variable annotations from many experts in the training data are assumed to be all realistic instances of the true segmentation; we assume, on the other hand, that there is a single, unknown, true segmentation map of the underlying anatomy, and each individual annotator produces a noisy approximation to it with variations that reflect their individual characteristics. The latter assumption may be reasonable in the context of segmentation problems since there exists only one true boundary of the physical objects captured in an image while multiple hypothesis can arise from ambiguities in human interpretations.
+
+We also note that, in standard classification problems, a plethora of different works have shown the utility of modelling the labeling process of human annotators in restoring the true label distribution \cite{raykar2010learning,khetan2017learning,tanno2019learning}. Such approaches can be categorized into two groups: (1) \textit{two-stage} approach \cite{dawid1979maximum,smyth1995inferring,whitehill2009whose,welinder2010multidimensional,rodrigues2013learning}, and (2) \textit{simultaneous} approach \cite{raykar2009supervised,yan2010modeling,branson2017lean,van2018lean,khetan2017learning,tanno2019learning,sudre2019let}. In the first category, the noisy labels are first curated through a probabilistic model of annotators, and subsequently, a supervised machine-learning model is trained on the curated labels. The initial attempt \cite{dawid1979maximum} was made in the early 1970s, and numerous advances such as \cite{smyth1995inferring,whitehill2009whose,welinder2010multidimensional,rodrigues2013learning} since built upon this work e.g. by estimating sample difficulty and human biases. In contrast, models in the second category aim to curate labels and learn a supervised model jointly in an end-to-end fashion \cite{raykar2009supervised,yan2010modeling,branson2017lean,van2018lean,khetan2017learning,tanno2019learning} so that the two components inform each other. Although the evidence still remains limited to the simple classification task, these \textit{simultaneous} approaches have shown promising improvements over the methods in the first category in terms of the predictive performance of the supervised model and the sample efficiency (i.e., fewer labels are required per input). However, to date very little attention has been paid to the same problem in more complicated, structured prediction tasks where the outputs are high dimensional. In this work, we propose the first \textit{simultaneous} approach to addressing such a problem for image segmentation, while drawing inspirations from the STAPLE framework \cite{warfield2004simultaneous} which would fall into the \textit{two-stage} approach category. 
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=\linewidth]{chapter_8/picture1.png}
+    \caption{An architecture schematic in the presence of 3 annotators of varying characteristics (oversegmentation, undersegmentation and confusing between two classes). The model consists of two parts: (1) \textit{segmentation network} parametrised by $\theta$ that generates an estimate of the unobserved true segmentation probabilities, $\textbf{p}_{\theta}(\textbf{x})$; (2) \textit{annotator network}, parametrised by $\phi$, that estimates the pixelwise confusion matrices $\{\textbf{A}_{\phi}^{(r)}(\textbf{x})\}_{r=1}^{3}$ of the annotators  for the given input image $\textbf{x}$. During training, the estimated annotators distributions $\hat{\textbf{p}}_{\theta,\phi}^{(r)}(\textbf{x}):=\textbf{A}_{\phi}^{(r)}(\textbf{x})\cdot\textbf{p}_{\theta}(\textbf{x})$ are computed, and the parameters $\{\theta, \phi\}$ are learned by minimizing the sum of their cross-entropy losses with respect to the acquired noisy segmentation labels $\tilde{\mathbf{y}}^{(r)}$, and the trace of the estimated CMs. At test time, the output of the segmentation network, $\hat{\textbf{p}}_{\theta}(\textbf{x})$ is used to yield the prediction.}
+    \label{picture1}
+\end{figure*}
+
+\section{Methodology}
+
+\subsection{Problem Set-up}
+In this work, we consider the problem of learning a supervised segmentation model from noisy labels acquired from multiple human annotators. Specifically, we consider a scenario where set of images $\{\textbf{x}_n \in \mathbb{R}^{W\times H\times C}\}_{n=1}^N$ (with $W, H, C$ denoting the width, height and channels of the image) are assigned with noisy segmentation labels $\{\tilde{\textbf{y}}_n^{(r)} \in \mathcal{Y}^{W\times H}\}_{n=1,...,N}^{r\in S(\mathbf{x}_i)}$ from multiple annotators where $\tilde{\textbf{y}}_n^{(r)}$ denotes the label from annotator $r \in \{1,...,R\}$ and $S(\mathbf{x}_n)$ denotes the set of all annotators who labelled image $\textbf{x}_i$ and $\mathcal{Y}=[1, 2,...,L]$ denotes the set of classes. 
+
+
+Here we assume that every image $\mathbf{x}$ annotated by at least one person i.e., $|S(\mathbf{x})|\geq 1$, and no GT labels $\{\textbf{y}_n \in \mathcal{Y}^{W\times H} \}_{n=1,...,N}$ are available. The problem of interest here is to \textit{learn the unobserved true segmentation distribution $p(\textbf{y} \mid \textbf{x})$ from such noisy labelled dataset $\mathcal{D}=\{\textbf{x}_n, \tilde{\textbf{y}}_n^{(r)}\}^{r\in S(\mathbf{x}_n)}_{n=1,...,N}$} i.e., the combination of images, noisy annotations and experts' identities for labels (which label was obtained from whom). 
+
+We also emphasise that \textit{the goal at inference time is to segment a given unlabelled test image} but not to fuse multiple available labels as is typically done in multi-atlas segmentation approaches \cite{iglesias2013unified}. 
+
+\subsection{Probabilistic Model and Proposed Architecture}
+Here we describe the probabilistic model of the observed noisy labels from multiple annotators. We make two key assumptions: (1) annotators are statistically independent, (2) annotations over different pixels are independent given the input image. Under these assumptions, the probability of observing noisy labels $\{\tilde{\textbf{y}}^{(r)}\}_{r\in S(\mathbf{x})}$ on $\textbf{x}$ factorises as:
+
+\begin{equation}
+\begin{aligned}
+   p(\{\tilde{\textbf{y}}^{(r)}\}_{r\in S(\mathbf{x})}\mid \textbf{x}) 
+   &=\prod_{r\in S(\mathbf{x})}p(\tilde{\textbf{y}}^{(r)}\mid \textbf{x})  \\
+   &= \prod_{r\in S(\mathbf{x})}\prod_{\substack{w\in\{1,...,W\}\\h\in\{1,...,H\}}} p(\tilde{y}^{(r)}_{wh} \mid \textbf{x})
+\end{aligned}
+\label{eq:joint_probs}
+\end{equation}
+where $\tilde{y}^{(r)}_{wh} \in [1, ..., L]$ denotes the $(w, h)^{\text{th}}$ elements of $\tilde{\textbf{y}}^{(r)}\in \mathcal{Y}^{W\times H}$. Now we rewrite the probability of observing each noisy label on each pixel $(w, h)$ as: 
+
+\begin{equation}
+    p(\tilde{y}^{(r)}_{wh}\mid \textbf{x})= \sum_{y_{wh}= 1}^{L} p(\tilde{y}^{(r)}_{wh}\mid y_{wh},\textbf{x}) \cdot  p(y_{wh}\mid \textbf{x}) 
+    \label{eq:confusion_matrix}
+\end{equation}
+where $p(y_{wh}\mid\textbf{x})$ denotes the GT label distribution over the $(w, h)^{\text{th}}$ pixel in the image $\textbf{x}$, and $p(\tilde{y}^{(r)}_{wh}\mid y_{wh},\textbf{x})$ describes the noisy labelling process by which annotator $r$ corrupts the true segmentation label. In particular, we refer to the $L\times L$ matrix whose each $(i,j)^{\text{th}}$ element is defined by the second term $\textbf{a}^{(r)}(\mathbf{x},w,h)_{ij}:=p(\tilde{y}^{(r)}_{wh}=i\mid y_{wh}=j,\textbf{x})$ as the CM of annotator $r$ at pixel $(w, h)$ in image $\mathbf{x}$. 
+
+We introduce a CNN-based architecture which models the different constituents in the above joint probability distribution $p(\{\tilde{\textbf{y}}^{(r)}\}_{r\in S(\mathbf{x})}\mid \textbf{x})$ as illustrated in Fig. \ref{picture1}. The model consists of two components: (1) \textit{Segmentation Network}, parametrised by $\theta$, which estimates the GT segmentation probability map, $\hat{\textbf{p}}_{\theta}(\textbf{x}) \in \mathbb{R}^{W\times H \times L}$ whose each $(w, h, i)^\text{th}$ element approximates $p(y_{wh}=i\mid \textbf{x})$;(2) \textit{Annotator Network}, parametrised by $\phi$, that generate estimates of the pixel-wise CMs of respective annotators as a function of the input image, $\{\hat{\textbf{A}}_{\phi}^{(r)}(\textbf{x})\in [0,1]^{W\times H\times L \times L}\}_{r=1}^{R}$ whose each $(w, h, i, j)^\text{th}$ element approximates $p(\tilde{y}^{(r)}_{wh}=i\mid y_{wh}=j,\textbf{x})$. Each product ${\hat{\textbf{p}}_{\theta, \phi}^{(r)}}(\textbf{x}):=\hat{\textbf{A}}_{\phi}^{(r)}(\textbf{x})\cdot \hat{\textbf{p}}_\theta (\textbf{x})$ represents the estimated segmentation probability map of the corresponding annotator. Note that here ``$\,\cdot\,$'' denotes the element-wise matrix multiplications in the spatial dimensions $W, H$. At inference time, we use the output of the segmentation network ${\hat{\textbf{p}}_\theta }(\textbf{x})$ to segment test images. 
+
+We note that each spatial CM, $\hat{\textbf{A}}_{\phi}^{(r)}(\textbf{x})$ contains $WHL^2$ variables, 
+and calculating the corresponding annotator's prediction $\hat{\textbf{p}}_{\theta, \phi}^{(r)}(\textbf{x})$ requires $WH(2L-1)L$ floating-point operations, potentially incurring a large time/space cost when the number of classes is large. Although not the focus of this work (as we are concerned with medical imaging applications for which the number of classes are mostly limited to less than 10), we also consider a low-rank approximation (rank$=1$) scheme to alleviate this issue wherever appropriate. More details are provided in the supplementary.
+
+\subsection{Learning Spatial Confusion Matrices and True Segmentation}
+
+Next, we describe how we jointly optimise the parameters of segmentation network, $\theta$ and the parameters of annotator network, $\phi$. In short, we minimise the negative log-likelihood of the probabilistic model plus a regularisation term via stochastic gradient descent. A detailed description is provided below. 
+
+Given training input $\textbf{X}=\{\textbf{x}_n\}_{n=1}^N$ and noisy labels ${\tilde{\textbf{Y}}^{(r)}} = \{ \tilde{ \textbf{y}}_n^{(r)}: r \in S(\mathbf{x}_n)\} _{n = 1}^N$ for $r=1,...,R$, we optimaize the parameters $\{ \theta , \phi \}$ by minimizing the negative log-likelihood (NLL), $ - \log p({\tilde{\textbf{Y}}^{(1)}},...,{\tilde{\textbf{Y}}^{(R)}}\left| \textbf{X} \right.)$. From eqs.~\ref{eq:joint_probs} and \ref{eq:confusion_matrix}, this optimization objective equates to the sum of cross-entropy losses between the observed noisy segmentations and the estimated annotator label distributions:
+
+\begin{equation}
+    - \log p({\tilde{\textbf{Y}}^{(1)}},...,{\tilde{\textbf{Y}}^{(R)}}\left| \textbf{X} \right.) 
+    = \sum\limits_{n = 1}^N {\sum\limits_{r = 1}^R  \mathds{1}(\tilde{\textbf{y}}_n^{(r)} \in \mathcal{S}({\textbf{x}_n}))}  \cdot
+    \text{CE}\big{(}\hat{\textbf{A}}_{\phi}^{(r)}(\textbf{x})\cdot \hat{\textbf{p}}_\theta ({\textbf{x}_n}),\,\,\tilde{\textbf{y}}_n^{(r)}\big{)} 
+\end{equation}\label{eq3}
+
+Minimizing the above encourages each annotator-specific predictions $\hat{\textbf{p}}_{\theta, \phi}^{(r)}(\textbf{x})$ to be as close as possible to the true noisy label distribution of the annotator ${\textbf{p}^{(r)}}(\textbf{x})$. However, this loss function alone is not capable of separating the annotation noise from the true label distribution; there are many combinations of pairs $ {\hat{\textbf{A}}_{\phi}^{(r)}}(\mathbf{x})$ and segmentation model $\hat{\textbf{p}}_\theta(\mathbf{x})$ such that $\hat{\textbf{p}}_{\theta, \phi}^{(r)}(\textbf{x})$ perfectly matches the true annotator's distribution $\textbf{p}^{(r)}(\mathbf{x})$ for any input $\textbf{x}$ (e.g., permutations of rows in the CMs). To combat this problem, inspired by \cite{tanno2019learning}, which addressed an analogous issue for the classification task, we add the trace of the estimated CMs to the loss function in Eq. \ref{eq3} as a regularisation term %(see Sec~\ref{sec:trace_theory}). 
+We thus optimize the combined loss:
+\begin{equation}
+    \mathcal{L}_{\text{total}}(\theta, \phi) := \sum\limits_{n = 1}^N {\sum\limits_{r = 1}^R \mathds{1}(\tilde{\textbf{y}}_n^{(r)} \in \mathcal{S}({\textbf{x}_i}))} \cdot \Big{[} \text{CE}\big{(}\hat{\textbf{A}}_{\phi}^{(r)}(\textbf{x})\cdot \hat{\textbf{p}}_\theta({\textbf{x}_n}),\,\,\tilde{\textbf{y}}_n^{(r)}\big{)} + \lambda\cdot \text{tr}\big{(}\hat{\textbf{A}}_{\phi}^{(r)}(\mathbf{x}_{n})\big{)}\Big{]}
+\end{equation}\label{eq4}
+where $\mathcal{S}({\textbf{x}}))$ denotes the set of all labels available for image $\textbf{x}$, and $\text{tr}({\textbf{A}})$ denotes the trace of matrix $\textbf{A}$. The mean trace represents the average probability that a randomly selected annotator provides an accurate label. Intuitively, minimising the trace encourages the estimated annotators to be maximally unreliable while minimising the cross entropy ensures fidelity with observed noisy annotators. We minimise this combined loss via stochastic gradient descent to learn both $\{ \theta ,\phi\}$.  
+
+\subsection{Justification for the Trace Norm}
+
+Here we provide a further justification for using the trace regularisation. \cite{tanno2019learning} showed that if the average CM of annotators is \textit{diagonally dominant}, and the cross-entropy term in the loss function is zero, minimising the trace of the estimated CMs uniquely recovers the true CMs. However, their results concern properties of the average CMs of both the annotators and the classifier over the data population, rather than individual data samples. We show a similar but slightly weaker result in the sample-specific regime, which is more relevant as we estimate CMs of respective annotators on every input image. 
+
+First, let us set up the notations. For brevity, for a given input image $\mathbf{x} \in \mathbb{R}^{W\times H \times C}$, we denote the estimated CM of annotator $r$ at $(i, j)^{\text{th}}$ pixel by $\hat{\textbf{A}}^{(r)} := [\textbf{A}^{(r)}(\mathbf{x})_{ij}] \in [0, 1]^{L\times L}$. We also define the mean CM $\textbf{A}^*:= \sum_{r=1}^R \pi_r\hat{\textbf{A}}^{(r)}$ and its estimate $\hat{\textbf{A}}^{*}:=\sum_{r=1}^R \pi_r \hat{\textbf{A}}^{(r)}$ where $\pi_r\in [0,1]$ is the probability that the annotator $r$ labels image $\mathbf{x}$. Lastly, as we stated earlier, we assume there is a single GT segmentation label per image --- thus the true $L$-dimensional probability vector at pixel $(i, j)$ takes the form of a one-hot vector i.e., $\textbf{p}(\textbf{x}) = \mathbf{e}_k$ for, say, class $k \in [1, ...,L]$.  Then, the followings result motivates the use of the trace regularisation: 
+
+\begin{theorem}
+If the annotator's segmentation probabilities are perfectly modelled by the model for the given image i.e., $\hat{\textbf{A}}^{(r)}\hat{\textbf{p}}_\theta(\textbf{x})=\textbf{A}^{(r)}\textbf{p}(\textbf{x}) \forall r=1,...,R$, and the average true confusion matrix $\textbf{A}^{*}$ at a given pixel and its estimate $\hat{\textbf{A}}^{*}$ satisfy that $a^*_{kk} > a^*_{kj}$ for $j \neq k$ and $\hat{a}^*_{ii} > \hat{a}^*_{ij}$ for all $i, j$ such that $j \neq i$, then  $\textbf{A}^{(1)}, ..., \textbf{A}^{(R)} = \text{argmin }_{\hat{\textbf{A}}^{(1)}, ..., \hat{\textbf{A}}^{(R)}}\Big{[}\text{tr}(\hat{\textbf{A}}^{*})\Big{]}$ and such solutions are \textbf{unique} in the $k^{\text{th}}$ column where $k$ is the correct pixel class.
+\end{theorem}
+
+The corresponding proof is provided in the supplementary material. The above result shows that if each estimated annotator's distribution $\hat{\textbf{A}}^{(r)}\hat{\textbf{p}}_{\theta}(\mathbf{x})$ is very close to the true noisy distribution $\textbf{p}^{(r)}(\mathbf{x})$ (which is encouraged by minimizing the cross-entropy loss), and for a given pixel, the average CM has the k$^{\text{th}}$ diagonal entry larger than any other entries in the same row \footnote{For the standard ``majority vote'' label to capture the correct true labels, one requires the k$^{\text{th}}$ diagonal element in the average CM to be larger than the sum of the remaining elements in the same row, which is a more strict condition.}, then minimizing its trace will drive the estimates of the $k^{\text{th}}$ (`correct class') columns in the respective annotator's CMs to match the true values. Although this result is weaker than what was shown in \cite{tanno2019learning} for the population setting rather than the individual samples, the single-ground-truth assumption means that the remaining values of the CMs are uniformly equal to $1/L$, and thus it suffices to recover the column of the correct class.  
+
+To encourage $\{\hat{\mathbf{A}}^{(1)}, ..., \hat{\mathbf{A}}^{(R)}\}$ to be also diagonally dominant, we initialize them with identity matrices by training the \textit{annotation network} to maximise the trace for sufficient iterations as a warm-up period. Intuitively, the combination of the trace term and cross-entropy separates the true distribution from the annotation noise by finding the maximal amount of confusion which explains the noisy observations well. 
+
+\section{Experiments}
+We evaluate our method on a variety of datasets including both synthetic and real-world scenarios:1) for MNIST segmentation and ISBI2015 MS lesion segmentation challenge dataset \cite{jesson2015hierarchical}, we apply morphological operations to generate synthetic noisy labels in binary segmentation tasks; 2) for BraTS 2019 dataset \cite{menze2014multimodal}, we apply similar simulation to create noisy labels in a multi-class segmentation task; 3) we also consider the LIDC-IDRI dataset which contains multiple annotations per input acquired from different clinical experts as the evaluation in practice. 4) Finally, we created a real-world dataset using the MS images obtained from UCLH and manually labelled with 3 different radiologists and 1 expert.
+
+Our experiments are based on the assumption that no ground-truth (GT) label is not known a priori, hence, we compare our method against multiple label fusion methods. In particular, we consider four label fusion baselines: a) mean of all of the noisy labels; b) mode labels by taking the ``majority vote''; c) label fusion via the original STAPLE method \cite{warfield2004simultaneous}; d) Spatial STAPLE, a more recent extension of c) that accounts for spatial variations in CMs. After curating the noisy annotations via above methods, we train the segmentation network and report the results. For c) and d), we used the toolkit\footnote{https://www.nitrc.org/projects/masi-fusion/}. In addition, we also include a recent method called Probabilistic U-net as another baseline, which has been shown to capture inter-reader variations accurately. The details are presented in Appendix \ref{Appendix MNIST and MS}. 
+
+For evaluation metrics, we use: 1) root-MSE between estimated CMs and real CMs; 2) Dice coefficient (DICE) between estimated segmentation and true segmentation; 3) The generalized energy distance proposed in \cite{kohl2018probabilistic} to measure the quality of the estimated annotator's labels. 
+
+\subsection{Annotation Simulation Details}
+We generate synthetic annotations from an assumed GT on MNIST, MS lesion and BraTS datasets, to generate efficacy of the approach in an idealised situation where the GT is known. We simulate a group of 5 annotators of disparate characteristics by performing morphological transformations (e.g., thinning, thickening, fractures, etc) on the ground-truth (GT) segmentation labels, using Morpho-MNIST software \cite{castro2019morphomnist}. In particular, the first annotator provides faithful segmentation (``good-segmentation'') with approximate GT, the second tends over-segment (``over-segmentation''), the third tends to under-segment (``under-segmentation''), the fourth is prone to the combination of small fractures and over-segmentation (``wrong-segmentation'') and the fifth always annotates everything as the background (``blank-segmentation''). To create synthetic noisy labels in multi-class scenario, we first choose a target class and then apply morphological operations on the provided GT mask to create 4 synthetic noisy labels at different patterns, namely, over-segmentation, under-segmentation, wrong segmentation and good segmentation. We create training data by deriving labels from the simulated annotators. We also experimented with varying the levels of morphological operations on MNIST and MS lesion datasets, to test the robustness of our methods to varying degrees of annotation noise.
+
+\subsection{MNIST and MSLSC datasets}
+MNIST dataset consists of 60,000 training and 10,000 testing examples, all of which are 28 $\times$ 28 grayscale images of digits from 0 to 9, and we derive the segmentation labels by thresholding the intensity values at 0.5. The ISBI 2015 challenge MS dataset is publicly available and comprises 21 3D scans from 5 subjects. All scans are split into 10 for training and 11 for testing. We hold out 20\% of training images as a validation set for both datasets. On both datasets, our proposed model achieves a higher dice similarity coefficient than STAPLE on the dense label case and, even more prominently, on the single label (i.e., 1 label per image) case (shown in Tables.~\ref{denselabel of MNIST and MS}\&\ref{singlelabel of MNIST and MS}). In addition, our model outperforms STAPLE without or with trace norm, in terms of CM estimation, specifically, we could achieve an increase at $6.3\%$. Additionally, we include the performance on different regularisation coefficient, which is presented in Fig.~\ref{Paramater lambda}. Fig.~\ref{plot of denselabel and single label} compares the segmentation accuracy on MNIST and MSLSC for a range of average dice where labels are generated by a group of 5 simulated annotators. Fig.~\ref{MNIST segmentation results}\&\ref{MS segmentation results} illustrates our model can capture the patterns of mistakes for each annotator.
+
+\begin{figure}[t]
+        \center
+        \includegraphics[width=\linewidth]{chapter_8/picture2.jpg}
+        \caption{Curves of validation accuracy during training of our model on MNIST for a range of hyperparameters. For our method, the scaling of trace regularizer is varied in [0.001, 0.01, 0.1, 0.4, 0.7, 0.9].)}
+        \label{Paramater lambda}
+\end{figure}
+    
+\begin{figure}[t]
+        \center
+        \includegraphics[width=\linewidth]{chapter_8/picture3.png}
+        \caption{Segmentation accuracy of different models on MNIST (a, b) and MS (c, d) dataset for a range of annotation noise (measured in averaged Dice with respect to GT.}
+        \label{plot of denselabel and single label}
+\end{figure}
+
+\begin{table*}[!h]
+	\center
+	\scriptsize
+	\begin{tabular}{@{}lllllllll}
+		\hline
+		 & MNIST & MNIST  & MSLesion  & MSLesion  \\
+		Models & DICE (\%) & CM estimation & DICE (\%) & CM estimation \\
+		\hline	
+		Naive CNN on mean labels & 38.36 $\pm$ 0.41 &  n/a & 46.55 $\pm$ 0.53 &  n/a  \\
+		Naive CNN on mode labels & 62.89 $\pm$ 0.63 &  n/a & 47.82 $\pm$ 0.76 &  n/a  \\
+		Probabilistic U-net \cite{kohl2018probabilistic}  & 65.12 $\pm$ 0.83  &  n/a  & 46.15 $\pm$ 0.59  & n/a    \\
+		Separate CNNs on annotators & 70.44 $\pm$ 0.65 & n/a & 46.84 $\pm$ 1.24 & n/a &   \\ 
+		STAPLE \cite{warfield2004simultaneous}& 78.03 $\pm$ 0.29 &  0.1241 $\pm$ 0.0011 & 55.05 $\pm$ 0.53 &  0.1502 $\pm$ 0.0026 \\ 
+		Spatial STAPLE \cite{asman2012formulating} & 78.96 $\pm$ 0.22 &  0.1195 $\pm$ 0.0013 & 58.37 $\pm$ 0.47 &  0.1483 $\pm$ 0.0031  \\
+		Ours with Global CMs & 79.21 $\pm$ 0.41  & 0.1132 $\pm$ 0.0028 & 61.58 $\pm$ 0.59   &  0.1449 $\pm$ 0.0051   \\
+		Ours without Trace & 79.63 $\pm$ 0.53  &  0.1125 $\pm$ 0.0037 & 65.77 $\pm$ 0.62 &  0.1342 $\pm$ 0.0053  \\
+		Ours & 82.92 $\pm$ 0.19 &  0.0893 $\pm$ 0.0009 & 67.55 $\pm$ 0.31 &  0.0811 $\pm$ 0.0024    \\
+		Oracle (Ours but with known CMs)   & 83.29 $\pm$ 0.11 & 0.0238 $\pm$ 0.0005 & 78.86 $\pm$ 0.14 &  0.0415 $\pm$ 0.0017   \\ 
+		\hline
+	\end{tabular}%
+\caption{Comparison of segmentation accuracy and error of CM estimation for different methods with dense labels (mean $\pm$ standard deviation).}
+\label{denselabel of MNIST and MS}
+\end{table*}
+
+\begin{table*}[!h]
+	\center
+	\scriptsize
+	\begin{tabular}{@{}llllllllll}
+		\hline
+		 & MNIST & MNIST  & MSLesion  & MSLesion  \\
+		Models & DICE (\%) & CM estimation & DICE (\%) & CM estimation \\
+		  
+		\hline	
+		Naive CNN & 32.79 $\pm$ 1.13 &  n/a & 27.41 $\pm$ 1.45 &  n/a  \\
+		STAPLE \cite{warfield2004simultaneous}& 54.07 $\pm$ 0.68 &  0.2617 $\pm$ 0.0064& 35.74 $\pm$ 0.84 &  0.2833 $\pm$ 0.0081  \\ 
+		Spatial STAPLE \cite{asman2012formulating} & 56.73 $\pm$ 0.53 &  0.2384 $\pm$ 0.0061& 38.21 $\pm$ 0.71 &  0.2591 $\pm$ 0.0074  \\
+ 		Ours with Global CMs  & 59.01 $\pm$ 0.65   & 0.1953 $\pm$ 0.0041   & 40.32 $\pm$ 0.68  & 0.1974 $\pm$ 0.0063    \\
+		Ours without Trace & 74.48 $\pm$ 0.37  &  0.1538 $\pm$ 0.0029 & 54.76 $\pm$ 0.66 & 0.1745 $\pm$ 0.0044  \\
+		Ours & 76.48 $\pm$ 0.25  &  0.1329 $\pm$ 0.0012 & 56.43 $\pm$ 0.47 &  0.1542 $\pm$ 0.0023  \\
+		\hline
+	\end{tabular}%
+\caption{Comparison of segmentation accuracy and error of CM estimation for different methods with one label per image (mean $\pm$ standard deviation).  We note that `Naive CNN' is trained on randomly selected annotations for each image.}
+\label{singlelabel of MNIST and MS}
+\end{table*}
+
+\subsection{BraTS Dataset and LIDC-IDRI Dataset}
+We also evaluate our model on a multi-class segmentation task, using all of the 259 high grade glioma (HGG) cases in training data from 2019 multi-modal Brain Tumour Segmentation Challenge (BraTS). We extract each slice as 2D images and split them at case-wise to have, 1600 images for training, 300 for validation and 500 for testing. Pre-processing includes: concatenation of all of available modalities; centre cropping to 192 x 192; normalisation for each case at each modality. To create synthetic noisy labels in multi-class scenario, we first choose a target class and then apply morphological operations on the provided GT mask to create 4 synthetic noisy labels at different patterns, namely, over-segmentation, under-segmentation, wrong segmentation and good segmentation.
+
+We also use the LIDC-IDRI dataset to evaluate our method in the scenario where multiple labels are acquired from different clinical experts. The dataset contains 1018 lung CT scans from 1010 lung patients with manual lesion segmentations from four experts. %This dataset is a good representation of the typical ambiguities that appear in CT scans. 
+For each scan, 4 radiologists provided annotation masks for lesions that they independently detected and considered to be abnormal. For our experiments, we use the same method in \cite{kohl2018probabilistic} to pre-process all scans. We split the dataset at case-wise into a training (722 patients), validation (144 patients) and testing (144 patients). We then resampled the CT scans to $1 mm \times 1 mm$ in-plane resolution. We also centre cropped 2D images ($180 \times 180$ pixels) around lesion positions, in order to focus on the annotated lesions. The lesion positions are those where at least one of the experts segmented a lesion. We hold 5000 images in the training set, 1000 images in the validation set and 1000 images in the test set. Since the dataset does not provide a single curated ground-truth for each image, we created a ``gold standard'' by aggregating the labels via STAPLE \cite{asman2012formulating}, a recent variant of the STAPLE framework employed in the creation of public medical image segmentation datasets e.g., ISLES \cite{winzeck2018isles}, MSSeg \cite{commowick2018objective}, Gleason'19 \cite{gleason2019} datasets. We further note that, as before, we assume labels are only available to the model during training, but not at test time, thus label aggregation methods cannot be applied on the test examples. 
+
+On both BraTS and LIDC-IDRI datasets, our proposed model achieves a higher dice similarity coefficient than STAPLE and Spatial STAPLE on both of the dense labels and single label scenarios (shown in Table. \ref{denselabebrats} and Table. \ref{singlelabebrats}). In addition, our model (with trace) outperforms STAPLE in terms of CM estimation by a large margin at $14.4\%$ on BraTS. In Fig. \ref{Brats results}, we visualized the segmentation results on BraTS and the corresponding annotators' predictions. Fig.~\ref{LIDCresults} presents three examples of the segmentation results and the corresponding four annotator contours, as well as the consensus. As shown in both figures, our model successfully predicts the both the segmentation of lesions and the variations of each annotator in different cases. We also measure the inter-reader consensus levels by computing the IoU of multiple annotations, and compare the segmentation performance in three subgroups of different consensus levels (low, medium and high). Results are shown in Fig.~\ref{consensus} and Fig.~\ref{consensus dice}.
+
+\begin{figure}[t]
+        \center
+        \includegraphics[width=\linewidth]{chapter_8/picture92.jpg}
+        \caption{The consensus level amongst the estimated annotators is plotted against the ground truth on LIDC-IDRI dataset. The strong positive linear correlation shows that the variation in the inter-reader variability on different input examples (e.g., some examples are more ambiguous than others) is captured well. We do note, however, that the inter-reader variation seems more under-estimated for ``easy'' (i.e., higher consensus) samples.}
+        \label{consensus}
+\end{figure}
+    
+\begin{figure}[t]
+        \center
+        \includegraphics[width=\linewidth]{chapter_8/picture93.jpg}
+        \caption{Segmentation performance on 3 different subgroups of the LIDC-IDRI dataset with varying levels of inter-reader agreement. Our method shows \textit{consistent} improvement over the baselines and the competing methods in all groups, showing its enhanced ability to segment challenging examples (i.e., low-consensus cases).}
+        \label{consensus dice}
+\end{figure}
+
+\begin{table*}[!t]
+\scriptsize
+	\center
+	\begin{tabular}{@{}llllllllll}
+		\hline
+		 & BraTS & BraTS  & LIDC-IDRI  & LIDC-IDRI  \\
+		Models & DICE (\%) & CM estimation & DICE (\%) & CM estimation \\
+		  
+		\hline	
+		Naive CNN on mean \& mode labels& 36.12 $\pm$ 0.93  &  n/a & 48.36 $\pm$ 0.79   &  n/a  \\
+		STAPLE \cite{warfield2004simultaneous}& 38.74 $\pm$ 0.85  & 0.2956 $\pm$ 0.1047  & 57.32 $\pm$ 0.87  & 0.1715 $\pm$ 0.0134     \\ 
+		Spatial STAPLE \cite{asman2012formulating} & 41.59 $\pm$ 0.74  & 0.2543 $\pm$ 0.0867  & 62.35 $\pm$ 0.64  & 0.1419 $\pm$ 0.0207    \\
+ 		Ours with Global CMs  & 41.76 $\pm$ 0.71  & 0.2419 $\pm$ 0.0829   & 63.25 $\pm$ 0.66  & 0.1382 $\pm$ 0.0175    \\
+		Ours without Trace & 43.74 $\pm$ 0.49   & 0.1825 $\pm$ 0.0724   & 66.95 $\pm$ 0.51  & 0.0921 $\pm$ 0.0167   \\
+		Ours & \textbf{46.21 $\pm$ 0.28}   & \textbf{0.1576 $\pm$ 0.0487 }  & \textbf{68.12 $\pm$ 0.48}  & \textbf{0.0587 $\pm$ 0.0098   } \\
+		\hline
+	\end{tabular}%
+    \caption{Comparison of segmentation accuracy and error of CM estimation for different methods trained with only one label available per image (mean $\pm$ standard deviation). The best results are shown in bald.}
+    \label{singlelabebrats}
+\end{table*}
+
+\begin{table*}[!t]
+\scriptsize
+	\center
+	\begin{tabular}{@{}lllllllll}
+		\hline
+		 & BraTS & BraTS  & LIDC-IDRI  & LIDC-IDRI  \\
+		Models & DICE (\%) & CM estimation & DICE (\%) & CM estimation \\
+		  
+		\hline	
+		Naive CNN on mean labels & 29.42 $\pm$ 0.58  &  n/a & 56.72 $\pm$ 0.61  &  n/a  \\
+		Naive CNN on mode labels & 34.12 $\pm$ 0.45  &  n/a & 58.64 $\pm$ 0.47  &  n/a  \\
+		Probabilistic U-net \cite{kohl2018probabilistic}  & 40.53 $\pm$ 0.75   &  n/a  & 61.26 $\pm$ 0.69  &  n/a   \\
+		STAPLE \cite{warfield2004simultaneous}& 46.73 $\pm$ 0.17  & 0.2147 $\pm$ 0.0103   & 69.34 $\pm$ 0.58  & 0.0832 $\pm$ 0.0043   \\ 
+		Spatial STAPLE \cite{asman2012formulating} & 47.31 $\pm$ 0.21  & 0.1871 $\pm$ 0.0094   & 70.92 $\pm$ 0.18  &  0.0746 $\pm$ 0.0057   \\
+		Ours with Global CMs &  47.33 $\pm $ 0.28  &  0.1673 $\pm $ 0.1021    & 70.94 $\pm $ 0.19  & 0.1386 $\pm $ 0.0052   \\
+		Ours without Trace & 49.03 $\pm$ 0.34   & 0.1569 $\pm$ 0.0072   & 71.25 $\pm$ 0.12  & 0.0482 $\pm$ 0.0038    \\
+		Ours & \textbf{53.47 $\pm $ 0.24}  & \textbf{0.1185 $\pm$ 0.0056 }  & \textbf{74.12 $\pm $ 0.19 } &  \textbf{0.0451 $\pm$ 0.0025     }\\
+		Oracle (Ours but with known CMs)   & 67.13 $\pm$ 0.14  & 0.0843 $\pm$ 0.0029  & 79.41 $\pm$ 0.17  & 0.0381 $\pm$ 0.0021    \\ 
+		\hline
+	\end{tabular}%
+    \caption{Comparison of segmentation accuracy and error of CM estimation for different methods trained with \textbf{dense labels} (mean $\pm$ standard deviation). The best results are shown in bald. Note that we count out the Oracle from the model ranking as it forms a theoretical upper-bound on the performance where true labels are known on the training data.}
+\label{denselabebrats}
+\end{table*}
+
+Additionally, as shown in Table.\ref{ged_result}, our model consistently outperforms Probabilistic U-Net on generalized energy distance across the four test different datasets, indicating our method can better capture the inter-annotator variations than the baseline Probabilistic U-Net. This result shows that the information about which labels are acquired from whom is useful in modelling the variability in the observed segmentation labels. 
+
+\begin{table*}[!h]
+	\center
+	\scriptsize
+	\begin{tabular}{@{}llllllllll}
+		\hline
+		 Models & MNIST & MS  & BraTS  & LIDC-IDRI  \\
+		\hline	
+		Probabilistic U-net \cite{kohl2018probabilistic}  & 1.46 $\pm$ 0.04 & 1.91 $\pm$ 0.03  & 3.23 $\pm$ 0.07  &  1.97 $\pm$ 0.03  \\
+		Ours & \textbf{1.24 $\pm$ 0.02} & \textbf{1.67 $\pm$ 0.03}  & \textbf{3.14 $\pm$ 0.05}  &  \textbf{1.87 $\pm$ 0.04}  \\
+		\hline
+	\end{tabular}%
+\caption{Comparison of Generalised Energy Distance on different datasets (mean $\pm$ standard deviation). The distance metric used here is Dice.}
+\label{ged_result}
+\end{table*}
+
+\subsection{Performance on Real-World MS Lesion Segmentation Dataset}
+
+Although we have evaluated our model on both systhetic and real annotated datasets, we would like to put our model into more realistic situation for evaluation. In this experiment, we create a MS lesion segmentation dataset using multiple sclerosis patients treated with natalizumab at the National Hospital for Neurology and Neurosurgery, University College London Hospitals NHS Foundation Trust, London, UK, according to local, standard-of-care protocols, for whom at least one full brain scan pre- or post-initiation of natalizumab was available.
+
+\begin{figure}
+        \center
+        \includegraphics[width=\linewidth]{chapter_8/picture94.png}
+        \caption{Curves of validation accuracy during training of different models on our practical dataset.}
+        \label{val-acc}
+\end{figure}
+
+\begin{figure*}
+        \center
+        \includegraphics[width=\linewidth]{chapter_8/picture95.png}
+        \caption{Visualisation of each annotator contours and the consensus (red for Annnotator 1, yellow for Annotator 2, blue for Annotator 3 and purple for consensus), and the confusion matrices on our practical dataset (white is the true positive, green is the false negative, red is the false positive and black is the true negative) (Best viewed in colour). }
+        \label{consensus&CM}
+\end{figure*}
+
+\begin{figure*}
+        \center
+        \includegraphics[width=0.75\linewidth]{chapter_8/picture96.png}
+        \caption{The annotator confidential scores of each testing example and corresponding CM errors. We select the middle 20 slices and compute the CM mean error for each example.}
+        \label{consensus&CM}
+\end{figure*}
+
+\begin{figure*}
+        \center
+        \includegraphics[width=0.75\linewidth]{chapter_8/picture98.png}
+        \caption{The annotator confidential scores of each testing example and corresponding CM errors. We select the middle 20 slices and compute the CM mean error for each example.}
+        \label{consensus&CM}
+\end{figure*}
+
+\begin{figure}
+        \center
+        \includegraphics[width=0.8\linewidth]{chapter_8/picture99.png}
+        \caption{The dice coefficients of each example and corresponding incompetence score.}
+        \label{dice&score}
+\end{figure}
+
+
+
+\section{Conclusion}
+We introduced the first supervised segmentation method for jointly estimating the spatial characteristics of labelling errors from multiple human annotators and the ground-truth label distribution. We demonstrated this method on real-world datasets with both synthetic and real-world annotations. Our method is capable of estimating individual annotators and thereby improving robustness against label noise. Experiments have shown our model achieves considerable improvement over the traditional label fusion approaches including averaging, the majority vote and the widely used STAPLE framework and its recent extensions, in terms of both segmentation accuracy and the quality of confusion matrix (CM) estimation.
+
+In the future, we aim to extend this work both in theory and applications. Here we made a simplifying assumption that there is a single, unknown, true segmentation map of the underlying anatomy, and each individual annotator produces a noisy approximation to it with variations that reflect their individual characteristics. This is in stark contrast with many recent advances (e.g., Probabilistic U-net \cite{kohl2018probabilistic} and PHiSeg \cite{baumgartner2019phiseg}) that assume variable annotations from experts are all realistic instances of the true segmentation. One could argue that single-truth assumption may be sensible in the context of segmentation problems since there exists only one true boundary of the physical objects captured in an image while multiple hypothesis can arise from ambiguities in human interpretations. However, we believe that the reality lies somewhere between i.e., some variations are indeed intrinsic while some are specific to human imperfections. Separation of the two could be potentially addressed by using some prior knowledge about the individual annotators (e.g., meta-information such as the years of experiences, etc) \cite{raykar2009supervised} or using a small portion of dataset with curated annotations as a reference set which can be assumed to come from the true label distribution. 
+
+Another exciting avenue of research is the application of the annotation models in downstream tasks. Of particular interest is the design of active data collection schemes where the segmentation model is used to select which samples to annotate (``active learning''), and the annotator models are used to decide which experts to label them (``active labelling'')---e.g., extending Yan et al. \cite{yan2011active} from simple classification task to segmentation remains future work. Another exciting application is education of inexperienced annotators; the estimated spatial characteristics of segmentation mistakes provide further insights into their annotation behaviours, and as a result, potential help them improve the quality of their annotations in the next data acquisition. 
+
+
+%%Harvard
+% \bibliographystyle{model2-names.bst}\biboptions{authoryear}
+% \bibliography{refs}
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=\linewidth]{chapter_8/picture9.jpg}
+    \caption{Visualisation of segmentation labels on MNIST dataset for single label per image: (a) GT and simulated annotator’s segmentations (Annotator 1 - 5); (b) the predictions from the supervised models.}
+    \label{MNIST segmentation results}
+\end{figure*}
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=\linewidth]{chapter_8/picture8.jpg}
+    \caption{Visualisation of segmentation labels on ISBI 2015 challenge MS segmentation dataset for single label per image: (a) GT and simulated annotator’s segmentations (Annotator 1 - 5); (b) the predictions from the supervised models.}
+    \label{MS segmentation results}
+\end{figure*}
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=\linewidth]{chapter_8/picture91.jpg}
+    \caption{Visualisation of estimated true labels and confusion matrices on MNIST datasets (Best viewed in colour: white is the true positive, green is the false negative, red is the false positive and black is the true negative).}
+    \label{CMs of MNIST}
+\end{figure*}
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=\linewidth]{chapter_8/picture5.jpg}
+    \caption{Visualisation of estimated true labels and confusion matrices on ISBI 2015 challenge MS segmentation datasets (Best viewed in colour: white is the true positive, green is the false negative, red is the false positive and black is the true negative).}
+    \label{CMs of MS}
+\end{figure*}
+
+\begin{figure*}[h]
+        \center
+        \includegraphics[scale=0.12]{chapter_8/picture6.jpg}
+        \caption{The final segmentation of our model on BraTS and each annotator network predictions visualization. (Best viewed in colour: the target label is red.)}
+        \label{Brats results}
+\end{figure*}
+
+\begin{figure*}[h]  
+        \center
+        \includegraphics[scale=0.21]{chapter_8/picture7.jpg}
+        \caption{Segmentation results on LIDC-IDRI dataset and the visualization of each annotator contours and the consensus.}
+        \label{LIDCresults}
+\end{figure*}
+
+
+%%

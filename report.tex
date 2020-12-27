@@ -426,13 +426,27 @@ I, Ryutaro Tanno, confirm that the work presented in this thesis is my own. Wher
 
 
 \chapter*{Abstract}
-Should contain summaries of the three main components of the project, an individual paragraph to each: (a) why you did the work and what you were trying to achieve; (b) what methods you used and what results obtained; and (c) what you concluded from it. 
+Deep learning is now ubiquitous in the research field of medical image computing. As such technology progress towards clinical translation, the question of safety becomes critical. Once deployed, machine learning systems unavoidably face situations where the correct decision or prediction is ambiguous. However, the current methods disproportionately rely on deterministic algorithms, lacking a mechanism to represent and manipulate uncertainty. In safety-critical applications such as medical imaging, reasoning under uncertainty is crucial for developing a reliable decision making system. 
 
-\paragraph{Problem statement}
-Deep learning and decisions trees are now ubiquitous in the field of medical image processing. However, the current methods disproportionately rely on deterministic algorithms, which lack a mechanism to represent and manipulate uncertainty about models and predictions. In safety-critical applications such as medical imaging, quantifying what the model does not know is important for constructing a reliable decision making system. The aim of this thesis is to explore probabilitic modelling as a framework to integrate uncertainty information in deep learning and decision tree models, and demonstrate utility in various medical image processing applications. 
+Probabilistic machine learning provides a natural framework to quantify the degree of uncertainty over different variables of interest, be it the prediction, the model parameters and structures, or the underlying data (images and labels). Probability distributions are used to represent all the uncertain unobserved quantities in a model and how they relate to the data, and probability theory is used as a language to compute and manipulate these distributions. In this thesis, we explore probabilistic modelling as a framework to integrate uncertainty information into deep learning models, and demonstrate its utility in various high-dimensional medical imaging applications. In the process, we make several fundamental enhancements to current methods. 
 
-\paragraph{Scope}
-The thesis primarily focuses on both the development of new techniques for accounting for uncertainty information in deep learning and decision trees, and demonstrating their practical values in medical imaging applications. 
+We categorise our contributions into three groups according to the types of uncertainties being modelled: (i) predictive; (ii) structural and (iii) human uncertainty. \textit{Firstly}, we discuss the importance of quantifying predictive uncertainty and understanding its sources for developing a risk-averse and transparent medical image enhancement application. We demonstrate how a measure of predictive uncertainty can be used as a proxy for the predictive accuracy in the absence of ground-truths. Furthermore, assuming the structure of the model is flexible enough for the task, we introduce a way to decompose the predictive uncertainty into its orthogonal sources i.e. aleatoric and parameter uncertainty. We show the potential utility of such decoupling in providing a quantitative ``explanations'' into the model performance. \textit{Secondly}, we introduce our recent attempts at learning model structures directly from data. One work proposes a method based on variational inference to learn a posterior distribution over connectivity structures within a neural network architecture for multi-task learning, and share some preliminary results in the MR-only radiotherapy planning application. Another work explores how the training algorithm of decision trees could be extended to grow the architecture of a neural network to adapt to the given availability of data and the complexity of the task.  \textit{Lastly},  we develop methods to model the ``measurement noise'' (e.g., biases and skill levels) of human annotators, and integrate this information into the learning process of the neural network classifier. In particular, we show that explicitly modelling the uncertainty involved in the annotation process not only leads to an improvement in robustness to label noise, but also yields useful insights into the patterns of errors that characterise individual experts. 
+
+
+%Deep learning is now ubiquitous in the field of medical image computing. However, the current methods disproportionately rely on deterministic algorithms, which lack a mechanism to represent and manipulate uncertainty about models and predictions. In safety-critical applications such as medical imaging, quantifying what the model does not know is crucial for developing a reliable decision making system. 
+%
+%In this talk, I would like to give an overview of my past research and the future outlook, focusing on the methods for modelling (i) predictive, (ii) structural and (iii) human uncertainty. Firstly, I will discuss the importance of quantifying predictive uncertainty and understanding its sources for developing a risk-averse and transparent medical image enhancement application. Secondly, I will talk about our recent attempt at learning useful connectivity structures within a CNN model for multi-task learning, and share some preliminary results in the MR-only radiotherapy planning application. Lastly, I will present our recent work on modelling the uncertainty of multiple human annotators, and thereby learning efficiently in the presence of large label noise and disagreement, a pervasive issue in medical imaging datasets in practice. 
+
+%provides a natural framework to quantify the degree of uncertainty over different variables of interest, be it the prediction, the model parameters and structures, or the underlying data (images and labels) \cite{ghahramani2015probabilistic}.  The main goal of this thesis is to develop a practical framework for medical imaging applications to model and reason with different types of uncertainty in deep learning models by translating ideas from the paradigm of probabilistic machine learning. In the process, several fundamental enhancements to current methods arise. 
+
+
+% Should contain summaries of the three main components of the project, an individual paragraph to each: (a) why you did the work and what you were trying to achieve; (b) what methods you used and what results obtained; and (c) what you concluded from it. 
+
+%\paragraph{Problem statement}
+%Deep learning and decisions trees are now ubiquitous in the field of medical image processing. However, the current methods disproportionately rely on deterministic algorithms, which lack a mechanism to represent and manipulate uncertainty about models and predictions. In safety-critical applications such as medical imaging, quantifying what the model does not know is important for constructing a reliable decision making system. The aim of this thesis is to explore probabilitic modelling as a framework to integrate uncertainty information in deep learning and decision tree models, and demonstrate utility in various medical image processing applications. 
+%
+%\paragraph{Scope}
+%The thesis primarily focuses on both the development of new techniques for accounting for uncertainty information in deep learning and decision trees, and demonstrating their practical values in medical imaging applications. 
 
 %In order to find effective treatments for Alzheimer's disease (AD), a devastating neurodegenerative disease affecting millions of people worldwide, we need to identify subjects at risk of AD as early as possible. To this end, disease progression models have been recently developed, which not only to perform early diagnosis, but also estimate a unique disease signature that is used to predict the subjects' disease stages and future evolution. However, these models have not yet been applied to rare neurodegenerative diseases, are not suitable to understand the complex dynamics of biomarkers, work only on large multimodal datasets, and their predictive performance has not been objectively validated.
 %
@@ -480,17 +494,15 @@ Aknowledgement.
 \include{chapter_5/multitask_part1}
 \include{chapter_6/main}
 \include{chapter_7/main}
- \include{chapter_4/human_uncertainty}
+\include{chapter_4/human_uncertainty}
+\include{chapter_8/human_uncertainty_seg}
 \include{conclusions/conclusion}
-
-
 
 % these do NOT count as part of the suggested page count
 % This is probably a good place to explain the models in some detail for example
 
 %\appendix
 %\include{appendices/appendix}
-
 \cleardoublepage
 \bibliographystyle{unsrt}
 \bibliography{reference}

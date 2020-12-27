@@ -134,7 +134,8 @@ To make matters even worse, in practical applications such as medical imaging, t
 
 \section{``Classics'' in Uncertainty Modelling for Medical Imaging} \label{sec:classics_in_medical_imaging}
 % I would like to use this section to motivate the importance of uncertainty quantification in medical imaging applications. 
-The importance of representing uncertainty information has long been recognised in the medical imaging community before the recent surge of deep learning methods. There is a large body of prior research on uncertainty quantification, based on traditional probabilistic machine learning and statistical techniques in a variety of medical image processing tasks such as classification, registration, segmentation and synthesis. Here I provide a brief survey of such prior research. \textcolor{red}{Perhaps we could also include a paragraph on inverse problems?}
+The importance of representing uncertainty information has long been recognised in the medical imaging community before the recent surge of deep learning methods. There is a large body of prior research on uncertainty quantification, based on traditional probabilistic machine learning and statistical techniques in a variety of medical image processing tasks such as classification, registration, segmentation and synthesis. Here I provide a brief survey of such prior research. 
+%\textcolor{red}{Perhaps we could also include a paragraph on inverse problems?}
   
  % (Yarin says): This probabilistic view of machine learning offers confidence bounds for data analysis and decision making, information that a biologist for example would rely on to analyse her data, or an autonomous car would use to decide whether to brake or not. In analysing data or making decisions, it is required to be able to tell whether a model is certain about its output, being able to ask “maybe I need to use more diverse data? or change the model? or perhaps be careful when making a decision?”. Such questions are of fundamental concern in Bayesian machine learning, and have been studied extensively in the field [Ghahramani, 2015]. 
  
@@ -145,7 +146,7 @@ Many medical decisions can be viewed as classification tasks where the informati
 
 Another popular alternative to the above rule-based approaches is based on Bayesian networks (BNs) \cite{pearl2014probabilistic}. A typical BN-based decision model consists of a set of nodes and edges with directions, where the nodes are random variables which represent a set of symptoms and diseases, and the directed edges define the probabilistic relationships (conditional dependencies) between them, which can be more complex than the simple if-then-else conditional statements. In addition to such generality, BNs are attractive because they can naturally communicate the uncertainty in possible diagnostic alternatives as well as its underlying compositional reasoning even when data is incomplete or partially correct \cite{nikovski2000constructing}. Some notable applications of BNs include the diagnosis of cardiovascular diseases from echocardiography \cite{diez1997diaval}, prediction of mental retardation in newborn babies \cite{mani1997mentor}, and detection of breast cancer in mammography \cite{kahn1997construction,sajda2003multi,burnside2004probabilistic}. A more extensive review of the existing research, including attempts to mine unknown causal structures between symptoms and diseases, are provided in Sec.~2 in Luiz et al \cite{seixas2014bayesian}. Some of such development have also gone beyond the realm of academic research; several computerised diagnosis (also known as computer-aided diagnosis (CAD) \cite{doi1993digital}) systems have been approved by FDA for mammographic screening  and used in clinical practice \cite{sajda2006machine}. 
 
-\textcolor{red}{Lastly, we could perhaps also talk about ``ideal observer analysis''?}
+%\textcolor{red}{Lastly, we could perhaps also talk about ``ideal observer analysis''?}
 
 %Bayesian networks have been broadly applied in biomedicine, particularly in probabilistic expert systems for clinical diagnosis (96–98) and computational biology (99). They are attractive because they are able to deal with biomedical data that is incomplete or partially correct (100). A novel method for exploiting conditional dependencies in the structure of radiological images to improve detection of breast cancer is described below.
 
@@ -238,13 +239,13 @@ The thesis consists of 5 papers that touch on different types of uncertainties, 
 	
 \end{enumerate}
 
-Finally, in Chapter~\ref{chapter:conclusions}, we make overall conclusions, discuss the application of this technology and suggest directions for future research. For each chapter’s topic, we review the relevant prior art. 
+Finally, in Chapter~\ref{chapter:conclusions}, we make overall conclusions, discuss the application of this technology and suggest directions for future research. For each chapter’s topic, we review the relevant prior works. 
 
 
 %The thesis outline is as follows. In Chapter~\ref{chapter:biqt}, we introduce a probabilistic variant of decision trees to quantify predictive uncertainty, and demonstrate on image enhancement of neuroimages. In Chapter~\ref{chapter:deepuncertainty}, we focus on the same application, but explore ways to estimate the uncertainty over the prediction of deep learning models. We design a framework to jointly model the aleatoric uncertainty of the target mapping of interest, and the parameter uncertainty of the model, and propagate the two to estimate the predictive uncertainty. In Chapter~\ref{chapter:multitaskuncertainty_part1}, we show that the same concept could be naturally adapted to the multi-task learning paradigm, and demonstrate the benefits in the MR-only radiotherapy treatment planning application where the synthetic CT image and the segmentation of organs at risk are simultaneously predicted from the input MR image. Motivated by the same problem, Chapter~\ref{chapter:multitaskuncertainty_part2} introduces a Bayesian method to learn the connectivity structures in a neural network. The goal here is to disentangle task-specific and shared features across different tasks, and thereby benefit more from jointly learning from multiple related talks. In Chapter~\ref{chapter:ant}, we explore how the training algorithm of decision trees could be extended to learn the structure and the complexity of a network architecture for the given availability of data and the complexity of the task. In Chapter~\ref{chapter:humanuncertainty}, we consider explicitly modelling the ``measurement noise'' of human annotators, and propose a well-grounded and practical optimisation method to learn such noise model. We evaluate the method in the cardiac view classification task of ultrasound images, where the annotations are very noisy and sparse. 
 
 \section*{Publications}
-\small
+\footnotesize
 \begin{enumerate}
 	\item \textbf{R. Tanno}, A. Ghosh, F. Grussu, E. Kaden, A. Criminisi, and D. C. Alexander, “Bayesian image quality transfer". (2016) \textbf{MICCAI}
 	
@@ -264,8 +265,6 @@ Finally, in Chapter~\ref{chapter:conclusions}, we make overall conclusions, disc
 	\item \textbf{R. Tanno}, K. Arulkumaran, D. C. Alexander, A. Criminisi and A. Nori,  “Adaptive Neural Trees”.  (2019) \textbf{ICML }
 	\item F.J.S. Bragman$^*$, \textbf{R. Tanno}$^*$, S. Ourselin, D. C. Alexander, M. J. Cardoso, ``Stochastic Filter Groups for Multi-Task CNNs: Learning Specialist and Generalist Convolution Kernels''.  (2019) \textbf{ICCV} ($^*$ equal contributions)
 	
-	\item \textbf{R. Tanno}, D. E. Worrall, E. Kaden, A. Ghosh, F. Grussu, A. Bizzi, S. N. Sotiropoulos, A. Criminisi, and D. C. Alexander, ``Uncertainty Quantification in Deep Learning for Safer Neuroimage Enhancement''. (2019) \textbf{Neuroimage} (Under Submission)
-	
 	\item F.J.S. Bragman$^*$, \textbf{R. Tanno}$^*$, S. Ourselin, D. C. Alexander, M. J. Cardoso, ``Learning task-specific and shared representations in medical imaging''.  (2019) \textbf{MICCAI} ($^*$equal contributions)
 	
 	\item C. Sudre, B.G. Anson, S. Ingala, D. Jimenez, C. Lane, L. Haider, T. Varsavsky,  \textbf{R.~Tanno}, L. Smith, S. Ourselin, R. Jager, M. J. Cardoso, ``Let's agree to disagree: learning highly debatable multirater labelling''.  (2019) \textbf{MICCAI} 
@@ -273,7 +272,19 @@ Finally, in Chapter~\ref{chapter:conclusions}, we make overall conclusions, disc
 	\item S. B. Blumberg, M. Palombo, C. S. Khoo, C. Tax, \textbf{R. Tanno}, D. C Alexander. “Multi-Stage Prediction Networks for Data Harmonization”. (2019) \textbf{MICCAI }
 	
 	\item K. Quan, \textbf{R. Tanno}, M. Duong, R. Shipley, M. Jones, C. Bereton, J. Hurst, D. Hawkes, J. Jacobs, 	``Modelling Airway Geometry as Stock Market Data using Bayesian Changepoint Detection'', (2019) \textbf{MICCAI} 10$^{\text{th}}$Machine Learning in Medical Imaging Workshop
-	
+
+\item C. Jin, \textbf{R. Tanno}, M. Xu, T. Mertzanidou, D. C. Alexander, ``Foveation for Segmentation of Mega-Pixel Histology Images''.  (2020) \textbf{MICCAI} 
+
+\item L. Zhang$^*$, \textbf{R. Tanno}$^*$,  C. Jin, J. Jacob, O. Ciccarelli, F. Barkhof, D. C. Alexander, ``Learning to Segment When Experts Disagree''.  (2020) \textbf{MICCAI} ($^*$equal contributions)
+
+\item \textbf{R. Tanno}, D. E. Worrall, E. Kaden, A. Ghosh, F. Grussu, A. Bizzi, S. N. Sotiropoulos, A. Criminisi, and D. C. Alexander, ``Uncertainty Quantification in Deep Learning for Safer Neuroimage Enhancement''. (2020) \textbf{Neuroimage} 
+
+\item L. Zhang$^*$, \textbf{R. Tanno}$^*$, M. Xu, C. Jin, J. Jacob, O. Ciccarelli, F. Barkhof, D. C. Alexander, ``Disentangling Human Error from the Ground Truth in Segmentation of Medical Images''.  (2020) \textbf{NeurIPS} ($^*$equal contributions)
+
+
+
+
+
 \end{enumerate}
 
 \section*{Patents}
