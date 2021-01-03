@@ -83,14 +83,14 @@
 %
 
 
-\chapter{Modelling Human Uncertainty} \label{chapter:humanuncertainty}
+\chapter{Modelling Human Uncertainty (I): \,\,\,\, Classification} \label{chapter:humanuncertainty}
 %\title{Learning From Noisy Labels By \\
 %Regularized Estimation Of Annotator Confusion}
 
 %\textcolor{red}{Here you can add to the motivation based on Ben's outlook on the present availability of data to train ML models \cite{harvey2019standardised} which is nicely summarised in the following sentence: "Medical imaging data is now extremely abundant due to over two decades of digitisation of imaging protocols and data storage formats. However, clean, well-curated data, that is amenable to machine learning, is relatively scarce, and AI developers are paradoxically data starved". Also, have a look at "Quality and Curation of Medical Images and Data: Opportunities, Applications and Risks" \cite{van2019quality} in the same book. Variability in lables is an established problem in radiology e.g. inter-rater variability in the range 74-85\% for glioblastoma \cite{menze2014multimodal}, datasets can contain incorrect segmentations \cite{wachinger2015brainprint}. }
 
 %------------------ Abstract ------------------------------------
-\paragraph{Abstract: }
+%\paragraph{Abstract: }
 The predictive performance of supervised learning algorithms depends on the quality of labels. In a typical label collection process, multiple annotators provide subjective noisy estimates of the ``truth" under the influence of their varying skill-levels and biases. Blindly treating these noisy labels as the ground truth limits the accuracy of learning algorithms in the presence of strong disagreement. This problem is critical for applications in domains such as medical imaging where both the annotation cost and inter-observer variability are high. In this work, we present a method for simultaneously learning the individual annotator model and the underlying true label distribution, using only noisy observations. Each annotator is modeled by a confusion matrix that is jointly estimated along with the classifier predictions. We propose to add a regularization term to the loss function that encourages convergence to the true annotator confusion matrix. We provide a theoretical argument as to how the regularization is essential to our approach both for the case of single annotator and multiple annotators. Despite the simplicity of the idea, experiments on image classification tasks with both simulated and real labels show that our method either outperforms or performs on par with the state-of-the-art methods and is capable of estimating the skills of annotators even with a single label available per image. This chapter is based on the publication \cite{tanno2019learning}. 
  
 
@@ -220,7 +220,7 @@ We also provide pseudo-codes of our method (Algorithm 2), generalized EM \cite{r
 \begin{algorithm}
 	\caption{Our method}
 	\label{alg:ourmethod}
-		\small
+		\footnotesize
 	\begin{algorithmic}
 		%\Require Topology $\mathbb{T}$, parameters $\theta$
 		\State \textbf{Inputs}: $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$,
@@ -238,7 +238,7 @@ We also provide pseudo-codes of our method (Algorithm 2), generalized EM \cite{r
 \begin{algorithm}
 	\caption{Generalized EM \cite{raykar2009supervised}}
 	\label{alg:generalised_em}
-	\small
+	\footnotesize
 	\begin{algorithmic}
 		%\Require Topology $\mathbb{T}$, parameters $\theta$
 		\State \textbf{Inputs}: $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$,
@@ -272,7 +272,7 @@ We also provide pseudo-codes of our method (Algorithm 2), generalized EM \cite{r
 \begin{algorithm}
 	\caption{Model-Bootstrapped EM \cite{khetan2017learning}}
 	\label{alg:generalised_em}
-	\small
+	\footnotesize
 	\begin{algorithmic}
 		%\Require Topology $\mathbb{T}$, parameters $\theta$
 		\State \textbf{Inputs}: $\mathcal{D} = \{\textbf{x}_n, \tilde{y}^{(1)}_{n},...,\tilde{y}^{(R)}_{n}\}_{n=1}^{N}$,

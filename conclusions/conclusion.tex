@@ -1,12 +1,11 @@
 \chapter{Conclusions and Future Work} \label{chapter:conclusions}
 
-This thesis has explored the utility of modelling and reasoning with different types of uncertainty in deep learning models in high-dimensional, challenging medical imaging applications where safety is critical. The paucity of methodological literature upon embarking on this journey in 2015 motivated the development of new algorithms presented in the thesis, many of which are attained by translating ideas from the established paradigm of probabilistic machine learning to the developing world of deep learning. While most of the research questions I have attempted to answer derive from specific applications, the resultant solutions are general and their applicability extends to other problems in medical imaging and beyond. This chapter is intended to summarise the key implications of the respective chapters in a wider context and finally discuss open questions and challenges that remain.
+This thesis has explored the utility of modelling and reasoning with different types of uncertainty in deep learning models in high-dimensional, challenging medical imaging applications where safety is critical. The paucity of methodological literature upon embarking on this journey in 2015 motivated the development of new algorithms presented in the thesis, many of which are attained by translating ideas from the established paradigm of probabilistic machine learning to the developing world of deep learning. While most of the research questions I have attempted to answer derive from specific applications, the resultant solutions are general and their applicability extends to other problems in medical imaging and beyond. 
+%This chapter is intended to summarise the key implications of the respective chapters in a wider context and finally discuss open questions and challenges that remain. 
 
-
-\section{Summary}
 \paragraph{Predictive uncertainty and its Constituents}
-
 Chapter~\ref{chapter:deepuncertainty} has investigated the importance of quantifying predictive uncertainty and its constituents (namely, aleatoric and parameter uncertainty) in the context of MRI super-resolution application. In particular we have demonstrated that rather simple attempts at modelling uncertainty (with the mean-field Gaussian likelihood and variational approximation of the weight posterior) confer tangible benefits such as 1) performance improvement: e.g., the generalisation to out-of-distribution data and robustness to input noise and outliers; 2) reliability assessment of prediction: e.g., certification of performance based on uncertainty-thresholding and detection of unfamiliar structures. Moreover, assuming sufficient flexibility of the model structure, we also introduce a way to decompose the predictive uncertainty into its orthogonal sources i.e. aleatoric and parameter uncertainty. Preliminary results indicate the potential utility of such decoupling in providing a quantitative ``explanations'' into the model's under-performance (e.g., if one observes high parameter and low parameter uncertainty around a certain image feature, then acquiring more training data of similar cases may be recommended). However, much work still is needed to design systematic means to elicit actionable insights from such uncertainty decomposition. 
+
 
 Chapter~\ref{chapter:multitaskuncertainty_part1} has shown that the same methods of uncertainty modelling could be naturally extended to the multi-task learning setting. Such adaptation leads to a mechanism which automatically determines, in a spatially adaptive fashion, the relative weighting between the task losses, which is a key determinant in the efficacy of multi-task learning. We demonstrate similar benefits in performance improvement and reliability assessment in another challenging multi-task image translation problem where the synthetic CT image and the segmentation of organs at risk are simultaneously predicted from the input MR image for the downstream radio-therapy planning. 
 
@@ -18,38 +17,37 @@ In contrast, Chapter~\ref{chapter:ant} moves away from the probabilistic treatme
 \paragraph{Annotation Uncertainty}
 In many medical imaging applications, acquiring reliable annotations is often challenging due to the high cost and rarity of highly experienced clinical experts. As a result, many medical imaging datasets in practice are contaminated with systematic annotation noise (a form of "measurement error") which are complex functions of biases (e.g., personality, hospital policies) and competence levels (e.g., amount of experiences) of individual human experts. However, annotation noise is commonly seen as a form of (irreducible) aleatoric uncertainty, and unwillingly accepted as a part of the training data without any additional measure. 
 
-Contrary to such popular stance, Chapter~\ref{chapter:humanuncertainty} develops a method that explicitly models the annotation noise  (e.g., biases and skill levels) of human experts, and thereby better infer the (possibly unobserved) true label distribution, from noisy labels alone, by ``inverting'' such noise models. A well-grounded and practical optimisation method is designed to disentangle the annotation noise and the true labels, leading to a considerable improvement in accuracy in a real-world classification task where the annotations are very noisy and sparse. Chapter.~\ref{chapter:humanuncertainty_segmentation} extends this idea to the more challenging task of semantic segmentation where every pixel in the input image is classified. The modified noise model combined with an effective optimisation algorithm improve substantially the robustness of the model to annotation noise in three established benchmarks in comparison with the blind approach based on the majority vote and more established label curation methods. These empirical evidence in both classification and segmentation suggest that if one has a good understanding of the noise behaviours present in the data, incorporating them explicitly into the model helps and even allow ones to learn a model that is more accurate than the available data. 
+Contrary to such popular stance, Chapter~\ref{chapter:humanuncertainty} develops a method that explicitly models the annotation noise  (e.g., biases and skill levels) of human experts, and thereby better infer the (possibly unobserved) true label distribution, from noisy labels alone, by ``inverting'' such noise models. A well-grounded and practical optimisation method is designed to disentangle the annotation noise and the true labels, leading to a considerable improvement in accuracy in a real-world classification task where the annotations are very noisy and sparse. Chapter.~\ref{chapter:humanuncertainty_seg} extends this idea to the more challenging task of semantic segmentation where every pixel in the input image is classified. The modified noise model combined with an effective optimisation algorithm improve substantially the robustness of the model to annotation noise in three established benchmarks in comparison with the blind approach based on the majority vote and more established label curation methods. These empirical evidence in both classification and segmentation suggest that if one has a good understanding of the noise behaviours present in the data, incorporating them explicitly into the model helps and even allow ones to learn a model that is more accurate than the available data. 
 
 
-\section{Open Challenges}
-There are several future research directions that can be pursued after this work. Challenges concerning the quality of 
-
-Perhaps refer the readers to Yingzhen's and Nalishik's thesis for good surveys of open challenges. 
-
-
-\subsection{Clinical translation of uncertainty estimates}
-
-\subsection{Robustness of predictive uncertainty under data shifts}
-Observed even in toy classification benchmarks: \cite{ovadia2019can}
-
-
-\subsection{Uncertainty Propagation}
-
-\subsection{Interpretability of Uncertainty} 
-Uncertainty is useful for yielding insights into failure cases. Decomposition of uncertainty into "actionable" components. Relation to the existing methods such as ANOVA and Borel Decomposition would be interesting. 
-
-\subsection{Lack of Benchmarks}
-Mention Google's recent benchmark. Importance of high-dimensional sysnthetic datasets. 
-Simulation of pathology e.g., https://brainweb.bic.mni.mcgill.ca/brainweb/
-
-\subsection{Scalability}
-
-\subsection{Structural Uncertainty: Model Selection}
-Model misspecificaion,  
-
-\subsection{Annotation and measurement noise} 
-Noise models, 
-
-\subsection{Under-explored Applications} 
-Continual learning (e.g., VAE), active learning, data adjudication (e.g., label cleansing/outlier removal), data acquisition (e.g., EDDI), causal inference, reinforcement learning (Exploration vs Exploitation)
- 
+%There are several future research directions that can be pursued after this work. Challenges concerning the quality of 
+%
+%Perhaps refer the readers to Yingzhen's and Nalishik's thesis for good surveys of open challenges. 
+%
+%
+%\subsection{Clinical translation of uncertainty estimates}
+%
+%\subsection{Robustness of predictive uncertainty under data shifts}
+%Observed even in toy classification benchmarks: \cite{ovadia2019can}
+%
+%
+%\subsection{Uncertainty Propagation}
+%
+%\subsection{Interpretability of Uncertainty} 
+%Uncertainty is useful for yielding insights into failure cases. Decomposition of uncertainty into "actionable" components. Relation to the existing methods such as ANOVA and Borel Decomposition would be interesting. 
+%
+%\subsection{Lack of Benchmarks}
+%Mention Google's recent benchmark. Importance of high-dimensional sysnthetic datasets. 
+%Simulation of pathology e.g., https://brainweb.bic.mni.mcgill.ca/brainweb/
+%
+%\subsection{Scalability}
+%
+%\subsection{Structural Uncertainty: Model Selection}
+%Model misspecificaion,  
+%
+%\subsection{Annotation and measurement noise} 
+%Noise models, 
+%
+%\subsection{Under-explored Applications} 
+%Continual learning (e.g., VAE), active learning, data adjudication (e.g., label cleansing/outlier removal), data acquisition (e.g., EDDI), causal inference, reinforcement learning (Exploration vs Exploitation)
+% 
