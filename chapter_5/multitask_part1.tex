@@ -32,7 +32,7 @@
 \chapter{Uncertainty in Multitask Learning (I): Spatially Adaptive Weighting of Task Loss Functions} \label{chapter:multitaskuncertainty_part1}
 %\chapter{Uncertainty in Multitask Learning for MR-only Radiotherapy Planning (I): Spatially Adaptive Weighting of Task Loss Functions} \label{chapter:multitaskuncertainty_part1}
 
-\paragraph{Abstract:} In this chapter, we extend the methods of uncertainty modelling introduced in Chapter~\ref{chapter:deepuncertainty} to the multi-task learning setting. Such adaptation naturally yields a mechanism to automatically determine, in a spatially adaptive fashion, the relative weighting between the task losses, which is a key determinant in the efficacy of multi-task learning. Focusing on the task of structured predictions, we evaluate the benfits of this idea in the context of MR-only radiotherapy planning by considering the multi-task learning problem of simultaneously regressing a synthetic CT (synCT) scan and segmenting  organs at risk (OAR) from the input MRI. We test our method on prostate cancer scans and show that it achieves state-of-the-art performance in the regression and segmentation of prostate cancer scans. We further show that the estimates of uncertainty correlate strongly in areas prone to errors across both tasks, which can be used as mechanism for quality control in radiotherapy treatment planning. This chapter is based on a joint work \cite{bragman2018uncertainty} with Felix Bragman.
+\paragraph{Abstract:} In this chapter, we extend the methods of uncertainty modelling introduced in Chapter~\ref{chapter:deepuncertainty} to the multi-task learning setting. Such adaptation naturally yields a mechanism to automatically determine, in a spatially adaptive fashion, the relative weighting between the task losses, which is a key determinant in the efficacy of multi-task learning. Focusing on the task of structured predictions, we evaluate the benfits of this idea in the context of MR-only radiotherapy planning by considering the multi-task learning problem of simultaneously regressing a synthetic CT (synCT) scan and segmenting  organs at risk (OAR) from the input MRI. We test our method on prostate cancer scans and show that it achieves state-of-the-art performance in the regression and segmentation of prostate cancer scans. We further show that the estimates of uncertainty correlate strongly in areas prone to errors across both tasks, which can be used as mechanism for quality control in radiotherapy treatment planning. This chapter is based on a joint work \cite{bragman2018uncertainty} with Felix Bragman. My primary contributions are method development and experiment design. 
 
 \section{Introduction}
 % (version 2):
@@ -58,7 +58,7 @@ Here we use a standard multi-task learning architecture with hard-parameter shar
 	\begin{figure}[!b]
 		\centering
 \includegraphics[height=0.185\textwidth]{chapter_5/figures/final_for_ryu_MT.pdf}
-		\caption{Multi-task learning architecture. The predictive mean and variance $[f^{\mathbf{W}}_i(\text{\textbf{x}}), \sigma_{i}^{\mathbf{W}}(\text{\textbf{x}})^{2}]$ are estimated for the regression and segmentation. The task-specific likelihoods p$\left(\text{\textbf{y}}_{i}|\text{\textbf{W}},\text{\textbf{x}}\right)$ are combined to yield the multi-task likelihood p$\left(\text{\textbf{y}}_{1}, \text{\textbf{y}}_{2}|\text{\textbf{W}},\mathbf{x}\right)$.} 
+		\caption{\footnotesize Multi-task learning architecture. The predictive mean and variance $[f^{\mathbf{W}}_i(\text{\textbf{x}}), \sigma_{i}^{\mathbf{W}}(\text{\textbf{x}})^{2}]$ are estimated for the regression and segmentation. The task-specific likelihoods p$\left(\text{\textbf{y}}_{i}|\text{\textbf{W}},\text{\textbf{x}}\right)$ are combined to yield the multi-task likelihood p$\left(\text{\textbf{y}}_{1}, \text{\textbf{y}}_{2}|\text{\textbf{W}},\mathbf{x}\right)$.} 
 		\label{fig:diagram}
 	\end{figure}
     
@@ -181,7 +181,7 @@ We performed a 3-fold cross-validation. Statistics over all hold-out sets are re
 
 \subsection{Model performance}
 \begin{table}[!b]
-\caption{Model comparison. Bold values indicate where a model was significantly worse than M4 $p<0.05$. No data was available for significance testing with AP. M2b was statistically better $p<0.05$ than M4 in the prostate segmentation.}
+\caption{\footnotesize Model comparison. Bold values indicate where a model was significantly worse than M4 $p<0.05$. No data was available for significance testing with AP. M2b was statistically better $p<0.05$ than M4 in the prostate segmentation.}
 \begin{center}
 \scalebox{0.90}{
 \begin{tabular}{lccccccc}
@@ -230,7 +230,7 @@ An example of the model output is shown in Fig.~\ref{fig:diagram2}. We calculate
 	{\includegraphics[height=0.21\textwidth]{chapter_5/figures/new_figure_1a.pdf}}%
 	\hspace{3pt}
 	{\includegraphics[height=0.21\textwidth]{chapter_5/figures/new_figure_1b.pdf}}%
-	\caption{Example output from the proposed network. The propagated \textit{intrinsic} and \textit{parameter} uncertainty both correlate with regions of high contrast (bone in the regression, organ boundary for segmentation). Note the correlation between model error and the predicted uncertainty.}
+	\caption{\footnotesize Example output from the proposed network. The propagated \textit{intrinsic} and \textit{parameter} uncertainty both correlate with regions of high contrast (bone in the regression, organ boundary for segmentation). Note the correlation between model error and the predicted uncertainty.}
 	\label{fig:diagram2}
 \end{figure}
 
@@ -245,7 +245,7 @@ The predictive uncertainty can be exploited for quality assurance (Fig. \ref{fig
 	{\includegraphics[trim=0mm 0mm 0mm 0mm,clip=true,height=0.29\textwidth,keepaspectratio]{chapter_5/figures/new_fig_z_1.pdf}}
 	\hspace{0.01\textwidth}
 	{\includegraphics[trim=0mm 0mm 0mm 0mm,clip=true,height=0.29\textwidth,keepaspectratio]{chapter_5/figures/fig_z_2.png}}
-	\caption{Analysis of uncertainty estimation. a) synCTs and z-scores for the a subject between M4 (top) and M3 (bottom) models. b) z-score distribution of all patients ($15$) between both models.}
+	\caption{\footnotesize Analysis of uncertainty estimation. a) synCTs and z-scores for the a subject between M4 (top) and M3 (bottom) models. b) z-score distribution of all patients ($15$) between both models.}
 	\label{fig:diag3}
 \end{figure}
 
@@ -266,7 +266,7 @@ The predictive uncertainty can be exploited for quality assurance (Fig. \ref{fig
 \begin{figure}[!t]
 	\centering
 	\includegraphics[width=\linewidth]{chapter_5/figures/new_qa.pdf}
-	\caption{Uncertainty in problematic areas. a) T2 with reference segmentation, b) synCT with localised errors at the rectum, c) propagated intrinsic uncertainty in synCT, d) propagated parameter uncertainty in synCT, e) total predictive uncertainty and f) error in HU (range [-750HU, 750HU]).} 
+	\caption{\footnotesize Uncertainty in problematic areas. a) T2 with reference segmentation, b) synCT with localised errors at the rectum, c) propagated intrinsic uncertainty in synCT, d) propagated parameter uncertainty in synCT, e) total predictive uncertainty and f) error in HU (range [-750HU, 750HU]).} 
 	\label{fig:diagram4}
 \end{figure}
 

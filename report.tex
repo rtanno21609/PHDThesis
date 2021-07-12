@@ -129,6 +129,7 @@
 
 % \usepackage{algpseudocode} % for writing pseudocode & algorithms
 \usepackage{algorithm,algpseudocode}
+\counterwithin{algorithm}{chapter}
 %\usepackage[linesnumbered]{algorithm2e}
 %\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
 %\SetCommentSty{mycommfont}
@@ -195,8 +196,8 @@
 % % Left bar
 \usepackage{framed}
 \usepackage{amsthm}
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
 
 \newcommand{\etal}{\textit{et al.}}
 
@@ -429,7 +430,7 @@ I, Ryutaro Tanno, confirm that the work presented in this thesis is my own. Wher
 
 
 \chapter*{Abstract}
-Deep learning is now ubiquitous in the research field of medical image computing. As such technology progress towards clinical translation, the question of safety becomes critical. Once deployed, machine learning systems unavoidably face situations where the correct decision or prediction is ambiguous. However, the current methods disproportionately rely on deterministic algorithms, lacking a mechanism to represent and manipulate uncertainty. In safety-critical applications such as medical imaging, reasoning under uncertainty is crucial for developing a reliable decision making system. 
+Deep learning is now ubiquitous in the research field of medical image computing. As such technologies progress towards clinical translation, the question of safety becomes critical. Once deployed, machine learning systems unavoidably face situations where the correct decision or prediction is ambiguous. However, the current methods disproportionately rely on deterministic algorithms, lacking a mechanism to represent and manipulate uncertainty. In safety-critical applications such as medical imaging, reasoning under uncertainty is crucial for developing a reliable decision making system. 
 
 Probabilistic machine learning provides a natural framework to quantify the degree of uncertainty over different variables of interest, be it the prediction, the model parameters and structures, or the underlying data (images and labels). Probability distributions are used to represent all the uncertain unobserved quantities in a model and how they relate to the data, and probability theory is used as a language to compute and manipulate these distributions. In this thesis, we explore probabilistic modelling as a framework to integrate uncertainty information into deep learning models, and demonstrate its utility in various high-dimensional medical imaging applications. In the process, we make several fundamental enhancements to current methods. 
 
@@ -455,7 +456,9 @@ We categorise our contributions into three groups according to the types of unce
 %
 %In this work I developed novel models of disease progression and applied them to estimate the progression of Alzheimer's disease and Posterior Cortical atrophy, a rare neurodegenerative syndrome causing visual deficits. My first contribution is a study on the progression of Posterior Cortical Atrophy, using models already developed: the Event-based Model (EBM) and the Differential Equation Model (DEM). My second contribution is the development of DIVE, a novel spatio-temporal model of disease progression that estimates fine-grained spatial patterns of pathology, potentially enabling us to understand complex disease mechanisms relating to pathology propagation along brain networks. My third contribution is the development of Disease Knowledge Transfer (DKT), a novel disease progression model that estimates the multimodal progression of rare neurodegenerative diseases from limited, unimodal datasets, by transferring information from larger, multimodal datasets of typical neurodegenerative diseases. My fourth contribution is the development of novel extensions for the EBM and the DEM, and the development of novel measures for performance evaluation of such models. My last contribution is the organization of the TADPOLE challenge, a competition which aims to identify algorithms and features that best predict the evolution of AD. 
 
-%\chapter*{Impact Statement}
+\chapter*{Impact Statement}
+This thesis introduces new algorithms for modelling different types of uncertainty in deep learning models and explores utility thereof in high-dimensional, challenging medical imaging applications where safety is critical. We have demonstrated that appropriate modelling of uncertainty not only improves the predictive performance of the machine learning model in an array of settings (e.g., within-distribution and out-of-distribution generalisation, presence of outliers/noisy labels in the training data, scenarios in which multiple tasks are jointly learned, etc), but also enables quantification of risks associated with the prediction, which can be used to manage the safety of downstream decision-making.  While most of the algorithmic advances were motivated by specific medical applications, the resultant solutions are general and thus their applicability extends to other problems in medical imaging and beyond (e.g., computer vision). 
+
 %\thispagestyle{empty}
 
 %The work presented in this thesis furthers our understanding of the temporal evolution of Posterior Cortical Atrophy and Alzheimer's disease. The disease progression models and evaluation techniques that we developed can help towards understanding underlying disease mechanisms, aid patient stratification and drug evaluation in clinical trials for Alzheimer's disease and Posterior Cortical Atrophy, and can be used in clinical practice for predicting the future evolution of subjects that are at risk of developing Alzheimer's disease. 
@@ -465,9 +468,9 @@ We categorise our contributions into three groups according to the types of unce
 % link: https://www.grad.ucl.ac.uk/essinfo/docs/Impact-Statement-Guidance-Notes-for-Research-Students-and-Supervisors.pdf
 
 
-%\chapter*{Acknowledgements}
-%\thispagestyle{empty}
-%Aknowledgement. 
+\chapter*{Acknowledgements}
+\thispagestyle{empty}
+Aknowledgement. 
 
 
 %%%%%%%%%%% MPhil transfer statement %%%%%%%%%%%%

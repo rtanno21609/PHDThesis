@@ -21,7 +21,7 @@ In the SARCOS experiments, all the non-NN-based methods were trained using sciki
 
 \subsection{Model Performance}
 \begin{table*}[ht!]
-	\caption{ Comparison of performance of different models on SARCOS, MNIST and CIFAR-10. The columns ``Error (multi-path)'' and ``Error (single-path)'' indicate the classification ($\%$) or regression (MSE) errors of predictions based on the multi-path and the single-path inference. The columns ``Params. (multi-path)'' and ``Params. (single-path)'' respectively show the total number of parameters in the model and the average number of parameters used during single-path inference. ``Ensemble Size'' indicates the size of ensemble used. An entry of ``--'' indicates that no value was reported.  Methods marked with \textsuperscript{\textdagger} are from our implementations trained in the same experimental setup. * indicates that the parameters are initialised with a pre-trained CNN.}
+	\caption{\footnotesize Comparison of performance of different models on SARCOS, MNIST and CIFAR-10. The columns ``Error (multi-path)'' and ``Error (single-path)'' indicate the classification ($\%$) or regression (MSE) errors of predictions based on the multi-path and the single-path inference. The columns ``Params. (multi-path)'' and ``Params. (single-path)'' respectively show the total number of parameters in the model and the average number of parameters used during single-path inference. ``Ensemble Size'' indicates the size of ensemble used. An entry of ``--'' indicates that no value was reported.  Methods marked with \textsuperscript{\textdagger} are from our implementations trained in the same experimental setup. * indicates that the parameters are initialised with a pre-trained CNN.}
 	\label{table:mnist_results}
 	\centering
 	\footnotesize
@@ -102,7 +102,7 @@ In addition, Tab.~\ref{tab:flops} shows that the single-path inference reduces t
 
 \begin{table}[h]
 	% 	\caption {Comparison of classification performance between the default single-path inference scheme and the prediction based on the least likely expert. \label{tab:test_routers} between the }
-	\caption{\small Comparison of FLOPs. The results for ResNet110 and DenseNet were retrieved from \cite{guan2017energy} and \cite{huang2018condensenet}, respectively. The FLOPs of all other models were computed using TorchStat toolbox available at \url{https://github.com/Swall0w/torchstat}.  \label{tab:flops}}
+	\caption{\footnotesize Comparison of FLOPs. The results for ResNet110 and DenseNet were retrieved from \cite{guan2017energy} and \cite{huang2018condensenet}, respectively. The FLOPs of all other models were computed using TorchStat toolbox available at \url{https://github.com/Swall0w/torchstat}.  \label{tab:flops}}
 	\vspace{-5mm}
 	\footnotesize
 	\center
@@ -190,7 +190,7 @@ Shortcut connections \cite{fahlman1990cascade} have recently lead to leaps in pe
 Tab.~\ref{table:traintime} summarises the time taken on a single Titan X GPU for the growth phase and refinement phase of various ANTs trained on the CIFAR10 dataset, and compares against the training time of All-CNN \cite{springenberg2014striving}. Local optimisation during the growth phase means that the gradient computation is constrained to the newly added component of the graph, allowing us to grow a good candidate model under $3$ hours on one GPU. 
 \begin{table}[ht]
 	\footnotesize
-	\caption{Training time comparison. Time and number of epochs taken for the growth and refinement phase are shown. along with the time required to train the baseline, All-CNN \cite{springenberg2014striving}.}
+	\caption{\footnotesize Training time comparison. Time and number of epochs taken for the growth and refinement phase are shown. along with the time required to train the baseline, All-CNN \cite{springenberg2014striving}.}
 	\label{table:traintime}
 	%\vskip 0.1in  % Was 0.15in
 	\vspace{-7mm}
@@ -216,20 +216,20 @@ Tab.~\ref{table:traintime} summarises the time taken on a single Titan X GPU for
 \subsection{Interpretability}
 \begin{figure*}[t!]
 	\center
-	\begin{subfigure}[t]{0.9\linewidth}
+	\begin{subfigure}[t]{\linewidth}
 		\includegraphics[width=\linewidth]{chapter_7/figures/fig_7_9.png}
 		%\label{fig:ch5:active}
 		\vspace{-6mm}
 		\caption{Before refinement}
 	\end{subfigure}
 	\hspace{4.66mm}
-	\begin{subfigure}[t]{0.9\linewidth}
+	\begin{subfigure}[t]{\linewidth}
 		\includegraphics[width=\linewidth]{chapter_7/figures/fig_7_10.png}
 		%\label{fig:ch5:active2}
 		\vspace{-6mm}
 		\caption{After refinement}
 	\end{subfigure}
-	\caption{\small Visualisation of class distributions (red) and path probabilities (blue) computed over the whole test set at respective nodes of an example ANT (a) before and (b) after the refinement phase. (a) shows that the model captures an interpretable hierarchy, grouping semantically similar images on the same branches. (b) shows that the refinement phase polarises path probabilities, pruning a branch.}
+	\caption{\footnotesize Visualisation of class distributions (red) and path probabilities (blue) computed over the whole test set at respective nodes of an example ANT (a) before and (b) after the refinement phase. (a) shows that the model captures an interpretable hierarchy, grouping semantically similar images on the same branches. (b) shows that the refinement phase polarises path probabilities, pruning a branch.}
 	\label{fig:learnedmodel}
 \end{figure*}
 
@@ -238,7 +238,7 @@ The growth procedure of ANTs is capable of discovering hierarchical structures i
 To further attest that the model learns a meaningful routing strategy, we also present the test accuracy of the predictions from the leaf node with the smallest reaching probability in Tab.~\ref{tab:test_routers}. We observe that using the least likely ``expert'' leads to a substantial drop in classification accuracy to close to that of random guess or even worse for large trees (ANT-MNIST-C and ANT-CIFAR10-C). This demonstrates that features in ANTs become specialised to the subsets of the partitioned input space at lower levels in the tree hierarchy. 
 
 \begin{table}[h]
-	\caption {Comparison of classification performance between the default single-path inference scheme and the prediction based on the least likely expert. \label{tab:test_routers} between the }
+	\caption{\footnotesize Comparison of classification performance between the default single-path inference scheme and the prediction based on the least likely expert. \label{tab:test_routers} between the }
 	\footnotesize
 	\center
 	\begin{tabular}{|l|c|c|}
@@ -260,8 +260,8 @@ In addition, most learned trees are unbalanced. This property of adaptive comput
 
 \begin{figure*}[ht]
 	\center
-	\includegraphics[width=0.8\linewidth]{chapter_7/figures/trees_all.pdf}
-	\caption{\small Illustration of discovered ANT architectures. (i) ANT-MNIST-A, (ii) ANT-MNIST-B, (iii) ANT-MNIST-C, (iv) ANT-CIFAR10-A, (v) ANT-CIFAR10-B, (vi) ANT-CIFAR10-C. Histograms in red and blue show the class distributions and path probabilities at respective nodes. Small black circles on the edges represent transformers, circles in white at the internal nodes represent routers, and circles in gray are solvers. The small white circles on the edges denote specific cases where transformers are identity functions.}
+	\includegraphics[width=\linewidth]{chapter_7/figures/trees_all.pdf}
+	\caption{\footnotesize Illustration of discovered ANT architectures. (i) ANT-MNIST-A, (ii) ANT-MNIST-B, (iii) ANT-MNIST-C, (iv) ANT-CIFAR10-A, (v) ANT-CIFAR10-B, (vi) ANT-CIFAR10-C. Histograms in red and blue show the class distributions and path probabilities at respective nodes. Small black circles on the edges represent transformers, circles in white at the internal nodes represent routers, and circles in gray are solvers. The small white circles on the edges denote specific cases where transformers are identity functions.}
 	\label{fig:architectures}
 \end{figure*}
 
@@ -289,7 +289,7 @@ In addition, most learned trees are unbalanced. This property of adaptive comput
 		%\label{fig:ch5:active2}
 	\end{subfigure}
 	\vspace{-2mm}
-	\caption{\small (a) Test accuracy on CIFAR-10 of ANTs for varying amounts of training data. (b) The complexity of the grown ANTs increases with dataset size. (c) Refinement improves generalisation; the dotted lines show where the refinement phase starts.}
+	\caption{\footnotesize (a) Test accuracy on CIFAR-10 of ANTs for varying amounts of training data. (b) The complexity of the grown ANTs increases with dataset size. (c) Refinement improves generalisation; the dotted lines show where the refinement phase starts.}
 	\label{fig:cifar10}
 \end{figure}
 
