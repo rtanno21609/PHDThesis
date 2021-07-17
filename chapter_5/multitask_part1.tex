@@ -62,7 +62,8 @@ Here we use a standard multi-task learning architecture with hard-parameter shar
 		\label{fig:diagram}
 	\end{figure}
     
-The rationale behind shared layers is to learn a joint representation between two tasks to regularise the learning of features for one task by using cues from the other. We used a high-resolution network architecture (HighResNet) \cite{li2017compactness} as the shared trunk of the model for its compactness and accuracy shown in brain parcellation. HighResNet is a fully convolutional architecture that utilises dilated convolutions and residual connections to produce an end-to-end mapping from an input patch (\textbf{x}) to voxel-wise predictions (\textbf{y}).  
+The rationale behind shared layers is to learn a joint representation between two tasks to regularise the learning of features for one task by using cues from the other. We used a high-resolution network architecture (HighResNet) \cite{li2017compactness} as the shared trunk of the model for its compactness and accuracy shown in brain parcellation. HighResNet is a fully convolutional architecture that utilises dilated convolutions and residual connections to produce an end-to-end mapping from an input patch (\textbf{x}) to voxel-wise predictions (\textbf{y}). The combination of dilated convolution and the residual connections enable the model to integrate efficiently both the short-range (e.g., textures, intensities) and long-range information (e.g., semantic features), both of which are important for the synthesis and anatomical segmentation tasks. 
+
 %The network is capable of representing the data at multiple scales  \todo[color=red!40]{(Ryu): Not sure if this statement is correct. The original dilated conv paper used a context aggregation module which applies 3x3 dilated conv kernels of different dilation factors to the same input features. This allows for multi-scale representation. But, in HighResNet, each dilated conv layer has a fixed dilation factor, right? I agree that this increases the receptive efficiently without pooling.} by increasing the dilation factor of the convolutions at each successive layer. The residual blocks facilitate the modeling of an identity mapping in feature space. Each residual block combines a convolutional layer, an activation layer and a batch-normalisation layer.   
 
 %\subsubsection{Task-specific networks}
@@ -230,7 +231,7 @@ An example of the model output is shown in Fig.~\ref{fig:diagram2}. We calculate
 	{\includegraphics[height=0.21\textwidth]{chapter_5/figures/new_figure_1a.pdf}}%
 	\hspace{3pt}
 	{\includegraphics[height=0.21\textwidth]{chapter_5/figures/new_figure_1b.pdf}}%
-	\caption{\footnotesize Example output from the proposed network. The propagated \textit{intrinsic} and \textit{parameter} uncertainty both correlate with regions of high contrast (bone in the regression, organ boundary for segmentation). Note the correlation between model error and the predicted uncertainty.}
+	\caption{\footnotesize Example outputs from the proposed model. Right: the propagated \textit{intrinsic} (``Heteroscedastic'') and \textit{parameter} (``Model'') uncertainty are shown on an example image for both tasks (CT synthesis and anatomical segmentation) along with the ground truth (``Reference'') and the predictions (``Result''). The uncertainty maps correlate with regions of high contrast (bone in the regression, organ boundary for segmentation). Left: The errors in CT-synthesis (``synCT error'') are compared against the predictive uncertainty (``Total'')---the sum of the heteroscedastic and model uncertainty---on two additional images.  Note the correlation between model error and the predicted uncertainty.}
 	\label{fig:diagram2}
 \end{figure}
 
